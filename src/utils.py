@@ -1,15 +1,32 @@
 import re
 from pathlib import Path
 import time
+import logging
+import os
+from typing import List
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+
+logger = logging.getLogger(__name__)
 
 def extract_x(response: str, code_type: str) -> str:
     pattern = rf"```{code_type}\s*(.*?)```"
     match = re.search(pattern, response, re.DOTALL)
     return match.group(1).strip() if match else None
 
+def cleanup_files(file_paths: List[str]) -> None:
+    """Delete all temporary files generated during the workflow"""
+    # print(file_paths)
+    for file_path in file_paths:
+        try:
+            if os.path.exists(file_path):
+                if "logo.png" in file_path:
+                    continue
+                os.remove(file_path)
+                logger.info(f"Deleted temporary file: {file_path}")
+        except Exception as e:
+            logger.warning(f"Failed to delete file {file_path}: {e}")
 
 
 
@@ -48,7 +65,10 @@ def capture_html_screenshot(
 
         # Capture screenshot of the element
         element.screenshot(output)
-        print(f"✅ Image element captured and saved to {output}")
+        logger.info(f"Image element captured and saved to {output}")
+    except Exception as e:
+        logger.error(f"Error capturing image element: {e}")
+        raise e
     finally:
         driver.quit()
 
