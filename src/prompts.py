@@ -10,6 +10,7 @@ HEADLINE: {}
 - **Composition:** Eye-catching, shareable, thumb-stopping visual
 - **NO TEXT ELEMENTS:** Pure visual content only (text will be added separately)
 - Leave space for text to be added in the bottom of the image.
+- No Gradients in the image or blank space in the image.
 - Keep It photorealistic.
 
 **CONTENT GUIDELINES:**
@@ -18,7 +19,19 @@ HEADLINE: {}
 - If featuring **lifestyle content:** Use aspirational, relatable scenarios that resonate with young Indians
 - If featuring **trending topics:** Incorporate current, relevant visual elements
 
-Generate an image for the above headline.
+***OUTPUT GUIDELINES***
+- Generate a list of 3 image descriptions each different from each other.
+
+OUTPUT:
+```json
+{{
+  "image_description": [
+    "image_description_1",
+    "image_description_2",
+    "image_description_3",
+  ]
+}}
+```
 """
 
 COPY_EXTRACTOR_PROMPT = """
@@ -161,7 +174,7 @@ HTML_TEMPLATE_PROMPT = """
   <body> 
     <div class="container">
       <img src="./logo.png" alt="SW Logo" class="logo" />
-      <img src="./generated_image.png" class="background-image" />
+      <img src="{file_path}" class="background-image" />
       <div class="text-overlay">
         <div class="blue-bar"></div>
         <div class="text-content">
