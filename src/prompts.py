@@ -1,72 +1,3 @@
-INPUT_TEMPLATE_PROMPT = """
-Review the Generated Background Image and headline and generate the following JSON Output Template. 
-Headline:
-{}
-
-JSON INPUT TEMPLATE:
-{}
-
-- TIPS TO CHOOSE COLORS : background color for highlighted text spans. Choose a contrasting color that maintains readability against both the background color and image background.
-- Generate Catchy Sentence and make use of highlights(if possible) to make the post more visually appealing and engaging. 
-- The Sentences should fit inside the Instagram post.
-JSON OUTPUT TEMPLATE:
-```json
-{{}}
-```
-"""
-
-HTML_TEMPLATE_PROMPT = """
-You are a senior HTML developer tasked with creating a General Reusable HTML template for social media posts. Your goal is to replicate the design and typography exactly as shown in the reference image provided.
-
-Instructions:
-
-HTML Structure:
-Post Topic: {}
-Create the html template for the given post topic, 
-
-Create a single, standalone Python Formatable html string with no external CSS or JavaScript.
-Must be Python Formatable string, so use "{{{{}}}}" for normal-css-syntax curly braces and "{{<variable_name>}}" for input variables. 
-
-Variables To include:
- - background_image_url : for the inserting background image url
- - logo_url : for inserting logo url
-
-Variables to Generate:
- - Generate simple variables for headline, subtext , highlight text, font_color, highlight_font color etc. Keep it simple and short and dont create too many variables.
-
-
-Structure the content using only <div> elements.
-
-Text should be placed exactly as shown in the image.
-
--> Typography and Design:
-
-	* Replicate the exact fonts, font sizes, line heights, colors, and letter spacing from the image.
-	* Match the highlighted headline style, including background color, padding, positioning, and box styling.
-  * Use Placeholder text and image src links in template
-	* The background or image area should be defined using an <img> tag 
-	* Use placeholder variables for image src links. For the background image use resolution 1024x1536.
-
--> CSS Styling:
-
-	* Use a <style> tag in the <head> of the HTML file for all CSS.
-	* Do not use JavaScript.
-	* Use Flexbox or absolute positioning based on which better matches the visual layout from the image.
-	* No need to import social media icons, or arrows—they are assumed to be part of the image and will be handled separately.
-
--> No External Dependencies:
-	* Do not use external icons, or libraries.
-	* The file must be fully self-contained and portable.
-  * No Emojis or watermarks
-
-Output:
-A Python Formatable html string along with its json input template.
-
-```html
-HTML_STRING
-```
-"""
-
 IMAGE_DESCRIPTION_PROMPT = """You are an expert visual designer creating social media post images for ScoopWhoop, India's leading youth media brand. Generate a compelling image description for the given headline:
 
 HEADLINE: {}
@@ -78,6 +9,8 @@ HEADLINE: {}
 **IMAGE REQUIREMENTS:**
 - **Composition:** Eye-catching, shareable, thumb-stopping visual
 - **NO TEXT ELEMENTS:** Pure visual content only (text will be added separately)
+- Leave space for text to be added in the bottom of the image.
+- Keep It photorealistic.
 
 **CONTENT GUIDELINES:**
 - If featuring **celebrities/influencers:** Include their name and ensure recognizable features
@@ -85,43 +18,7 @@ HEADLINE: {}
 - If featuring **lifestyle content:** Use aspirational, relatable scenarios that resonate with young Indians
 - If featuring **trending topics:** Incorporate current, relevant visual elements
 
-Generate a detailed, specific image description that an AI image generator can execute perfectly.
-
-Output Format:
-```json
-{{
-  "image_description": str
-}}
-```
-"""
-
-IMAGE_DESCRIPTION_WITH_TEXT_PROMPT = """You are an expert visual designer creating social media post images with integrated text for ScoopWhoop, India's leading youth media brand. Generate a compelling image description that includes text elements for the given headline:
-
-HEADLINE: {}
-
-**SCOOPWHOOP BRAND GUIDELINES:**
-- **Color Palette:** Vibrant, eye-catching colors
-- **Typography Style:** Bold, modern, highly readable fonts with strong contrast
-
-**IMAGE WITH TEXT REQUIREMENTS:**
-- **Text Placement:** Bottom third of the image, ensuring readability
-- **Reference Image:** Use the reference image for textual design, placement and colors.
-
-**CONTENT GUIDELINES:**
-- If featuring **celebrities/influencers:** Include their name in text and ensure recognizable features
-- If featuring **brands/products:** Include brand name/product name in the text elements
-- If featuring **lifestyle content:** Use relatable text that connects with young Indian audience
-- If featuring **trending topics:** Include relevant hashtags or trending phrases in the design
-- No Hashtags or Emojis
-
-Generate a detailed, specific image description that includes both visual elements and text integration for an AI image generator.
-
-Output Format:
-```json
-{{
-  "image_description": str
-}}
-```
+Generate an image for the above headline.
 """
 
 COPY_EXTRACTOR_PROMPT = """
@@ -147,4 +44,132 @@ Output Format:
   "headline": str,
   "subtext": str
 }}
+"""
+
+TEMPLATE_PROMPT ="""
+You are an expert in creating social media post templates. Your task is to generate a post design specification for the given headline: 
+
+{}. 
+
+You will be provided with a reference image that showcases the brand's styling and design tone. Use it strictly as a template for visual style and text formatting.
+
+Your output should contain the following sections:
+
+- headline: 
+    Generate a h1 html tag for the post headline, should only be one line max.
+    Make use of span tags with class "yellow" to highlight words and to make the headline more engaging.
+    EX: <h1>
+            Temples and <span class="yellow">Gurdwaras</span><br />Created
+            Inside A Game!
+        </h1>
+- sub_text: A short p tag for the post, one sentence max.
+    Ex: <p>Gamers have made fully-functional religious<br />places INSIDE AGAME! 😲</p>
+
+Note: 
+- Dont Use any Emojis
+- Make use of br tags to break the text into multiple lines. Max two lines.
+
+
+Output format:
+```json
+{{
+  "headline": html_snippet_code,
+  "sub_text": html_snippet_code
+}}
+```
+"""
+
+HTML_TEMPLATE_PROMPT = """
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title></title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Golos+Text:wght@400..900&display=swap");
+      body,
+      html {{
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        font-family: "Golos Text", sans-serif;
+        background-color: #f0f0f0;
+      }}
+      .container {{
+        position: relative;
+        width: 100%;
+        max-width: 600px; /* Adjust as needed */
+        margin: auto;
+        overflow: hidden;
+      }}
+      .background-image {{
+        width: 100%;
+        display: block;
+      }}
+      .logo {{
+        position: absolute;
+        top: 40px;
+        left: 40px;
+        width: 90px; /* Increased logo size */
+        filter: brightness(0) invert(1);
+      }}
+      .text-overlay {{
+        position: absolute;
+        bottom: 0; /* Anchored overlay to the bottom */
+        left: 0;
+        right: 0;
+        /* Gradient from semi-transparent black to fully transparent */
+        background: linear-gradient(
+          to top,
+          rgba(0, 0, 0, 0.9) 60%,
+          transparent 100%
+        );
+        /* Pushed content up using bottom padding */
+        padding: 60px 10px 45px 30px;
+        color: white;
+        display: flex;
+        /* align-items: flex-end; */ /* Removed this to allow stretching */
+      }}
+      .blue-bar {{
+        flex-shrink: 0; /* Prevents the bar from shrinking */
+        width: 11px;
+        /* height: 155px; */ /* Removed fixed height */
+        background-color: #007de1;
+        margin-right: 15px;
+      }}
+      .text-content {{
+        display: flex; /* Added */
+        flex-direction: column; /* Added */
+        justify-content: flex-end; /* Added to push text to the bottom */
+      }}
+      .text-content h1 {{
+        margin: 0;
+        font-size: 2.5em; /* Increased font size */
+        font-weight: 700;
+        line-height: 1.1;
+      }}
+      .text-content h1 .yellow {{
+        color: #ffee04;
+      }}
+      .text-content p {{
+        margin: 10px 0 0;
+        font-size: 1.3em; /* Increased font size */
+      }}
+    </style>
+  </head>
+  <body> 
+    <div class="container">
+      <img src="./logo.png" alt="SW Logo" class="logo" />
+      <img src="./generated_image.png" class="background-image" />
+      <div class="text-overlay">
+        <div class="blue-bar"></div>
+        <div class="text-content">
+          {headline}
+          {sub_text}
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
 """
