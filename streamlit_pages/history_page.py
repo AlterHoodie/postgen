@@ -54,7 +54,7 @@ def load_history_data():
     """Load history data from database"""
     try:
         mongo_client = get_mongo_client()
-        history_data = mongo_client.get_recent_workflows(limit=20)
+        history_data = mongo_client.get_recent_workflows(limit=15)
         mongo_client.close()
         
         st.session_state.history_data = history_data
