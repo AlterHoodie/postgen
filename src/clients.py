@@ -11,7 +11,7 @@ load_dotenv(override=True)
 logging.basicConfig(level=logging.INFO)
 
 openai_client = openai.AsyncClient(api_key=os.getenv("OPENAI_API_KEY"))
-anthropic_client = anthropic.AsyncAnthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+# anthropic_client = anthropic.AsyncAnthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
 
 async def openai_response(
@@ -71,28 +71,28 @@ async def openai_image_response(prompt:str, images:List[str] = [],timeout=300):
 
     return image_bytes
 
-async def anthropic_response(images: List[str], prompt:str, model:str) -> Tuple[dict, dict]:
-    messages = []
+# async def anthropic_response(images: List[str], prompt:str, model:str) -> Tuple[dict, dict]:
+#     messages = []
 
-    for image in images:
-        with open(image, "rb") as f:
-            encoded_image = base64.b64encode(f.read()).decode("utf-8")
-        messages.append(
-            {
-                "type": "image",
-                "source": {
-                    "type": "base64",
-                    "media_type": "image/png",
-                    "data": encoded_image,
-                },
-            }
-        )
-    messages.append({"type": "text", "text": prompt})
+#     for image in images:
+#         with open(image, "rb") as f:
+#             encoded_image = base64.b64encode(f.read()).decode("utf-8")
+#         messages.append(
+#             {
+#                 "type": "image",
+#                 "source": {
+#                     "type": "base64",
+#                     "media_type": "image/png",
+#                     "data": encoded_image,
+#                 },
+#             }
+#         )
+#     messages.append({"type": "text", "text": prompt})
 
-    response = await anthropic_client.messages.create(
-        model=model,
-        max_tokens=2000,
-        messages=[{"role": "user", "content": messages}],
-    )
+#     response = await anthropic_client.messages.create(
+#         model=model,
+#         max_tokens=2000,
+#         messages=[{"role": "user", "content": messages}],
+#     )
     
-    return response.content[0].text
+#     return response.content[0].text

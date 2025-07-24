@@ -21,7 +21,7 @@ class SimpleMongoClient:
         
         self.client = MongoClient(mongo_uri)
         self.db = self.client[database_name]
-        self.collection = self.db.posts
+        self.collection = self.db.ig_posts
     
     def _encode_image_to_base64(self, image_path: str) -> str:
         """Convert image file to base64 string"""
