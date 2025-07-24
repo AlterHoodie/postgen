@@ -47,7 +47,7 @@ async def openai_response(
 
     return response.output_text
 
-async def openai_image_response(prompt:str, images:List[str] = [],timeout=300):
+async def openai_image_response(prompt:str, images:List[str] = [],timeout=200):
     if images:
         result = await openai_client.images.edit(
         model="gpt-image-1",
