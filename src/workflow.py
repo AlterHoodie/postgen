@@ -36,7 +36,6 @@ async def process_single_image(description: str, index: int, analysis: dict, ses
         # Save generated image (WITHOUT TEXT)
         with open(image_without_text_path, "wb") as f:
             f.write(image_bytes)
-        logger.info(f"Saved generated image (without text): {image_without_text_path}")
         
         # Generate HTML template for this image
         html_template = await html_template_generator(
@@ -48,7 +47,6 @@ async def process_single_image(description: str, index: int, analysis: dict, ses
         # Save HTML template
         with open(html_path, "w", encoding="utf-8") as f:
             f.write(html_template)
-        logger.info(f"Saved HTML template: {html_path}")
         
         # Capture screenshot of the final post (WITH TEXT)
         capture_html_screenshot(
@@ -56,7 +54,6 @@ async def process_single_image(description: str, index: int, analysis: dict, ses
             element_selector=".container",
             output=image_with_text_path
         )
-        logger.info(f"Saved final post image (with text): {image_with_text_path}")
         
         # Return both image paths
         image_paths = {
@@ -89,7 +86,6 @@ async def workflow(image_bytes: bytes, store_in_db: bool = True) -> Optional[str
     all_temp_files = []
     all_image_results = []
     document_id = None
-    
     try:
         # Save reference image for analysis
         with open(analyze_path, "wb") as f:    
@@ -140,7 +136,6 @@ async def workflow(image_bytes: bytes, store_in_db: bool = True) -> Optional[str
                 logger.info(f"Stored workflow results in MongoDB with document_id: {document_id}")
             except Exception as e:
                 logger.error(f"Failed to store in MongoDB: {e}")
-        
         return session_id
         
     except Exception as e:
@@ -148,8 +143,8 @@ async def workflow(image_bytes: bytes, store_in_db: bool = True) -> Optional[str
         raise
     finally:
         # Clean up temporary files (HTML templates and reference image)
-        logger.info("Cleaning up temporary files...")
-        # cleanup_files(all_temp_files)
+        cleanup_files(all_temp_files)
+        logger.info(f"Finished Workflow with session ID: {session_id}")
 
 if __name__ == "__main__":
     with open("./data/scoopwhoop/analyze.png", "rb") as f:

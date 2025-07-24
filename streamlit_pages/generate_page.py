@@ -31,12 +31,15 @@ def show_generate_page():
             st.image(image, caption="Uploaded Image", use_container_width=True)
         
         with col2:
+
+            def on_click():
+                with col2:
+                    generate_posts(pil_image_to_bytes(image), store_in_db)
+            
             st.subheader("Generation Settings")
             store_in_db = True
-            
             # Generate button
-            if st.button("🚀 Generate Posts", type="primary", use_container_width=True):
-                generate_posts(pil_image_to_bytes(image), store_in_db)
+            st.button("🚀 Generate Posts", type="primary", use_container_width=True, on_click=on_click)
 
 def generate_posts(image_bytes:bytes, store_in_db):
     """Generate posts with loading progress"""
@@ -76,17 +79,6 @@ def generate_posts(image_bytes:bytes, store_in_db):
         progress_bar.progress(100)
         status_text.text("✅ Posts generated successfully!")
         
-        # Show success message
-        st.success("🎉 Successfully generated 3 social media posts!")
-        
-        if store_in_db and document_id:
-            st.info(f"📊 Results saved to database with ID: `{document_id}`")
-            
-            # Add button to view in history
-            if st.button("📜 View in History", type="secondary"):
-                st.session_state.page_selector = "History"
-                st.rerun()
-        
         # Display results if available
         if store_in_db and document_id:
             show_generated_results(document_id)
@@ -111,15 +103,6 @@ def show_generated_results(document_id):
         
         if result:
             st.markdown("### 📱 Generated Posts Preview")
-            
-            # Display analysis
-            analysis = result.get("analysis", {})
-            if analysis:
-                col1, col2 = st.columns(2)
-                with col1:
-                    st.write(f"**Headline:** {analysis.get('headline', 'N/A')}")
-                with col2:
-                    st.write(f"**Subtext:** {analysis.get('subtext', 'N/A')}")
             
             # Display images
             images = result.get("images", [])

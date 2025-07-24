@@ -22,8 +22,6 @@ class SimpleMongoClient:
         self.client = MongoClient(mongo_uri)
         self.db = self.client[database_name]
         self.collection = self.db.posts
-        
-        logger.info(f"Connected to MongoDB: {database_name}")
     
     def _encode_image_to_base64(self, image_path: str) -> str:
         """Convert image file to base64 string"""
@@ -154,8 +152,7 @@ class SimpleMongoClient:
         logger.warning(f"Image {image_index} not found for session {session_id}")
         return False
     
-    def save_both_image_versions(self, session_id: str, image_index: int, 
-                               output_dir: str = "./") -> Dict[str, bool]:
+    def save_both_image_versions(self, session_id: str, image_index: int, output_dir: str = "./") -> Dict[str, bool]:
         """Save both versions of an image (with and without text)
         
         Returns:
@@ -180,7 +177,6 @@ class SimpleMongoClient:
     def close(self):
         """Close MongoDB connection"""
         self.client.close()
-        logger.info("Closed MongoDB connection")
 
 # Convenience function to get a client instance
 def get_mongo_client() -> SimpleMongoClient:
