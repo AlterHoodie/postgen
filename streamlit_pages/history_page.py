@@ -117,8 +117,6 @@ def display_workflow_result(workflow_result):
 
 def display_image_pair(img_data):
     """Display a pair of images (with and without text)"""
-    st.write(f"**Description:** {img_data.get('description', 'N/A')}")
-    
     col1, col2 = st.columns(2)
     
     # Without text
