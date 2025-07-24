@@ -4,7 +4,8 @@ import time
 import logging
 import os
 from typing import List
-
+import io
+from PIL import Image
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
@@ -71,6 +72,54 @@ def capture_html_screenshot(
         raise e
     finally:
         driver.quit()
+
+def pil_image_to_bytes(image, format='PNG'):
+    buffer = io.BytesIO()
+    image.save(buffer, format=format)
+    return buffer.getvalue()
+
+def compress_image(image_data: bytes, max_size: tuple = (1200, 1800), quality: int = 80) -> bytes:
+    """
+    Compress an image while maintaining aspect ratio and quality.
+    
+    Args:
+        image_data: Raw image bytes
+        max_size: Maximum dimensions (width, height) for the image
+        quality: JPEG quality (1-100, higher is better quality)
+        
+    Returns:
+        Compressed image bytes
+        
+    Example:
+        ```python
+        with open("image.jpg", "rb") as f:
+            image_bytes = f.read()
+        compressed_bytes = compress_image(image_bytes)
+        ```
+    """
+    try:
+        # Open image from bytes
+        img = Image.open(io.BytesIO(image_data))
+        
+        # Convert to RGB if necessary (for PNG with transparency)
+        if img.mode in ('RGBA', 'P'):
+            img = img.convert('RGB')
+            
+        # Calculate new dimensions while maintaining aspect ratio
+        ratio = min(max_size[0] / img.width, max_size[1] / img.height)
+        if ratio < 1:  # Only resize if image is larger than max_size
+            new_size = (int(img.width * ratio), int(img.height * ratio))
+            img = img.resize(new_size, Image.Resampling.LANCZOS)
+            
+        # Save compressed image to bytes
+        output = io.BytesIO()
+        img.save(output, format='JPEG', quality=quality, optimize=True)
+        return output.getvalue()
+        
+    except Exception as e:
+        print(f"Error compressing image: {e}")
+        return image_data  # Return original if compression fails
+
 
 
 if __name__ == "__main__":

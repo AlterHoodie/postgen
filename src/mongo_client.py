@@ -8,6 +8,8 @@ from pathlib import Path
 from pymongo import MongoClient
 from dotenv import load_dotenv
 
+from src.utils import compress_image
+
 load_dotenv(override=True)
 logger = logging.getLogger(__name__)
 
@@ -27,7 +29,7 @@ class SimpleMongoClient:
         """Convert image file to base64 string"""
         try:
             with open(image_path, "rb") as image_file:
-                return base64.b64encode(image_file.read()).decode('utf-8')
+                return base64.b64encode(compress_image(image_file.read(),quality=70)).decode('utf-8')
         except Exception as e:
             logger.error(f"Error encoding image {image_path}: {e}")
             return ""
@@ -101,9 +103,12 @@ class SimpleMongoClient:
     
     def get_recent_workflows(self, limit: int = 10) -> List[Dict]:
         """Get recent workflow results"""
-        documents = list(self.collection.find()
-                        .sort("created_at", -1)
-                        .limit(limit))
+        pipeline = [
+            {"$sort": {"created_at": -1}},
+            {"$limit": limit}
+        ]
+
+        documents = list(self.collection.aggregate(pipeline,allowDiskUse=True))
         
         # Convert ObjectIds to strings
         for doc in documents:
@@ -180,3 +185,12 @@ class SimpleMongoClient:
 # Convenience function to get a client instance
 def get_mongo_client() -> SimpleMongoClient:
     return SimpleMongoClient() 
+
+
+if __name__ == "__main__":
+    client = get_mongo_client()
+    # client.collection.create_index([("created_at", -1)])
+    # # Create index on session_id for faster lookups
+    # client.collection.create_index("session_id")
+    # logger.info("Database indexes created successfully")
+    print(len(client.get_recent_workflows(10)))

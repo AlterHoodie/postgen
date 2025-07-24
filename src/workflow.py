@@ -6,7 +6,7 @@ from pathlib import Path
 
 from src.agents import copy_extractor, image_desc_generator, image_generator, html_template_generator
 from src.mongo_client import get_mongo_client
-from src.utils import cleanup_files, capture_html_screenshot
+from src.utils import cleanup_files, capture_html_screenshot,compress_image
 
 logger = logging.getLogger(__name__)
 
@@ -141,7 +141,7 @@ async def workflow(image_bytes: bytes, store_in_db: bool = True) -> Optional[str
             except Exception as e:
                 logger.error(f"Failed to store in MongoDB: {e}")
         
-        return document_id
+        return session_id
         
     except Exception as e:
         logger.error(f"Workflow failed: {e}")
@@ -149,7 +149,7 @@ async def workflow(image_bytes: bytes, store_in_db: bool = True) -> Optional[str
     finally:
         # Clean up temporary files (HTML templates and reference image)
         logger.info("Cleaning up temporary files...")
-        cleanup_files(all_temp_files)
+        # cleanup_files(all_temp_files)
 
 if __name__ == "__main__":
     with open("./data/scoopwhoop/analyze.png", "rb") as f:
