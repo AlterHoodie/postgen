@@ -1,7 +1,6 @@
 import os
 import logging
 from datetime import datetime
-import pytz
 from typing import List, Dict, Optional
 import base64
 from pathlib import Path
@@ -13,7 +12,6 @@ from src.utils import compress_image
 
 load_dotenv(override=True)
 logger = logging.getLogger(__name__)
-ist = pytz.timezone('Asia/Kolkata')
 
 class SimpleMongoClient:
     def __init__(self):
@@ -71,7 +69,7 @@ class SimpleMongoClient:
         # Create document to store
         document = {
             "session_id": session_id,
-            "created_at": datetime.now(tz=ist),
+            "created_at": datetime.now(),
             "analysis": {
                 "headline": analysis.get("headline", ""),
                 "subtext": analysis.get("subtext", "")

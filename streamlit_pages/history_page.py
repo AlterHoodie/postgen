@@ -3,6 +3,7 @@ import time
 from datetime import datetime
 import base64
 import logging
+import pytz
 
 from src.mongo_client import get_mongo_client
 
@@ -159,13 +160,23 @@ def display_image_pair(img_data):
         except Exception as e:
             st.error("Failed to load image with text")
 
+
 def format_date(date_obj):
-    """Format datetime object to readable string"""
+    """Format UTC datetime object to IST and return a readable string"""
     if date_obj:
         if isinstance(date_obj, str):
             return date_obj
         try:
-            return date_obj.strftime("%Y-%m-%d %H:%M")
-        except:
+            # Convert UTC to IST
+            utc = pytz.utc
+            ist = pytz.timezone("Asia/Kolkata")
+
+            if date_obj.tzinfo is None:
+                # Assume it's naive UTC (from MongoDB)
+                date_obj = utc.localize(date_obj)
+
+            ist_date = date_obj.astimezone(ist)
+            return ist_date.strftime("%Y-%m-%d %H:%M")
+        except Exception as e:
             return str(date_obj)
-    return "Unknown" 
+    return "Unknown"
