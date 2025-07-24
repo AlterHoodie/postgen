@@ -35,3 +35,7 @@ async def image_desc_generator(query:str = "") -> List[str]:
 async def image_generator(query:str = "") -> bytes:
     response = await openai_image_response(prompt=query)
     return response
+
+if __name__ == "__main__":
+    import asyncio
+    print(asyncio.run(copy_extractor(image=["./data/image.png"])))
