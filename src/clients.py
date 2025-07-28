@@ -7,13 +7,37 @@ import io
 
 import httpx
 import openai
-import anthropic
 
 load_dotenv(override=True)
 logging.basicConfig(level=logging.INFO)
 
 openai_client = openai.AsyncClient(api_key=os.getenv("OPENAI_API_KEY"))
-# anthropic_client = anthropic.AsyncAnthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+
+async def download_image(image_url: str) -> io.BytesIO:
+    """
+    Download image from URL and return as BytesIO object
+    Returns the image data as BytesIO object if it's a valid image
+    """
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(image_url, timeout=10)
+            response.raise_for_status()
+            
+            # Check if content type is an image
+            content_type = response.headers.get('content-type', '').lower()
+            if not content_type.startswith('image/'):
+                logging.warning(f"URL does not return an image content type: {content_type} for {image_url}")
+                return None
+            
+            # Create BytesIO object with image data
+            image_data = io.BytesIO(response.content)
+            image_data.name = "image.jpg"  # Default name
+            
+            logging.info(f"Downloaded image: {image_url}")
+            return image_data
+    except Exception as e:
+        logging.error(f"Failed to download image {image_url}: {e}")
+        return None
 
 
 async def openai_response(
@@ -59,78 +83,46 @@ async def openai_response(
 
     return response.output_text
 
-async def openai_image_response(prompt:str, images:List[str] = [],timeout=200):
-    if images:
-        result = await openai_client.images.edit(
-        model="gpt-image-1",
-        prompt=prompt,
-        image=[open(image, "rb") for image in images],
-        size = "1024x1536",
-        quality="high",
-        timeout=timeout
-        )
-    else:
+async def openai_image_response(prompt:str, images:List[str] = [],timeout=200,model="gpt-image-1"):
+
+    if model == "dall-e-3":
+        size = "1024x1024"
+        quality = "hd"
+
         result = await openai_client.images.generate(
-            model="gpt-image-1",
+            model=model,
             prompt=prompt,
-            size = "1024x1536",
-            quality="high",
+            size = size,
+            quality=quality,
             timeout=timeout
         )
+        url = result.data[0].url
+        image_bytes = await download_image(url)
 
-    image_base64 = result.data[0].b64_json
-    image_bytes = base64.b64decode(image_base64)
-
-    return image_bytes
-
-async def download_image(image_url: str) -> io.BytesIO:
-    """
-    Download image from URL and return as BytesIO object
-    Returns the image data as BytesIO object if it's a valid image
-    """
-    try:
-        async with httpx.AsyncClient() as client:
-            response = await client.get(image_url, timeout=10)
-            response.raise_for_status()
-            
-            # Check if content type is an image
-            content_type = response.headers.get('content-type', '').lower()
-            if not content_type.startswith('image/'):
-                logging.warning(f"URL does not return an image content type: {content_type} for {image_url}")
-                return None
-            
-            # Create BytesIO object with image data
-            image_data = io.BytesIO(response.content)
-            image_data.name = "image.jpg"  # Default name
-            
-            logging.info(f"Downloaded image: {image_url}")
-            return image_data
-    except Exception as e:
-        logging.error(f"Failed to download image {image_url}: {e}")
-        return None
-
-# async def anthropic_response(images: List[str], prompt:str, model:str) -> Tuple[dict, dict]:
-#     messages = []
-
-#     for image in images:
-#         with open(image, "rb") as f:
-#             encoded_image = base64.b64encode(f.read()).decode("utf-8")
-#         messages.append(
-#             {
-#                 "type": "image",
-#                 "source": {
-#                     "type": "base64",
-#                     "media_type": "image/png",
-#                     "data": encoded_image,
-#                 },
-#             }
-#         )
-#     messages.append({"type": "text", "text": prompt})
-
-#     response = await anthropic_client.messages.create(
-#         model=model,
-#         max_tokens=2000,
-#         messages=[{"role": "user", "content": messages}],
-#     )
+        return image_bytes.getvalue()
+    else:
+        size = "1024x1536"
+        quality = "high"
     
-#     return response.content[0].text
+        if images:
+            result = await openai_client.images.edit(
+            model=model,
+            prompt=prompt,
+            image=[open(image, "rb") for image in images],
+            size = size,
+            quality=quality,
+            timeout=timeout
+            )
+        else:
+            result = await openai_client.images.generate(
+                model=model,
+                prompt=prompt,
+                size = size,
+                quality=quality,
+                timeout=timeout
+            )
+
+        image_base64 = result.data[0].b64_json
+        image_bytes = base64.b64decode(image_base64)
+
+        return image_bytes

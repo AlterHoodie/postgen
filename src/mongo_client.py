@@ -44,13 +44,14 @@ class SimpleMongoClient:
             type = result["type"]
             description = result["description"]
             paths = result["paths"]
-            
+            model = result["model"]
             # Encode both versions to base64
             without_text_base64 = self._encode_image_to_base64(paths["without_text"])
             with_text_base64 = self._encode_image_to_base64(paths["with_text"])
             
             image_data = {
                 "type": type,
+                "model": model,
                 "description": description,
                 "images": {
                     "without_text": {

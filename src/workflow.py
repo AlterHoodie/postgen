@@ -7,11 +7,11 @@ import json
 
 from src.agents import copy_extractor, image_desc_generator, image_generator, html_template_generator, image_query_creator, image_search_agent
 from src.mongo_client import get_mongo_client
-from src.utils import cleanup_files, capture_html_screenshot,compress_image
+from src.utils import cleanup_files, capture_html_screenshot
 
 logger = logging.getLogger(__name__)
 
-async def generate_single_image( analysis: dict, session_id: str) -> Tuple[Dict[str, str], List[str]]:
+async def generate_single_image( analysis: dict, session_id: str,model:str) -> Tuple[Dict[str, str], List[str]]:
     """Process a single image: generate, save, create HTML, and capture screenshot
     
     Returns:
@@ -33,7 +33,7 @@ async def generate_single_image( analysis: dict, session_id: str) -> Tuple[Dict[
     try:
         # Generate image from description
         image_descriptions = await image_desc_generator(query=analysis["headline"])
-        image_bytes = await image_generator(query=image_descriptions[0])
+        image_bytes = await image_generator(query=image_descriptions[0],model=model)
         
         # Save generated image (WITHOUT TEXT)
         with open(image_without_text_path, "wb") as f:
@@ -66,6 +66,7 @@ async def generate_single_image( analysis: dict, session_id: str) -> Tuple[Dict[
         
         return {
             "type":"generated",
+            "model": model,
             "description": image_descriptions[0],
             "image_paths": image_paths,
             "temp_files": temp_files
@@ -132,6 +133,7 @@ async def fetch_single_image(analysis: dict, session_id: str) -> Tuple[Dict[str,
         
         return {
             "type":"real",
+            "model":None,
             "description": image_query_json["queries"][0],
             "image_paths": image_paths,
             "temp_files": temp_files
@@ -171,8 +173,8 @@ async def workflow(image_bytes: bytes, store_in_db: bool = True) -> Optional[str
         logger.info(f"Extracted analysis: {analysis}")
 
         tasks = [
-            fetch_single_image( analysis, session_id) ,
-            generate_single_image( analysis, session_id)
+            # fetch_single_image( analysis, session_id) ,
+            generate_single_image( analysis, session_id,model="dall-e-3")
         ]
         
         # Wait for all images to be processed in parallel

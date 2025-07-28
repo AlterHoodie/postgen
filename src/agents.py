@@ -40,8 +40,8 @@ async def image_desc_generator(query:str = "") -> List[str]:
     parsed_response = json.loads(extract_x(response, "json"))
     return parsed_response["image_description"]
 
-async def image_generator(query:str = "") -> bytes:
-    response = await openai_image_response(prompt=query)
+async def image_generator(query:str = "",model="gpt-image-1") -> bytes:
+    response = await openai_image_response(prompt=query,model=model)
     return response
 
 
