@@ -35,14 +35,13 @@ class SimpleMongoClient:
     def store_workflow_result(self, 
                             session_id: str,
                             analysis: Dict,
-                            image_descriptions: List[str],
                             image_results: List[Dict]) -> str:
         """Store complete workflow result in MongoDB with both image versions"""
         
         # Process each image result (contains both with and without text versions)
         images_data = []
         for result in image_results:
-            index = result["index"]
+            type = result["type"]
             description = result["description"]
             paths = result["paths"]
             
@@ -51,7 +50,7 @@ class SimpleMongoClient:
             with_text_base64 = self._encode_image_to_base64(paths["with_text"])
             
             image_data = {
-                "index": index,
+                "type": type,
                 "description": description,
                 "images": {
                     "without_text": {
@@ -74,7 +73,6 @@ class SimpleMongoClient:
                 "headline": analysis.get("headline", ""),
                 "subtext": analysis.get("subtext", "")
             },
-            "image_descriptions": image_descriptions,
             "images": images_data,
             "total_images": len(images_data)
         }

@@ -11,3 +11,4 @@ wheels/
 data_/
 .env
 .vscode/
+*.ipynb

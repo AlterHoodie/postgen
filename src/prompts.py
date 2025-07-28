@@ -149,7 +149,6 @@ HTML_TEMPLATE_PROMPT = """
         width: 11px;
         /* height: 155px; */ /* Removed fixed height */
         background-color: #007de1;
-        margin-right: 15px;
       }}
       .text-content {{
         display: flex; /* Added */
@@ -185,4 +184,157 @@ HTML_TEMPLATE_PROMPT = """
     </div>
   </body>
 </html>
+"""
+
+HTML_TEMPLATE_PROMPT_REAL = """
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title></title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Golos+Text:wght@400..900&display=swap");
+      body,
+      html {{
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        font-family: "Golos Text", sans-serif;
+        background-color: #f0f0f0;
+      }}
+      .container {{
+        position: relative;
+        width: 1080px;
+        height: 1350px;
+        margin: auto;
+        overflow: hidden;
+      }}
+      .background-image {{
+        width: 100%;
+        height: 100%;
+        display: block;
+        /* 'cover' scales the image to fill the container, cropping sides or top/bottom as needed */
+        object-fit: cover;
+        /* Aligns the image. 'center' horizontally, and 25% from the top vertically to shift it up. */
+        object-position: center 25%;
+      }}
+      .logo {{
+        position: absolute;
+        top: 40px;
+        left: 40px;
+        width: 110px; /* Increased logo size */
+        filter: brightness(0) invert(1);
+      }}
+      .text-overlay {{
+        position: absolute;
+        bottom: 0; /* Anchored overlay to the bottom */
+        left: 0;
+        right: 0;
+        /* Gradient from semi-transparent black to fully transparent */
+        background: linear-gradient(
+          to top,
+          rgba(0, 0, 0, 0.95) 40%,
+          rgba(0, 0, 0, 0.5) 75%,
+          transparent 100%
+        );
+        /* Pushed content up using bottom padding */
+        padding: 60px 10px 45px 30px;
+        color: white;
+        display: flex;
+        /* align-items: flex-end; */ /* Removed this to allow stretching */
+      }}
+      .blue-bar {{
+        flex-shrink: 0; /* Prevents the bar from shrinking */
+        width: 18px;
+        /* height: 155px; */ /* Removed fixed height */
+        background-color: #007de1;
+        margin-right: 20px;
+        margin-left: 40px;
+      }}
+      .text-content {{
+        display: flex; /* Added */
+        flex-direction: column; /* Added */
+        justify-content: flex-end; /* Added to push text to the bottom */
+        /* margin: 0px 0 100px 0; */
+      }}
+      .text-content h1 {{
+        margin: 0;
+        font-size: 3.8em; /* Increased font size */
+        font-weight: 700;
+        line-height: 1.1;
+      }}
+      .text-content h1 .yellow {{
+        color: #ffee04;
+      }}
+      .text-content p {{
+        margin: 20px 0 0;
+        font-size: 2em; /* Increased font size */
+      }}
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <img src="./logo.png" alt="SW Logo" class="logo" />
+      <img src="{file_path}" class="background-image" />
+      <div class="text-overlay">
+        <div class="blue-bar"></div>
+        <div class="text-content">
+          {headline}
+          {sub_text}
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+"""
+
+IMAGE_QUERY_PROMPT = """You are an expert image finder for the Instagram Page - Scoopwhoop. Your job is to give me a image query for the Instagram Post headline: {}.
+Requirements:
+-> Use the websearch tool to get more info on the Instagram Post headline.
+-> Your main goal is to generate queries that are broad and generic enough to guarantee good image results. Avoid being too specific, as this often leads to no images being found.
+-> The image queries should be relevant to the headline in terms of:
+  - Geographic location/region 
+  - Time period
+  - Factual accuracy and authenticity
+  - Must be relevant to the headline
+Examples:
+1. For a movie review headline "Ramayan Movie Review":
+   ["Ramayan movie poster 2025", "Ramayan movie stills", "Ramayan movie action scenes"]
+
+2. For a sports headline "Virat Kohli Scores His 50th ODI Century":
+   ["Virat Kohli century celebration World Cup", "Virat Kohli batting World Cup", "Virat Kohli India cricket team"]
+
+OUTPUT FORMAT:
+```json
+{{
+  "queries": []
+}}
+```
+""" 
+
+IMAGE_SCORER_PROMPT = """
+
+You are an expert in visual content evaluation. Your task is to **score images** based on how well they meet the requirements for **Instagram posts** on **ScoopWhoop**, a pop-culture and youth-focused media brand.
+
+**Scoring Criteria:**
+
+* Images must be **Instagram-worthy** (aesthetic appeal, good lighting, visually engaging)
+* Dimensions should be optimal for Instagram (preferably 1:1 or vertical 4:5 aspect ratio)
+* Images must be **free of any text**, watermarks etc.
+* Content should be relevant to the query
+* Avoid low-resolution or blurry images
+* The image should be worthy of being posted as an Instagram Post.
+* Avoid overly posed or generic stock images unless they’re editorially striking
+
+**Scoring Scale:**
+Score each image between **0 and 1**, using a **float value up to two decimal places**.
+
+**Output Format:**
+
+```json
+{{
+  "image_score": <number>
+}}
+```
 """
