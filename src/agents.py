@@ -5,9 +5,10 @@ import os
 import io
 import asyncio
 
+from PIL import Image
 from serpapi import GoogleSearch
 
-from src.prompts import IMAGE_DESCRIPTION_PROMPT, COPY_EXTRACTOR_PROMPT, TEMPLATE_PROMPT, HTML_TEMPLATE_PROMPT, IMAGE_QUERY_PROMPT, IMAGE_SCORER_PROMPT, HTML_TEMPLATE_PROMPT_REAL
+from src.prompts import IMAGE_DESCRIPTION_PROMPT, COPY_EXTRACTOR_PROMPT, TEMPLATE_PROMPT, HTML_TEMPLATE_PROMPT, IMAGE_QUERY_PROMPT, IMAGE_SCORER_PROMPT, HTML_TEMPLATE_PROMPT_REAL, IMAGE_CROPPER_PROMPT
 from src.utils import extract_x
 from src.clients import openai_response, openai_image_response, download_image
 
@@ -44,10 +45,17 @@ async def image_generator(query:str = "",model="gpt-image-1") -> bytes:
     response = await openai_image_response(prompt=query,model=model)
     return response
 
+async def image_cropper(image_bytes:bytes,headline:str) -> dict:
+    prompt = IMAGE_CROPPER_PROMPT.format(headline)
+    response = await openai_response(prompt=prompt,images=[image_bytes],model="gpt-4.1",type="bytes")
+    logger.info(f"Response: {response}")
+    return json.loads(extract_x(response,'json'))
 
 async def image_scorer_agent(images:List[io.BytesIO],query:str)->List[dict]:
-    prompt = IMAGE_SCORER_PROMPT.format(query)
+    resolution = Image.open(images[0]).size
+    prompt = IMAGE_SCORER_PROMPT.format(query,resolution)
     response = await openai_response(prompt,images=images,model="gpt-4.1",type="bytes")
+    logging.info(f"Response: {response}")
     return extract_x(response,'json')
 
 async def image_query_creator(headline:str)->dict:
@@ -55,7 +63,7 @@ async def image_query_creator(headline:str)->dict:
     response = await openai_response(prompt,model="gpt-4.1", tools=[{"type":"web_search_preview"}],type="bytes")
     return extract_x(response,'json')
 
-async def image_search_agent(query: str) -> dict:
+async def image_search_agent(query: str, reference_image:bytes = None) -> dict:
     """
     Image search agent that finds and selects the best image for a given query.
     
@@ -142,7 +150,7 @@ async def image_search_agent(query: str) -> dict:
                 scoring_tasks = []
                 for img_data in downloaded_images:
                     # Send single image to scorer
-                    task = image_scorer_agent([img_data['image_data']], query)
+                    task = image_scorer_agent([img_data['image_data'], reference_image], query)
                     scoring_tasks.append((img_data, task))
                 
                 # Execute all scoring tasks concurrently using asyncio.gather

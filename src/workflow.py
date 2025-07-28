@@ -4,10 +4,11 @@ import uuid
 from typing import List, Optional, Tuple, Dict
 from pathlib import Path
 import json
+import io
 
-from src.agents import copy_extractor, image_desc_generator, image_generator, html_template_generator, image_query_creator, image_search_agent
+from src.agents import copy_extractor, image_desc_generator, image_generator, html_template_generator, image_query_creator, image_search_agent, image_cropper
 from src.mongo_client import get_mongo_client
-from src.utils import cleanup_files, capture_html_screenshot
+from src.utils import cleanup_files, capture_html_screenshot, crop_image
 
 logger = logging.getLogger(__name__)
 
@@ -76,7 +77,7 @@ async def generate_single_image( analysis: dict, session_id: str,model:str) -> T
         logger.error(f"Error processing generated image {session_id}: {e}")
         raise
 
-async def fetch_single_image(analysis: dict, session_id: str) -> Tuple[Dict[str, str], List[str]]:
+async def fetch_single_image(analysis: dict, session_id: str, reference_image:bytes = None) -> Tuple[Dict[str, str], List[str]]:
     """Process a single image: generate, save, create HTML, and capture screenshot
     
     Returns:
@@ -89,6 +90,7 @@ async def fetch_single_image(analysis: dict, session_id: str) -> Tuple[Dict[str,
     temp_dir.mkdir(exist_ok=True)
     
     # File paths for both versions
+    image_without_text_path_og = f"./data/scoopwhoop/temp/real_image_{session_id}_og.png"
     image_without_text_path = f"./data/scoopwhoop/temp/real_image_{session_id}.png"
     html_path = f"./data/scoopwhoop/temp/html_template_{session_id}_real.html"
     image_with_text_path = f"./data/scoopwhoop/temp/image_real_with_text_{session_id}.png"
@@ -100,11 +102,20 @@ async def fetch_single_image(analysis: dict, session_id: str) -> Tuple[Dict[str,
         image_query_json = json.loads(image_query)
 
         # Generate image from description
-        image_bytes = await image_search_agent(query=image_query_json["queries"][0])
+        image_bytes = await image_search_agent(query=image_query_json["queries"][0], reference_image=reference_image)
+        image_bytes_og = image_bytes['image_data'].getvalue()
+
+        with open(image_without_text_path_og, "wb") as f:
+            f.write(image_bytes_og)
         
+        cropped_image_bytes = crop_image(image_bytes_og,bias=0.5)
+        bias = await image_cropper(cropped_image_bytes,headline=analysis["headline"])
+        logger.info(f"Bias: {bias}")
+
+        cropped_image_bytes = crop_image(image_bytes_og,bias=bias['bias'])
         # Save generated image (WITHOUT TEXT)
         with open(image_without_text_path, "wb") as f:
-            f.write(image_bytes['image_data'].getvalue())
+            f.write(cropped_image_bytes)
         
         # Generate HTML template for this image
         html_template = await html_template_generator(
@@ -173,8 +184,8 @@ async def workflow(image_bytes: bytes, store_in_db: bool = True) -> Optional[str
         logger.info(f"Extracted analysis: {analysis}")
 
         tasks = [
-            # fetch_single_image( analysis, session_id) ,
-            generate_single_image( analysis, session_id,model="dall-e-3")
+            fetch_single_image( analysis, session_id, image_bytes) ,
+            # generate_single_image( analysis, session_id,model="dall-e-3")
         ]
         
         # Wait for all images to be processed in parallel
@@ -216,6 +227,6 @@ async def workflow(image_bytes: bytes, store_in_db: bool = True) -> Optional[str
         logger.info(f"Finished Workflow with session ID: {session_id}")
 
 if __name__ == "__main__":
-    with open("./data_/image.png", "rb") as f:
+    with open("./data_/image_3.png", "rb") as f:
         image_bytes = f.read()
     print(asyncio.run(workflow(image_bytes, store_in_db=False)))

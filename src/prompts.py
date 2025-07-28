@@ -316,11 +316,10 @@ OUTPUT FORMAT:
 IMAGE_SCORER_PROMPT = """
 
 You are an expert in visual content evaluation. Your task is to **score images** based on how well they meet the requirements for **Instagram posts** on **ScoopWhoop**, a pop-culture and youth-focused media brand.
-
 **Scoring Criteria:**
 
 * Images must be **Instagram-worthy** (aesthetic appeal, good lighting, visually engaging)
-* Dimensions should be optimal for Instagram (preferably 1:1 or vertical 4:5 aspect ratio)
+* Dimensions should be optimal for Instagram (preferably 1:1 or vertical 4:5 aspect ratio), GIVE HIGH PRIORITY TO THIS.
 * Images must be **free of any text**, watermarks etc.
 * Content should be relevant to the query
 * Avoid low-resolution or blurry images
@@ -330,11 +329,52 @@ You are an expert in visual content evaluation. Your task is to **score images**
 **Scoring Scale:**
 Score each image between **0 and 1**, using a **float value up to two decimal places**.
 
+**INPUT:**
+Headline: {}
+Image Resolution: {}
+
+NOTE:
+- Primary Criteria: How relevant the image is to the headline and the reference image.
+- Secondary Criteria: How close the image resolution is to 1080x1350.
+
 **Output Format:**
+<reasoning>
+</reasoning>
 
 ```json
 {{
   "image_score": <number>
+}}
+```
+"""
+
+IMAGE_CROPPER_PROMPT = """
+You are given a cropped image. Your job is to analyze the image and decide whether to move it left, right, or keep it centered to ensure the main subject(s) remain clearly visible.
+You can use the bias parameter to shift the image position if the subject is not properly framed after cropping.
+
+**REQUIREMENTS:**
+Must be relevant to the headline.
+All the Subjects in the image should be visible. NO SUBJECT SHOULD BE CUT OFF. if they are i will find you and kill you.
+
+**INPUT:**
+Headline: {}
+
+Perform the following:
+Crop horizontally to match the target width.
+
+If subject is centered in frame, use bias = 0.5.
+
+If subject is going out of frame on left side, use bias range from 0.25 - 0.5
+
+If subject is going out of frame on right side, use bias range from 0.5 - 0.75
+
+Output Format:
+<reasoning>
+</reasoning>
+
+```json
+{{
+  "bias": <number>
 }}
 ```
 """

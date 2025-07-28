@@ -5,9 +5,11 @@ import logging
 import os
 from typing import List
 import io
+
 from PIL import Image
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+
 
 logger = logging.getLogger(__name__)
 
@@ -119,6 +121,41 @@ def compress_image(image_data: bytes, max_size: tuple = (1200, 1800), quality: i
     except Exception as e:
         print(f"Error compressing image: {e}")
         return image_data  # Return original if compression fails
+
+def crop_image(
+    image_bytes: bytes,
+    output_width: int = 1080,
+    output_height: int = 1350,
+    bias: float = 0.35
+) -> bytes:
+    """
+    Crops an image to the specified size with subject-biased centering.
+
+    Args:
+        image_path: Path to the input image.
+        output_path: Path to save the cropped image.
+        output_width: Target width (default 1080).
+        output_height: Target height (default 1350).
+        bias: Bias from center to keep subject in view (0 = left-aligned, 0.5 = center, 1 = right-aligned).
+
+    Returns:
+        Path to the cropped image.
+    """
+    img = Image.open(io.BytesIO(image_bytes))
+    scale_factor = output_height / img.height
+    resized_width = int(img.width * scale_factor)
+    resized_img = img.resize((resized_width, output_height), Image.Resampling.LANCZOS)
+
+    left = int((resized_width - output_width) * bias)
+    top = 0
+    right = left + output_width
+    bottom = output_height
+
+    cropped = resized_img.crop((left, top, right, bottom))
+    buffer = io.BytesIO()
+    cropped.save(buffer,format="PNG")
+
+    return buffer.getvalue()
 
 
 
