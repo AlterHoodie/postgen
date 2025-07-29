@@ -127,7 +127,7 @@ def display_image_pair(img_data):
         try:
             without_text_b64 = img_data["images"]["without_text"]["image_base64"]
             without_text_img = base64.b64decode(without_text_b64)
-            st.image(without_text_img, width=500)
+            st.image(without_text_img, width=450)
             
             # Download button
             st.download_button(
@@ -147,7 +147,7 @@ def display_image_pair(img_data):
         try:
             with_text_b64 = img_data["images"]["with_text"]["image_base64"]
             with_text_img = base64.b64decode(with_text_b64)
-            st.image(with_text_img, width=500)
+            st.image(with_text_img, width=450)
             
             # Download button
             st.download_button(
