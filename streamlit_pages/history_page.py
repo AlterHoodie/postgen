@@ -105,7 +105,7 @@ def display_workflow_result(workflow_result):
         
         # Create tabs for each image
         if len(images) > 1:
-            tab_names = [f"Post {img['index']}" for img in images]
+            tab_names = [f"Post {i+1}" for i in range(len(images))]
             tabs = st.tabs(tab_names)
             
             for tab, img_data in zip(tabs, images):
@@ -120,6 +120,8 @@ def display_image_pair(img_data):
     col1, col2 = st.columns(2)
     
     # Without text
+    if img_data.get('type', ''):
+        st.write(f"**Type**: **{img_data.get('type', '').capitalize()} Image**")
     with col1:
         st.write("**Without Text Overlay**")
         try:

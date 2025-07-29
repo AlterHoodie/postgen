@@ -132,14 +132,14 @@ async def openai_image_response(prompt:str, images:List[str] = [],timeout=200,mo
         return image_bytes
 
 
-async def google_image_response(prompt:str,timeout=200,model="imagen-4.0-ultra-generate-preview-06-06") -> bytes:
-    response = await google_client.aio.models.generate_images(
+async def google_image_response(prompt:str,timeout=100,model="imagen-4.0-ultra-generate-preview-06-06") -> bytes:
+    response = await asyncio.wait_for(google_client.aio.models.generate_images(
         model=model,
         prompt=prompt,
         config=types.GenerateImagesConfig(
             number_of_images= 1,
         )
-    )
+    ),timeout=timeout)
     # Get the image (assuming it's a PIL Image object)
     if response.generated_images:
         image = response.generated_images[0].image

@@ -107,19 +107,27 @@ def show_generated_results(document_id):
             # Display images
             images = result.get("images", [])
             if images:
-                st.markdown("#### Generated Images")
+                st.markdown("#### Images")
                 
                 for i, img_data in enumerate(images[:3]):  # Show first 3
-                    with st.expander(f"Post {img_data['index']}", expanded=i==0):
+                    with st.expander(f"Post {i+1}", expanded=i==0):
                         col1, col2 = st.columns(2)
                         
                         # Show without text
+                        st.write(f"**Type**: **{img_data.get('type', '').capitalize()} Image**")
                         with col1:
                             st.write("**Without Text Overlay**")
                             try:
                                 without_text_b64 = img_data["images"]["without_text"]["image_base64"]
                                 without_text_img = base64.b64decode(without_text_b64)
                                 st.image(without_text_img, use_container_width=True)
+                                st.download_button(
+                                    label="⬇️ Download",
+                                    data=without_text_img,
+                                    file_name=img_data["images"]["without_text"]["filename"],
+                                    mime="image/png",
+                                    key=img_data["images"]["without_text"]["filename"]
+                                )
                             except:
                                 st.error("Failed to load image without text")
                         
@@ -130,6 +138,13 @@ def show_generated_results(document_id):
                                 with_text_b64 = img_data["images"]["with_text"]["image_base64"]
                                 with_text_img = base64.b64decode(with_text_b64)
                                 st.image(with_text_img, use_container_width=True)
+                                st.download_button(
+                                    label="⬇️ Download",
+                                    data=with_text_img,
+                                    file_name=img_data["images"]["with_text"]["filename"],
+                                    mime="image/png",
+                                    key=img_data["images"]["with_text"]["filename"]
+                                )
                             except:
                                 st.error("Failed to load image with text")
                         
