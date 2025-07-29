@@ -26,6 +26,8 @@ class SimpleMongoClient:
     def _encode_image_to_base64(self, image_path: str) -> str:
         """Convert image file to base64 string"""
         try:
+            if image_path is None:
+                return ""
             with open(image_path, "rb") as image_file:
                 return base64.b64encode(compress_image(image_file.read(),quality=70)).decode('utf-8')
         except Exception as e:
@@ -45,6 +47,7 @@ class SimpleMongoClient:
             description = result["description"]
             paths = result["paths"]
             model = result["model"]
+            error = result.get("error", None)
             # Encode both versions to base64
             without_text_base64 = self._encode_image_to_base64(paths["without_text"])
             with_text_base64 = self._encode_image_to_base64(paths["with_text"])
@@ -55,14 +58,15 @@ class SimpleMongoClient:
                 "description": description,
                 "images": {
                     "without_text": {
-                        "filename": Path(paths["without_text"]).name,
+                        "filename": Path(paths["without_text"]).name if paths["without_text"] is not None else "",
                         "image_base64": without_text_base64
                     },
                     "with_text": {
-                        "filename": Path(paths["with_text"]).name,
+                        "filename": Path(paths["with_text"]).name if paths["with_text"] is not None else "",
                         "image_base64": with_text_base64
                     }
-                }
+                },
+                "error": error
             }
             images_data.append(image_data)
         

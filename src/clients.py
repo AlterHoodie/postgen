@@ -4,14 +4,20 @@ import os
 from dotenv import load_dotenv
 import logging
 import io
+import time
+import asyncio
 
 import httpx
 import openai
+from google import genai
+from google.genai import types
 
 load_dotenv(override=True)
 logging.basicConfig(level=logging.INFO)
 
 openai_client = openai.AsyncClient(api_key=os.getenv("OPENAI_API_KEY"))
+google_client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY"))
+
 
 async def download_image(image_url: str) -> io.BytesIO:
     """
@@ -32,8 +38,6 @@ async def download_image(image_url: str) -> io.BytesIO:
             # Create BytesIO object with image data
             image_data = io.BytesIO(response.content)
             image_data.name = "image.jpg"  # Default name
-            
-            logging.info(f"Downloaded image: {image_url}")
             return image_data
     except Exception as e:
         logging.error(f"Failed to download image {image_url}: {e}")
@@ -83,7 +87,7 @@ async def openai_response(
 
     return response.output_text
 
-async def openai_image_response(prompt:str, images:List[str] = [],timeout=200,model="gpt-image-1"):
+async def openai_image_response(prompt:str, images:List[str] = [],timeout=200,model="gpt-image-1") -> bytes:
 
     if model == "dall-e-3":
         size = "1024x1024"
@@ -126,3 +130,71 @@ async def openai_image_response(prompt:str, images:List[str] = [],timeout=200,mo
         image_bytes = base64.b64decode(image_base64)
 
         return image_bytes
+
+
+async def google_image_response(prompt:str,timeout=200,model="imagen-4.0-ultra-generate-preview-06-06") -> bytes:
+    response = await google_client.aio.models.generate_images(
+        model=model,
+        prompt=prompt,
+        config=types.GenerateImagesConfig(
+            number_of_images= 1,
+        )
+    )
+    # Get the image (assuming it's a PIL Image object)
+    if response.generated_images:
+        image = response.generated_images[0].image
+        return image.image_bytes
+    else:
+        return None
+
+async def flux_image_response(prompt:str,timeout=200,model="flux-pro-1.1-ultra") -> bytes:
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            f'https://api.bfl.ai/v1/{model}',
+            headers={
+                'accept': 'application/json',
+                'x-key': os.environ.get("FLUX_API_KEY"),
+                'Content-Type': 'application/json',
+            },
+            json={
+                'prompt': prompt,
+                "aspect_ratio": "3:4"
+            },
+            timeout=timeout
+        )
+        request = response.json()
+
+        request_id = request["id"]
+        polling_url = request["polling_url"]
+        while True:
+            await asyncio.sleep(1) 
+            response = await client.get(
+                polling_url,
+                headers={
+                    'accept': 'application/json',
+                    'x-key': os.getenv("FLUX_API_KEY"),
+                },
+                params={
+                    'id': request_id,
+                },
+                timeout=timeout
+            )
+            result = response.json()
+
+            status = result["status"]
+
+            if status == "Ready":
+                signed_url =  result['result']['sample']
+                break
+            elif status in ["Error", "Failed"]:
+                logging.error(f"Generation failed: {result}")
+                raise Exception(f"Flux Generation failed: {result}")
+    
+    image_bytes = await download_image(signed_url)
+    return image_bytes.getvalue()
+
+
+if __name__ == "__main__":
+    image_bytes = asyncio.run(google_image_response("A cat on its back legs running like a human is holding a big silver fish with its arms. The cat is running away from the shop owner and has a panicked look on his face. The scene is situated in a crowded market."))
+    with open("./data_/google_image.png", "wb") as f:
+        f.write(image_bytes)

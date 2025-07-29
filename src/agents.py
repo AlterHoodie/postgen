@@ -10,7 +10,7 @@ from serpapi import GoogleSearch
 
 from src.prompts import IMAGE_DESCRIPTION_PROMPT, COPY_EXTRACTOR_PROMPT, TEMPLATE_PROMPT, HTML_TEMPLATE_PROMPT, IMAGE_QUERY_PROMPT, IMAGE_SCORER_PROMPT, HTML_TEMPLATE_PROMPT_REAL, IMAGE_CROPPER_PROMPT
 from src.utils import extract_x
-from src.clients import openai_response, openai_image_response, download_image
+from src.clients import openai_response, openai_image_response, download_image, google_image_response, flux_image_response
 
 # Set up logging
 logging.basicConfig(
@@ -42,20 +42,23 @@ async def image_desc_generator(query:str = "") -> List[str]:
     return parsed_response["image_description"]
 
 async def image_generator(query:str = "",model="gpt-image-1") -> bytes:
-    response = await openai_image_response(prompt=query,model=model)
+    if model == "imagen-4.0-ultra-generate-preview-06-06":
+        response = await google_image_response(prompt=query,model=model)
+    elif model == "flux-pro-1.1-ultra":
+        response = await flux_image_response(prompt=query,model=model)
+    else:
+        response = await openai_image_response(prompt=query,model=model)
     return response
 
 async def image_cropper(image_bytes:bytes,headline:str) -> dict:
     prompt = IMAGE_CROPPER_PROMPT.format(headline)
     response = await openai_response(prompt=prompt,images=[image_bytes],model="gpt-4.1",type="bytes")
-    logger.info(f"Response: {response}")
     return json.loads(extract_x(response,'json'))
 
 async def image_scorer_agent(images:List[io.BytesIO],query:str)->List[dict]:
     resolution = Image.open(images[0]).size
     prompt = IMAGE_SCORER_PROMPT.format(query,resolution)
     response = await openai_response(prompt,images=images,model="gpt-4.1",type="bytes")
-    logging.info(f"Response: {response}")
     return extract_x(response,'json')
 
 async def image_query_creator(headline:str)->dict:
@@ -134,7 +137,6 @@ async def image_search_agent(query: str, reference_image:bytes = None) -> dict:
                     **img_data,
                     "image_data": image_data
                 })
-                logging.info(f"Downloaded image {i+1}: {img_data['image_description']}")
             else:
                 logging.warning(f"Failed to download image {i+1}")
             
@@ -204,12 +206,13 @@ async def image_search_agent(query: str, reference_image:bytes = None) -> dict:
         return None
 
 async def test_workflow(headline:str):
-    image_query = await image_query_creator(headline)
-    image_search = await image_search_agent(image_query)
-    return image_search
+    image_query = await image_desc_generator(headline)
+    print(image_query)
+    # image_bytes = await image_generator(image_query[0],model="imagen-4.0-generate-preview-06-06")
+    # return image_bytes
 
 if __name__ == "__main__":
     import asyncio
-    image = asyncio.run(test_workflow("Ka Ka Menon starrer Special Ops 2  shines as fans appreciate • acting, storyline and thrill"))
-    with open("./data_/image.png", "wb") as f:
-        f.write(image["image_data"].getvalue())
+    image = asyncio.run(test_workflow("Haryana Makes Gita Recitation a Must in Schools', 'subtext': 'New rule aims to build focus and discipline among young students statewide"))
+    # with open("./data_/google_image_1.png", "wb") as f:
+    #     f.write(image)
