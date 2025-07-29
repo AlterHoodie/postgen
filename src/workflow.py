@@ -244,7 +244,7 @@ async def workflow(image_bytes: bytes, store_in_db: bool = True) -> Optional[str
         raise
     finally:
         # Clean up temporary files (HTML templates and reference image)
-        # cleanup_files(all_temp_files)
+        cleanup_files(all_temp_files)
         logger.info(f"Finished Workflow with session ID: {session_id}")
 
 if __name__ == "__main__":
