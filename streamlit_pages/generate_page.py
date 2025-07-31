@@ -109,7 +109,7 @@ def show_generated_results(document_id):
             if images:
                 st.markdown("#### Images")
                 
-                for i, img_data in enumerate(images[:3]):  # Show first 3
+                for i, img_data in enumerate(images):  # Show first 3
                     with st.expander(f"Post {i+1}", expanded=i==0):
                         col1, col2 = st.columns(2)
                         

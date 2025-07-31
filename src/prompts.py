@@ -316,15 +316,6 @@ OUTPUT FORMAT:
 IMAGE_SCORER_PROMPT = """
 
 You are an expert in visual content evaluation. Your task is to **score images** based on how well they meet the requirements for **Instagram posts** on **ScoopWhoop**, a pop-culture and youth-focused media brand.
-**Scoring Criteria:**
-
-* Images must be **Instagram-worthy** (aesthetic appeal, good lighting, visually engaging)
-* Dimensions should be optimal for Instagram (preferably 1:1 or vertical 4:5 aspect ratio), GIVE HIGH PRIORITY TO THIS.
-* Images must be **free of any text**, watermarks etc.
-* Content should be relevant to the query
-* Avoid low-resolution or blurry images
-* The image should be worthy of being posted as an Instagram Post.
-* Avoid overly posed or generic stock images unless they’re editorially striking
 
 **Scoring Scale:**
 Score each image between **0 and 1**, using a **float value up to two decimal places**.
@@ -333,8 +324,12 @@ Score each image between **0 and 1**, using a **float value up to two decimal pl
 Headline: {}
 Image Resolution: {}
 
-NOTE:
-- Primary Criteria: How relevant the image is to the headline and the reference image.
+**Scoring Criteria:**
+- Primary Criteria: 
+  - How relevant the image is to the headline and the reference image.
+  - Images must be **free of any text**, watermarks etc.
+  - Images must be **Instagram-worthy** (aesthetic appeal, good lighting, visually engaging)
+  - Avoid low-resolution or blurry images
 - Secondary Criteria: How close the image resolution is to 1080x1350.
 
 **Output Format:**

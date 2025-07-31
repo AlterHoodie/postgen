@@ -59,14 +59,14 @@ async def image_scorer_agent(images:List[io.BytesIO],query:str)->List[dict]:
     resolution = Image.open(images[0]).size
     prompt = IMAGE_SCORER_PROMPT.format(query,resolution)
     response = await openai_response(prompt,images=images,model="gpt-4.1",type="bytes")
-    return extract_x(response,'json')
+    return extract_x(response,'json'), response
 
 async def image_query_creator(headline:str)->dict:
     prompt = IMAGE_QUERY_PROMPT.format(headline)
     response = await openai_response(prompt,model="gpt-4.1", tools=[{"type":"web_search_preview"}],type="bytes")
     return extract_x(response,'json')
 
-async def image_search_agent(query: str, reference_image:bytes = None) -> dict:
+async def image_search_agent(query: str, reference_image:bytes = None) -> List[dict]:
     """
     Image search agent that finds and selects the best image for a given query.
     
@@ -168,12 +168,14 @@ async def image_search_agent(query: str, reference_image:bytes = None) -> dict:
                         img_data['score'] = 5  # Default score
                     else:
                         try:
-                            scoring_result = json.loads(response)
+                            scoring_result = json.loads(response[0])
                             score = scoring_result.get('image_score', [])
+                            reasoning = response[1]
                             if score:
                                 img_data['score'] = score  # Single image, first score
                             else:
                                 img_data['score'] = 0.5  # Default score
+                            img_data['reasoning'] = reasoning
                         except Exception as e:
                             logging.error(f"Failed to parse score for image {i+1}: {e}")
                             img_data['score'] = 0.1  # Default score
@@ -194,7 +196,7 @@ async def image_search_agent(query: str, reference_image:bytes = None) -> dict:
             filtered_images = downloaded_images
         
         # Step 5: Select top 5 images based on score
-        top_image = sorted(filtered_images, key=lambda x: x.get('score', 0), reverse=True)[0]
+        top_image = sorted(filtered_images, key=lambda x: x.get('score', 0), reverse=True)[:3]
 
         if not top_image:
             logging.error("No images could be processed")
