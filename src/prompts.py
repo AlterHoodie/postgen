@@ -394,7 +394,7 @@ Image Resolution: {}
   - Images must be **free of any text**, watermarks etc. NOTE: This rule can be broken if the post is about a movie/ott series trailer or poster.
   - Images must be **Instagram-worthy** (aesthetic appeal, good lighting, visually engaging)
   - Avoid low-resolution or blurry images
-- Secondary Criteria: How close the image resolution is to 1080x1350.
+- Secondary Criteria: How close the image resolution is to 1080x1350. Avoid Landscape Images.
 
 **Output Format:**
 <reasoning>

@@ -103,7 +103,7 @@ async def image_search_agent(query: str, reference_image:bytes = None) -> List[d
             "q": query,
             "gl": "in",
             "api_key": os.getenv("SERP_API_KEY"),
-            "period_unit": "w"
+            "imgsz": "qsvga"
         }
         
         search = GoogleSearch(params)
