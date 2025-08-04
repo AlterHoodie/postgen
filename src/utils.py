@@ -161,16 +161,79 @@ def crop_image(
 
     return buffer.getvalue()
 
-def extract_text_from_html(html_content):
-    """Extract headline and sub_text from HTML content"""
+def convert_simple_text_to_html(headline_text, subtext_text):
+    """Convert simple text with **text** syntax to styled HTML"""
     try:
-        # Extract headline (h1 content)
-        headline_match = re.search(r'<h1[^>]*>(.*?)</h1>', html_content, re.DOTALL)
-        headline = headline_match.group(1).strip() if headline_match else ""
+        # Process headline
+        headline_lines = headline_text.strip().split('\n')
+        headline_html_parts = []
         
-        # Extract sub_text (p content) 
-        subtext_match = re.search(r'<p[^>]*>(.*?)</p>', html_content, re.DOTALL)
-        sub_text = subtext_match.group(1).strip() if subtext_match else ""
+        for line in headline_lines:
+            line = line.strip()
+            if line:
+                # Replace **text** syntax with yellow spans
+                processed_line = re.sub(
+                    r'\*\*([^*]+?)\*\*', 
+                    r'<span class="yellow">\1</span>', 
+                    line
+                )
+                headline_html_parts.append(processed_line)
+        
+        # Join with <br /> tags
+        headline_html = f"<h1>\n    {('<br />').join(headline_html_parts)}\n</h1>"
+        
+        # Process sub-text
+        subtext_lines = subtext_text.strip().split('\n')
+        subtext_html_parts = []
+        
+        for line in subtext_lines:
+            line = line.strip()
+            if line:
+                # Replace **text** syntax with yellow spans
+                processed_line = re.sub(
+                    r'\*\*([^*]+?)\*\*', 
+                    r'<span class="yellow">\1</span>', 
+                    line
+                )
+                subtext_html_parts.append(processed_line)
+        
+        # Join with <br /> tags
+        subtext_html = f"<p>{('<br />').join(subtext_html_parts)}</p>"
+        
+        return headline_html, subtext_html
+        
+    except Exception as e:
+        logger.error(f"Error converting simple text to HTML: {e}")
+        return f"<h1>{headline_text}</h1>", f"<p>{subtext_text}</p>"
+
+def extract_text_from_html(html_content):
+    """Extract clean text from HTML content, converting spans to **text** syntax"""
+    try:
+        soup = BeautifulSoup(html_content, 'html.parser')
+        
+        # Extract headline text (h1 content)
+        headline_tag = soup.find('h1')
+        headline = ""
+        if headline_tag:
+            # Convert yellow spans to **text** syntax
+            for span in headline_tag.find_all('span', class_='yellow'):
+                span.replace_with(f"**{span.get_text()}**")
+            
+            # Get text content, replace <br/> with newlines
+            headline = headline_tag.get_text(separator=' ').strip()
+            headline = re.sub(r'<br\s*/?>', '\n', headline)
+        
+        # Extract sub_text (p content)
+        subtext_tag = soup.find('p') 
+        sub_text = ""
+        if subtext_tag:
+            # Convert yellow spans to **text** syntax
+            for span in subtext_tag.find_all('span', class_='yellow'):
+                span.replace_with(f"**{span.get_text()}**")
+            
+            # Get text content, replace <br/> with newlines
+            sub_text = subtext_tag.get_text(separator='\n').strip()
+            sub_text = re.sub(r'<br\s*/?>', '\n', sub_text)
         
         return headline, sub_text
     except Exception as e:

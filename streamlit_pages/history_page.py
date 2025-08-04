@@ -6,7 +6,7 @@ import logging
 import pytz
 
 from src.mongo_client import get_mongo_client
-from src.utils import extract_text_from_html, regenerate_image_from_html, update_html_content
+from src.utils import extract_text_from_html, regenerate_image_from_html, update_html_content, convert_simple_text_to_html
 
 def show_history_page():
     st.title("📜 Generation History")
@@ -198,27 +198,30 @@ def show_edit_form(img_data, unique_key):
             st.error("No HTML content available for editing")
             return
         
-        # Extract current text
+        # Extract current text (with \highlight syntax)
         current_headline, current_sub_text = extract_text_from_html(html_content)
         
         st.markdown("---")
         st.markdown("**✏️ Edit Text Content**")
         
+        # Show simple syntax info
+        st.info("💡 **Simple Highlighting:** Use `**text**` to make text yellow. Example: `**GAME**` becomes a highlighted word.")
+        
         # Create edit form
         with st.form(key=f"edit_form_{unique_key}"):
             # Text inputs with current values
             new_headline = st.text_area(
-                "Headline (HTML):", 
+                "Headline:", 
                 value=current_headline,
                 height=100,
-                help="You can use HTML tags like <span class='yellow'> to highlight text"
+                help="Type your headline. Use **text** around words you want highlighted in yellow. Use multiple lines for line breaks."
             )
             
             new_sub_text = st.text_area(
-                "Sub Text (HTML):", 
+                "Sub Text:", 
                 value=current_sub_text,
                 height=80,
-                help="You can use <br/> tags for line breaks"
+                help="Type your sub-text. Use multiple lines for line breaks."
             )
             
             col1, col2 = st.columns(2)
@@ -229,8 +232,11 @@ def show_edit_form(img_data, unique_key):
             
             if regenerate_clicked:
                 with st.spinner("Regenerating image..."):
+                    # Convert simple text to styled HTML
+                    new_headline_html, new_sub_text_html = convert_simple_text_to_html(new_headline, new_sub_text)
+                    
                     # Update HTML with new content
-                    updated_html = update_html_content(html_content, new_headline, new_sub_text)
+                    updated_html = update_html_content(html_content, new_headline_html, new_sub_text_html)
                     
                     # Regenerate image (pass original image data for background image extraction)
                     new_image_bytes = regenerate_image_from_html(
