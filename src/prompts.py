@@ -318,6 +318,8 @@ Do not just search for the subject. Generate queries for different *types* of sh
 - **Avoid overly long or complex queries.** Keep them concise (3-6 words is ideal).
 - **Avoid searching for abstract emotions.** Don't search for "sadness"; search for "person looking down rain" which *implies* sadness.
 
+SPECIAL NOTE: THE QUERY MUST MATCH THE GIVEN REFERENCE IMAGE
+
 ---
 
 ### **Query Generation Strategies & Examples**
@@ -394,7 +396,8 @@ Image Resolution: {}
   - Images must be **free of any text**, watermarks etc. NOTE: This rule can be broken if the post is about a movie/ott series trailer or poster.
   - Images must be **Instagram-worthy** (aesthetic appeal, good lighting, visually engaging)
 - Secondary Criteria: 
-  - How close the image resolution is to 1080x1350. Avoid Landscape Images. 
+  - How close the image resolution is to 1080x1350. 
+  - NOTE PLEASE AVOID LANDSCAPE IMAGES OR ELSE I WILL FIND YOU AND KILL YOU.
   - If the image is not 1080x1350, then give score based on how centered the image subjects are.
 
 **Output Format:**

@@ -8,7 +8,7 @@ from PIL import Image
 
 from src.workflow import workflow
 from src.mongo_client import get_mongo_client
-from src.utils import pil_image_to_bytes
+from src.utils import pil_image_to_bytes, extract_text_from_html, regenerate_image_from_html, update_html_content, convert_simple_text_to_html
 
 def show_generate_page():
     st.title("🎨 Generate Social Media Posts")
@@ -40,6 +40,9 @@ def show_generate_page():
             store_in_db = True
             # Generate button
             st.button("🚀 Generate Posts", type="primary", use_container_width=True, on_click=on_click)
+    
+    # Always show the latest generated results if they exist
+            show_latest_results()
 
 def generate_posts(image_bytes:bytes, store_in_db):
     """Generate posts with loading progress"""
@@ -81,7 +84,9 @@ def generate_posts(image_bytes:bytes, store_in_db):
         
         # Display results if available
         if store_in_db and document_id:
-            show_generated_results(document_id)
+            # Store the latest document_id in session state
+            st.session_state['latest_document_id'] = document_id
+            # show_generated_results(document_id)
             
     except Exception as e:
         progress_bar.progress(0)
@@ -94,15 +99,25 @@ def generate_posts(image_bytes:bytes, store_in_db):
         progress_container.empty()
         status_container.empty()
 
-def show_generated_results(document_id):
+def show_generated_results(document_id, show_title=True):
     """Display the generated results"""
     try:
-        mongo_client = get_mongo_client()
-        result = mongo_client.get_workflow_result(document_id)
-        mongo_client.close()
+        # Check if we already have the result in session state
+        result_key = f"generated_result_{document_id}"
+        
+        if result_key not in st.session_state:
+            # Fetch from database and store in session state
+            mongo_client = get_mongo_client()
+            result = mongo_client.get_workflow_result(document_id)
+            mongo_client.close()
+            st.session_state[result_key] = result
+        else:
+            # Use cached result from session state
+            result = st.session_state[result_key]
         
         if result:
-            st.markdown("### 📱 Generated Posts Preview")
+            if show_title:
+                st.markdown("### 📱 Generated Posts Preview")
             
             # Display images
             images = result.get("images", [])
@@ -134,20 +149,150 @@ def show_generated_results(document_id):
                         # Show with text
                         with col2:
                             st.write("**With Text Overlay**")
-                            try:
-                                with_text_b64 = img_data["images"]["with_text"]["image_base64"]
-                                with_text_img = base64.b64decode(with_text_b64)
-                                st.image(with_text_img, use_container_width=True)
+                            
+                            # Create unique key for this image
+                            unique_key = f"{document_id}_{i}"
+                            edited_key = f"edited_image_{unique_key}"
+                            
+                            # Check if we have an edited version in session state
+                            if edited_key in st.session_state:
+                                # Show the edited image
+                                st.image(st.session_state[edited_key], use_container_width=True)
                                 st.download_button(
-                                    label="⬇️ Download",
-                                    data=with_text_img,
-                                    file_name=img_data["images"]["with_text"]["filename"],
+                                    label="⬇️ Download Edited",
+                                    data=st.session_state[edited_key],
+                                    file_name=f"edited_{img_data['images']['with_text']['filename']}",
                                     mime="image/png",
-                                    key=img_data["images"]["with_text"]["filename"]
+                                    key=f"download_edited_{unique_key}"
                                 )
-                            except:
-                                st.error("Failed to load image with text")
+                            else:
+                                # Show the original image
+                                try:
+                                    with_text_b64 = img_data["images"]["with_text"]["image_base64"]
+                                    with_text_img = base64.b64decode(with_text_b64)
+                                    st.image(with_text_img, use_container_width=True)
+                                    st.download_button(
+                                        label="⬇️ Download",
+                                        data=with_text_img,
+                                        file_name=img_data["images"]["with_text"]["filename"],
+                                        mime="image/png",
+                                        key=f"download_original_{unique_key}"
+                                    )
+                                except:
+                                    st.error("Failed to load image with text")
+                            
+                            # Add Edit button
+                            if st.button("✏️ Edit Text", key=f"edit_btn_{unique_key}"):
+                                st.session_state[f"show_edit_{unique_key}"] = True
+                            
+                            # Show edit form if button was clicked
+                            if st.session_state.get(f"show_edit_{unique_key}", False):
+                                show_edit_form_generate(img_data, unique_key)
                         
                         # st.write(f"**Description:** {img_data['description']}")
     except Exception as e:
-        st.error(f"Error displaying results: {str(e)}") 
+        st.error(f"Error displaying results: {str(e)}")
+
+def show_edit_form_generate(img_data, unique_key):
+    """Show the edit form for modifying text in generate page"""
+    try:
+        html_content = img_data.get("html", "")
+        if not html_content:
+            st.error("No HTML content available for editing")
+            return
+        
+        # Extract current text (with \highlight syntax)
+        current_headline, current_sub_text = extract_text_from_html(html_content)
+        
+        # Show simple syntax info
+        st.info("💡 **Simple Highlighting:** Use `**text**` to make text yellow.")
+        
+        # Create edit form
+        with st.form(key=f"edit_form_{unique_key}"):
+            # Text inputs with current values
+            new_headline = st.text_area(
+                "Headline:", 
+                value=current_headline,
+                height=100,
+                help="Type your headline. Use **text** around words you want highlighted in yellow. Use multiple lines for line breaks."
+            )
+            
+            new_sub_text = st.text_area(
+                "Sub Text:", 
+                value=current_sub_text,
+                height=80,
+                help="Type your sub-text. Use multiple lines for line breaks."
+            )
+            
+            col1, col3 = st.columns(2)
+            with col1:
+                regenerate_clicked = st.form_submit_button("🔄 Regenerate Image", type="primary")
+
+            with col3:
+                # Only show clear button if there's an edited version
+                edited_key = f"edited_image_{unique_key}"
+                clear_clicked = False
+                if edited_key in st.session_state:
+                    clear_clicked = st.form_submit_button("🔄 Show Original", type="secondary")
+            
+            if regenerate_clicked:
+                with st.spinner("Regenerating image..."):
+                    # Convert simple text to styled HTML
+                    new_headline_html, new_sub_text_html = convert_simple_text_to_html(new_headline, new_sub_text)
+                    
+                    # Update HTML with new content
+                    updated_html = update_html_content(html_content, new_headline_html, new_sub_text_html)
+                    
+                    # Regenerate image (pass original image data for background image extraction)
+                    new_image_bytes = regenerate_image_from_html(
+                        updated_html, 
+                        unique_key.split('_')[0], 
+                        unique_key.split('_')[1], 
+                        original_image_data=img_data
+                    )
+                    
+                    if new_image_bytes:
+                        # Store the edited image in session state
+                        st.session_state[f"edited_image_{unique_key}"] = new_image_bytes
+                        st.success("✅ Image regenerated successfully!")
+                        st.rerun()
+                    else:
+                        st.error("❌ Failed to regenerate image")
+            
+            if clear_clicked:
+                # Clear the edited image and show original
+                edited_key = f"edited_image_{unique_key}"
+                if edited_key in st.session_state:
+                    del st.session_state[edited_key]
+                # Hide the edit form
+                st.session_state[f"show_edit_{unique_key}"] = False
+                st.success("✅ Cleared edit - showing original image")
+                st.rerun()
+                
+    except Exception as e:
+        st.error(f"Error in edit form: {e}")
+
+def show_latest_results():
+    """Always show the latest generated results if they exist"""
+    latest_document_id = st.session_state.get('latest_document_id')
+    
+    if latest_document_id:
+        st.markdown("---")  # Visual separator
+        
+        # Add a header with clear button
+        col1, col2 = st.columns([3, 1])
+        with col1:
+            st.markdown("### 📱 Latest Generated Posts")
+        with col2:
+            if st.button("🗑️ Clear Results", type="secondary", help="Clear the latest results from view"):
+                # Clear all related session state
+                keys_to_clear = [key for key in st.session_state.keys() 
+                               if key.startswith(f'generated_result_{latest_document_id}') 
+                               or key.startswith(f'edited_image_{latest_document_id}')
+                               or key.startswith(f'show_edit_{latest_document_id}')]
+                for key in keys_to_clear:
+                    del st.session_state[key]
+                del st.session_state['latest_document_id']
+                st.rerun()
+        
+        show_generated_results(latest_document_id, show_title=False) 
