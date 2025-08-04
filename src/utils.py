@@ -5,10 +5,14 @@ import logging
 import os
 from typing import List
 import io
+import uuid
+import shutil
+import base64
 
 from PIL import Image
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from bs4 import BeautifulSoup
 
 
 logger = logging.getLogger(__name__)
@@ -157,6 +161,110 @@ def crop_image(
 
     return buffer.getvalue()
 
+def extract_text_from_html(html_content):
+    """Extract headline and sub_text from HTML content"""
+    try:
+        # Extract headline (h1 content)
+        headline_match = re.search(r'<h1[^>]*>(.*?)</h1>', html_content, re.DOTALL)
+        headline = headline_match.group(1).strip() if headline_match else ""
+        
+        # Extract sub_text (p content) 
+        subtext_match = re.search(r'<p[^>]*>(.*?)</p>', html_content, re.DOTALL)
+        sub_text = subtext_match.group(1).strip() if subtext_match else ""
+        
+        return headline, sub_text
+    except Exception as e:
+        logger.error(f"Error extracting text from HTML: {e}")
+        return "", ""
+
+def regenerate_image_from_html(html_content, session_id, image_index, original_image_data=None):
+    """Regenerate image from modified HTML content"""
+    try:
+        # Create temporary HTML file
+        temp_dir = Path("./data/scoopwhoop/temp")
+        temp_dir.mkdir(exist_ok=True)
+        
+        temp_html_path = f"./data/scoopwhoop/temp/edited_html_{session_id}_{image_index}_{uuid.uuid4().hex[:8]}.html"
+        temp_bg_image_name = f"bg_image_{session_id}_{image_index}_{uuid.uuid4().hex[:8]}.png"
+        temp_bg_image_path = f"./data/scoopwhoop/temp/{temp_bg_image_name}"
+        temp_image_path = f"./data/scoopwhoop/temp/edited_image_{session_id}_{image_index}_{uuid.uuid4().hex[:8]}.png"
+        # Extract background image src from HTML
+        # Use BeautifulSoup for reliable HTML parsing
+        soup = BeautifulSoup(html_content, 'html.parser')
+        background_image_tag = soup.find('img', class_='background-image')
+        background_image_src = background_image_tag.get('src') if background_image_tag else None
+        
+        if background_image_src and original_image_data:
+            
+            try:
+                # Get the image data from the original data (without text version)
+                if "images" in original_image_data and "without_text" in original_image_data["images"]:
+                    bg_image_b64 = original_image_data["images"]["without_text"]["image_base64"]
+                    bg_image_bytes = base64.b64decode(bg_image_b64)
+                    
+                    # Write background image to temp location
+                    with open(temp_bg_image_path, "wb") as f:
+                        f.write(bg_image_bytes)
+                    
+                    # Update HTML to point to the correct background image path
+                    
+                    # Use BeautifulSoup for reliable HTML modification
+                    background_image_tag['src'] = temp_bg_image_name
+                    html_content = str(soup)
+                    
+                    logger.info(f"Downloaded background image to: {temp_bg_image_path}")
+                    
+            except Exception as e:
+                logger.warning(f"Failed to extract background image: {e}")
+        
+        # Write HTML to file
+        with open(temp_html_path, "w", encoding="utf-8") as f:
+            f.write(html_content)
+        
+        # Capture screenshot
+        capture_html_screenshot(
+            file_path=temp_html_path,
+            element_selector=".container",
+            output=temp_image_path
+        )
+        
+        # Read the generated image
+        with open(temp_image_path, "rb") as f:
+            image_bytes = f.read()
+        
+        # Clean up temporary files
+        Path(temp_html_path).unlink(missing_ok=True)
+        Path(temp_image_path).unlink(missing_ok=True)
+        Path(temp_bg_image_path).unlink(missing_ok=True)
+        return image_bytes
+    
+    except Exception as e:
+        logger.error(f"Error regenerating image: {e}")
+        return None
+
+def update_html_content(original_html, new_headline, new_sub_text):
+    """Update HTML content with new headline and sub_text"""
+    try:
+        # Replace headline
+        updated_html = re.sub(
+            r'(<h1[^>]*>)(.*?)(</h1>)', 
+            fr'\1{new_headline}\3', 
+            original_html, 
+            flags=re.DOTALL
+        )
+        
+        # Replace sub_text
+        updated_html = re.sub(
+            r'(<p[^>]*>)(.*?)(</p>)', 
+            fr'\1{new_sub_text}\3', 
+            updated_html, 
+            flags=re.DOTALL
+        )
+        
+        return updated_html
+    except Exception as e:
+        logger.error(f"Error updating HTML content: {e}")
+        return original_html
 
 
 if __name__ == "__main__":

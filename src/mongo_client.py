@@ -47,6 +47,7 @@ class SimpleMongoClient:
             description = result["description"]
             paths = result["paths"]
             model = result["model"]
+            html = result["html"]
             error = result.get("error", None)
             # Encode both versions to base64
             without_text_base64 = self._encode_image_to_base64(paths["without_text"])
@@ -66,6 +67,7 @@ class SimpleMongoClient:
                         "image_base64": with_text_base64
                     }
                 },
+                "html": html,
                 "error": error
             }
             images_data.append(image_data)

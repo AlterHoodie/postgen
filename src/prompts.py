@@ -292,7 +292,7 @@ HTML_TEMPLATE_PROMPT_REAL = """
 IMAGE_QUERY_PROMPT = """**You are a Head Photo Editor for the Instagram Page - ScoopWhoop.** Your role is to generate precise Google image search queries to find the most appropriate photo for a news headline.
 
 Your most important task is to first analyze the headline and decide on the correct image strategy.
-
+Today's date: 2025-08-04
 **Headline:** {}
 
 ---

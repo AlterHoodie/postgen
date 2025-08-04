@@ -70,6 +70,7 @@ async def generate_single_image( analysis: dict, session_id: str,model:str) -> T
             "model": model,
             "description": image_descriptions[0],
             "image_paths": image_paths,
+            "html_path": html_path,
             "temp_files": temp_files
         }
         
@@ -83,6 +84,7 @@ async def generate_single_image( analysis: dict, session_id: str,model:str) -> T
                 "without_text": None,
                 "with_text": None
             },
+            "html_path": None,
             "temp_files": [],
             "error": str(e)
         }
@@ -145,6 +147,7 @@ async def process_single_image(analysis:dict,image_query:str, image_data:dict, s
             "model":f"Reasoning: {image_data['reasoning']}\nScore: {image_data['score']}",
             "description": image_query,
             "image_paths": image_paths,
+            "html_path": html_path,
             "temp_files": temp_files
         }
     except Exception as e:
@@ -157,6 +160,7 @@ async def process_single_image(analysis:dict,image_query:str, image_data:dict, s
                 "without_text": None,
                 "with_text": None
             },
+            "html_path": None,
             "temp_files": [],
             "error": str(e)
         }
@@ -239,6 +243,7 @@ async def workflow(image_bytes: bytes, store_in_db: bool = True) -> Optional[str
                 "model": result["model"],
                 "description": result["description"],
                 "paths": result["image_paths"],
+                "html": open(result["html_path"], "r", encoding="utf-8").read() if result["html_path"] else None,
                 "error": result.get("error", None)
             })
             all_temp_files.extend(result["temp_files"])
