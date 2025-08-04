@@ -138,7 +138,7 @@ async def process_single_image(analysis:dict,image_query:str, image_data:dict, s
 
         # Return both image paths
         image_paths = {
-            "without_text": image_without_text_path,
+            "without_text": image_without_text_path_og,
             "with_text": image_with_text_path
         }
 

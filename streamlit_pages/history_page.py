@@ -205,7 +205,7 @@ def show_edit_form(img_data, unique_key):
         st.markdown("**✏️ Edit Text Content**")
         
         # Show simple syntax info
-        st.info("💡 **Simple Highlighting:** Use `**text**` to make text yellow. Example: `**GAME**` becomes a highlighted word.")
+        st.info("💡 **Simple Highlighting:** Use `**text**` to make text yellow.")
         
         # Create edit form
         with st.form(key=f"edit_form_{unique_key}"):
@@ -228,7 +228,11 @@ def show_edit_form(img_data, unique_key):
             with col1:
                 regenerate_clicked = st.form_submit_button("🔄 Regenerate Image", type="primary")
             with col2:
-                cancel_clicked = st.form_submit_button("❌ Cancel")
+                # Only show clear button if there's an edited version
+                edited_key = f"edited_image_{unique_key}"
+                clear_clicked = False
+                if edited_key in st.session_state:
+                    clear_clicked = st.form_submit_button("🔄 Show Original", type="secondary")
             
             if regenerate_clicked:
                 with st.spinner("Regenerating image..."):
@@ -254,9 +258,14 @@ def show_edit_form(img_data, unique_key):
                     else:
                         st.error("❌ Failed to regenerate image")
             
-            if cancel_clicked:
+            if clear_clicked:
+                # Clear the edited image and show original
+                edited_key = f"edited_image_{unique_key}"
+                if edited_key in st.session_state:
+                    del st.session_state[edited_key]
                 # Hide the edit form
                 st.session_state[f"show_edit_{unique_key}"] = False
+                st.success("✅ Cleared edit - showing original image")
                 st.rerun()
                 
     except Exception as e:

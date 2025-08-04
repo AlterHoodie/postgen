@@ -393,8 +393,9 @@ Image Resolution: {}
   - How relevant the image is to the Query and the reference image.
   - Images must be **free of any text**, watermarks etc. NOTE: This rule can be broken if the post is about a movie/ott series trailer or poster.
   - Images must be **Instagram-worthy** (aesthetic appeal, good lighting, visually engaging)
-  - Avoid low-resolution or blurry images
-- Secondary Criteria: How close the image resolution is to 1080x1350. Avoid Landscape Images.
+- Secondary Criteria: 
+  - How close the image resolution is to 1080x1350. Avoid Landscape Images. 
+  - If the image is not 1080x1350, then give score based on how centered the image subjects are.
 
 **Output Format:**
 <reasoning>
