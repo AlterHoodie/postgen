@@ -61,9 +61,10 @@ async def image_scorer_agent(images:List[io.BytesIO],query:str)->List[dict]:
     response = await openai_response(prompt,images=images,model="gpt-4.1",type="bytes")
     return extract_x(response,'json'), response
 
-async def image_query_creator(headline:str)->dict:
+async def image_query_creator(headline:str, image:bytes)->dict:
     prompt = IMAGE_QUERY_PROMPT.format(headline)
-    response = await openai_response(prompt,model="gpt-4.1", tools=[{"type":"web_search_preview"}],type="bytes")
+    response = await openai_response(prompt,model="gpt-4.1", tools=[{"type":"web_search_preview"}], type="bytes", images=[image])
+    print(response)
     return extract_x(response,'json')
 
 async def image_search_agent(query: str, reference_image:bytes = None) -> List[dict]:
@@ -102,7 +103,7 @@ async def image_search_agent(query: str, reference_image:bytes = None) -> List[d
             "q": query,
             "gl": "in",
             "api_key": os.getenv("SERP_API_KEY"),
-            "imgsz": "svga"
+            "period_unit": "w"
         }
         
         search = GoogleSearch(params)
@@ -116,6 +117,7 @@ async def image_search_agent(query: str, reference_image:bytes = None) -> List[d
         images_data = []
         for img in results.get('images_results', []):
             images_data.append({
+                "query": query,
                 "image_url": img.get('original', ''),
                 "image_description": img.get('title', ''),
                 "image_source": img.get('source', ''),

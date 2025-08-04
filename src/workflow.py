@@ -87,7 +87,7 @@ async def generate_single_image( analysis: dict, session_id: str,model:str) -> T
             "error": str(e)
         }
 
-async def process_single_image(analysis:dict,image_query:str, image_data:bytes, session_id:str, index:int) -> Tuple[Dict[str, str], List[str]]:
+async def process_single_image(analysis:dict,image_query:str, image_data:dict, session_id:str, index:int) -> Tuple[Dict[str, str], List[str]]:
     """Process a single image: generate, save, create HTML, and capture screenshot
     
     Returns:
@@ -101,7 +101,7 @@ async def process_single_image(analysis:dict,image_query:str, image_data:bytes, 
         html_path = f"./data/scoopwhoop/temp/html_template_{session_id}_{index}_real.html"
         image_with_text_path = f"./data/scoopwhoop/temp/image_real_with_text_{session_id}_{index}.png"
 
-        temp_files = [html_path, image_without_text_path, image_with_text_path]  # Track temporary files for cleanup (keep both image versions)
+        temp_files = [html_path, image_without_text_path, image_with_text_path,image_without_text_path_og]  # Track temporary files for cleanup (keep both image versions)
 
         image_bytes_og = image_data['image_data'].getvalue()
 
@@ -174,7 +174,7 @@ async def fetch_multiple_images(analysis: dict, session_id: str, reference_image
     temp_dir.mkdir(exist_ok=True)
     
     try:
-        image_query = await image_query_creator(headline=analysis["headline"])
+        image_query = await image_query_creator(headline=analysis["headline"], image=reference_image)
         image_query_json = json.loads(image_query)
 
         # Generate image from description
@@ -219,12 +219,12 @@ async def workflow(image_bytes: bytes, store_in_db: bool = True) -> Optional[str
 
         tasks = [
             fetch_multiple_images( analysis, session_id, image_bytes),
-            generate_single_image( analysis, f"{session_id}_0",model="gpt-image-1"),
-            generate_single_image( analysis, f"{session_id}_1",model="gpt-image-1"),
-            generate_single_image( analysis, f"{session_id}_2",model="gpt-image-1"),
-            generate_single_image( analysis, f"{session_id}_0",model="imagen-4.0-ultra-generate-preview-06-06"),
-            generate_single_image( analysis, f"{session_id}_1",model="imagen-4.0-ultra-generate-preview-06-06"),
-            generate_single_image( analysis, f"{session_id}_2",model="imagen-4.0-ultra-generate-preview-06-06"),
+            # generate_single_image( analysis, f"{session_id}_0",model="gpt-image-1"),
+            # generate_single_image( analysis, f"{session_id}_1",model="gpt-image-1"),
+            # generate_single_image( analysis, f"{session_id}_2",model="gpt-image-1"),
+            # generate_single_image( analysis, f"{session_id}_0",model="imagen-4.0-ultra-generate-preview-06-06"),
+            # generate_single_image( analysis, f"{session_id}_1",model="imagen-4.0-ultra-generate-preview-06-06"),
+            # generate_single_image( analysis, f"{session_id}_2",model="imagen-4.0-ultra-generate-preview-06-06"),
         ]
         
         # Wait for all images to be processed in parallel
@@ -269,6 +269,6 @@ async def workflow(image_bytes: bytes, store_in_db: bool = True) -> Optional[str
         logger.info(f"Finished Workflow with session ID: {session_id}")
 
 if __name__ == "__main__":
-    with open("./image_1.png", "rb") as f:
+    with open("./data_/image_12.png", "rb") as f:
         image_bytes = f.read()
     print(asyncio.run(workflow(image_bytes, store_in_db=True)))

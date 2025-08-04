@@ -289,23 +289,87 @@ HTML_TEMPLATE_PROMPT_REAL = """
 </html>
 """
 
-IMAGE_QUERY_PROMPT = """You are an expert image finder for the Instagram Page - Scoopwhoop. Your job is to give me a image query for the Instagram Post headline: {}.
-Requirements:
--> Use the websearch tool to get more info on the Instagram Post headline.
--> Your main goal is to generate queries that are broad and generic enough to guarantee good image results. Avoid being too specific, as this often leads to no images being found.
--> The image queries should be relevant to the headline in terms of:
-  - Geographic location/region 
-  - Time period
-  - Factual accuracy and authenticity
-  - Must be relevant to the headline
-Examples:
-1. For a movie review headline "Ramayan Movie Review":
-   ["Ramayan movie poster 2025", "Ramayan movie stills", "Ramayan movie action scenes"]
+IMAGE_QUERY_PROMPT = """**You are a Head Photo Editor for the Instagram Page - ScoopWhoop.** Your role is to generate precise Google image search queries to find the most appropriate photo for a news headline.
 
-2. For a sports headline "Virat Kohli Scores His 50th ODI Century":
-   ["Virat Kohli century celebration World Cup", "Virat Kohli batting World Cup", "Virat Kohli India cricket team"]
+Your most important task is to first analyze the headline and decide on the correct image strategy.
 
-OUTPUT FORMAT:
+**Headline:** {}
+
+---
+
+### **Core Principles for Query Generation:**
+
+**1. The "Broad to Specific" Funnel:**
+- Start with a broad, high-level query that captures the main subject.
+- Create more specific variations by adding context like the event, location, or year. This gives you the best chance of finding a usable image. EX: Use location India as a keyword if the headline is about an Indian event/movie/ott series.
+
+**2. Think in Image Categories (Query Diversity):**
+Do not just search for the subject. Generate queries for different *types* of shots. Your queries should aim to find:
+- **Hero/Portrait Shots:** Tightly cropped, high-quality photos of the main person involved. Often good for celebrity or human-interest stories.
+  - *Example: "Liam Neeson portrait 2025", "Zendaya red carpet Met Gala"*
+- **Action/Event Shots:** Images that capture a key moment or activity.
+  - *Example: "Virat Kohli batting World Cup", "Formula 1 crash Monza"*
+- **Conceptual/Object Shots:** Close-ups of important objects or concepts when people aren't the focus.
+  - *Example: "new iPhone 17 design", "vintage film camera close up"*
+
+**3. What to AVOID:**
+- **Do not simply use the headline as a query.** It's almost always too specific and will yield no results.
+- **Avoid queries that will lead to charts, graphs, or text-heavy infographics.** Focus on photographic results.
+- **Avoid overly long or complex queries.** Keep them concise (3-6 words is ideal).
+- **Avoid searching for abstract emotions.** Don't search for "sadness"; search for "person looking down rain" which *implies* sadness.
+
+---
+
+### **Query Generation Strategies & Examples**
+
+#### **Strategy for Factual News Events (Goal: Authenticity)**
+
+**Example Headline:** "Indian Army's Lieutenant Colonel & soldier killed in Ladakh after huge rock falls on military vehicle"
+**Analysis:** This is a **Factual News Event**. The goal is to find real photos of this specific incident.
+```json
+{{
+  "queries": [
+    "Ladakh military vehicle accident scene",
+    "rockfall on military vehicle in Ladakh",
+  ]
+}}
+```
+*(Note: These queries are specific and use journalistic keywords to find real event photos.)*
+
+---
+
+#### **Strategy for Entertainment/Features (Goal: Aesthetics & Vibe)**
+
+**Example Headline:** "Kay Kay Menon starrer Special Ops Season 2 shines as fans appreciate acting, storyline and thrill"
+**Analysis:** This is **Entertainment News**. The goal is to find a cool, high-impact image. Its an Indian OTT series so use India as a keyword.
+```json
+{{
+  "queries": [
+    "Special Ops season 2 poster high resolution India",
+    "Kay Kay Menon in Special Ops series India",
+  ]
+}}
+```
+*(Note: These queries mix official assets with more conceptual, aesthetic shots.)*
+
+**Example Headline:** "Hyderabad airport launches 'Therapy Dog Program' to ease travel stress"
+**Analysis:** This is a **Feature/Lifestyle News** story. The goal is to find a heartwarming, visually appealing photo.
+```json
+{{
+  "queries": [
+    "Golden Retriever therapy dog at airport",
+    "passengers petting therapy dogs in terminal"
+  ]
+}}
+```
+*(Note: These queries focus on capturing the emotion and concept of the story.)*
+
+---
+
+**OUTPUT FORMAT:**
+<reasoning>
+</reasoning>
+
 ```json
 {{
   "queries": []
@@ -321,13 +385,13 @@ You are an expert in visual content evaluation. Your task is to **score images**
 Score each image between **0 and 1**, using a **float value up to two decimal places**.
 
 **INPUT:**
-Headline: {}
+Query: {}
 Image Resolution: {}
 
 **Scoring Criteria:**
 - Primary Criteria: 
-  - How relevant the image is to the headline and the reference image.
-  - Images must be **free of any text**, watermarks etc.
+  - How relevant the image is to the Query and the reference image.
+  - Images must be **free of any text**, watermarks etc. NOTE: This rule can be broken if the post is about a movie/ott series trailer or poster.
   - Images must be **Instagram-worthy** (aesthetic appeal, good lighting, visually engaging)
   - Avoid low-resolution or blurry images
 - Secondary Criteria: How close the image resolution is to 1080x1350.
