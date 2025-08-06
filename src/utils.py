@@ -42,7 +42,7 @@ def capture_html_screenshot(
     element_selector: str,
     output: str = "./data/scoopwhoop/element_screenshot.png",
     zoom: float = 1.0,
-    delay: float = 0.5,
+    delay: float = 0.2,
     headless: bool = True
 ):
     file_url = Path(file_path).resolve().as_uri()
@@ -65,10 +65,6 @@ def capture_html_screenshot(
 
         # Find the element (e.g., an <img> tag)
         element = driver.find_element("css selector", element_selector)
-
-        # Scroll into view
-        driver.execute_script("arguments[0].scrollIntoView(true);", element)
-        time.sleep(0.2)
 
         # Capture screenshot of the element
         element.screenshot(output)
@@ -331,4 +327,7 @@ def update_html_content(original_html, new_headline, new_sub_text):
 
 
 if __name__ == "__main__":
-    capture_html_screenshot(file_path="./data/scoopwhoop/html_template.html",element_selector=".container")
+    # print(convert_simple_text_to_html("""**Liam Neeson**  Tacaskes
+    #                                   cas
+    #                                   ascsac A Break From  **Action Movies**""","")[0])
+    capture_html_screenshot(file_path="./data_/test.html",element_selector=".container",output="./data_/test_out.png")

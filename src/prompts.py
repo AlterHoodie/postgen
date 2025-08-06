@@ -217,7 +217,7 @@ HTML_TEMPLATE_PROMPT_REAL = """
         /* 'cover' scales the image to fill the container, cropping sides or top/bottom as needed */
         object-fit: cover;
         /* Aligns the image. 'center' horizontally, and 25% from the top vertically to shift it up. */
-        object-position: center 25%;
+        object-position: center 1%;
       }}
       .logo {{
         position: absolute;
@@ -393,7 +393,8 @@ Image Resolution: {}
 **Scoring Criteria:**
 - Primary Criteria: 
   - How relevant the image is to the Query and the reference image.
-  - Images must be **free of any text**, watermarks etc. NOTE: This rule can be broken if the post is about a movie/ott series trailer or poster.
+  - Images must be **free of any text**, watermarks etc. 
+  NOTE: This rule can be broken if the image is an official poster or teaser of the movie.
   - Images must be **Instagram-worthy** (aesthetic appeal, good lighting, visually engaging)
 - Secondary Criteria: 
   - How close the image resolution is to 1080x1350. 

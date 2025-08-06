@@ -135,24 +135,23 @@ class SimpleMongoClient:
             return False
         
         # Find the specific image
-        for image_data in document.get("images", []):
-            if image_data["index"] == image_index:
-                try:
-                    # Choose the right version
-                    version_key = "with_text" if with_text else "without_text"
-                    image_info = image_data["images"][version_key]
-                    
-                    # Decode base64 and save to file
-                    image_bytes = base64.b64decode(image_info["image_base64"])
-                    with open(output_path, "wb") as f:
-                        f.write(image_bytes)
-                    
-                    version_desc = "with text" if with_text else "without text"
-                    logger.info(f"Saved image ({version_desc}) to {output_path}")
-                    return True
-                except Exception as e:
-                    logger.error(f"Error saving image: {e}")
-                    return False
+        image_data = document.get("images", [])[image_index]
+        try:
+            # Choose the right version
+            version_key = "with_text" if with_text else "without_text"
+            image_info = image_data["images"][version_key]
+            
+            # Decode base64 and save to file
+            image_bytes = base64.b64decode(image_info["image_base64"])
+            with open(output_path, "wb") as f:
+                f.write(image_bytes)
+            
+            version_desc = "with text" if with_text else "without text"
+            logger.info(f"Saved image ({version_desc}) to {output_path}")
+            return True
+        except Exception as e:
+            logger.error(f"Error saving image: {e}")
+            return False
 
         logger.warning(f"Image {image_index} not found for session {session_id}")
         return False
@@ -194,4 +193,5 @@ if __name__ == "__main__":
     # # Create index on session_id for faster lookups
     # client.collection.create_index("session_id")
     # logger.info("Database indexes created successfully")
-    print(len(client.get_recent_workflows(10)))
+    # print(len(client.get_recent_workflows(10)))
+    client.save_image_to_file("90c852fc",0,"./data_/test.png",with_text=False)

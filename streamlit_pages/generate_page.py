@@ -9,6 +9,7 @@ from PIL import Image
 from src.workflow import workflow
 from src.mongo_client import get_mongo_client
 from src.utils import pil_image_to_bytes, extract_text_from_html, regenerate_image_from_html, update_html_content, convert_simple_text_to_html
+import concurrent.futures
 
 def show_generate_page():
     st.title("🎨 Generate Social Media Posts")
@@ -44,7 +45,7 @@ def show_generate_page():
     # Always show the latest generated results if they exist
             show_latest_results()
 
-def generate_posts(image_bytes:bytes, store_in_db):
+def generate_posts(image_bytes: bytes, store_in_db):
     """Generate posts with loading progress"""
     
     # Create progress tracking
@@ -66,8 +67,13 @@ def generate_posts(image_bytes:bytes, store_in_db):
         progress_bar.progress(30)
         status_text.text("🤖 Extracting content and generating descriptions...")
         
-        # Run async workflow
-        document_id = asyncio.run(workflow(image_bytes, store_in_db=store_in_db))
+        # Run async workflow in a separate thread with its own event loop
+        def run_workflow():
+            return asyncio.run(workflow(image_bytes, store_in_db=store_in_db))
+        
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            future = executor.submit(run_workflow)
+            document_id = future.result()  # This will block until completion
         
         # Step 3: Progress updates
         progress_bar.progress(60)
@@ -86,7 +92,6 @@ def generate_posts(image_bytes:bytes, store_in_db):
         if store_in_db and document_id:
             # Store the latest document_id in session state
             st.session_state['latest_document_id'] = document_id
-            # show_generated_results(document_id)
             
     except Exception as e:
         progress_bar.progress(0)
