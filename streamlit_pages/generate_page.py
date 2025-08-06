@@ -6,7 +6,7 @@ import base64
 from io import BytesIO
 from PIL import Image
 
-from workflows.generate_posts import workflow
+from workflows.generate_posts import generate_posts_workflow
 from src.mongo_client import get_mongo_client
 from src.utils import pil_image_to_bytes, extract_text_from_html, regenerate_image_from_html, update_html_content, convert_simple_text_to_html
 import concurrent.futures
@@ -69,7 +69,7 @@ def generate_posts(image_bytes: bytes, store_in_db):
         
         # Run async workflow in a separate thread with its own event loop
         def run_workflow():
-            return asyncio.run(workflow(image_bytes, store_in_db=store_in_db))
+            return asyncio.run(generate_posts_workflow(image_bytes, store_in_db=store_in_db))
         
         with concurrent.futures.ThreadPoolExecutor() as executor:
             future = executor.submit(run_workflow)

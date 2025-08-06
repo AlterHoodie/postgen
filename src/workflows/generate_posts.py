@@ -192,7 +192,7 @@ async def fetch_multiple_images(analysis: dict, session_id: str, reference_image
         logger.error(f"Error processing real image {session_id}: {e}")
         return []
 
-async def workflow(image_bytes: bytes, store_in_db: bool = True) -> Optional[str]:
+async def generate_posts_workflow(image_bytes: bytes, store_in_db: bool = True) -> Optional[str]:
     """
     Run the complete workflow and optionally store results in MongoDB
     
