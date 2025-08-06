@@ -330,4 +330,6 @@ if __name__ == "__main__":
     # print(convert_simple_text_to_html("""**Liam Neeson**  Tacaskes
     #                                   cas
     #                                   ascsac A Break From  **Action Movies**""","")[0])
-    capture_html_screenshot(file_path="./data_/test.html",element_selector=".container",output="./data_/test_out.png")
+    # with open("./data_/test_cropped.png","wb") as f:
+    #     f.write(crop_image(image_bytes=open("./data_/test.png","rb").read(),bias=0.5))
+    capture_html_screenshot(file_path="./data_/overlay_test.html",element_selector=".container",output="./data_/test_out.png",delay=0.1,headless=True)

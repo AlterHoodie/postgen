@@ -6,7 +6,7 @@ import base64
 from io import BytesIO
 from PIL import Image
 
-from src.workflow import workflow
+from workflows.generate_posts import workflow
 from src.mongo_client import get_mongo_client
 from src.utils import pil_image_to_bytes, extract_text_from_html, regenerate_image_from_html, update_html_content, convert_simple_text_to_html
 import concurrent.futures

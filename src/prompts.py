@@ -234,8 +234,9 @@ HTML_TEMPLATE_PROMPT_REAL = """
         /* Gradient from semi-transparent black to fully transparent */
         background: linear-gradient(
           to top,
-          rgba(0, 0, 0, 0.95) 40%,
-          rgba(0, 0, 0, 0.5) 75%,
+          rgba(0, 0, 0, 0.95) 30%,
+          rgba(0, 0, 0, 0.8) 60%,
+          rgba(0, 0, 0, 0.4) 80%,
           transparent 100%
         );
         /* Pushed content up using bottom padding */
@@ -277,6 +278,96 @@ HTML_TEMPLATE_PROMPT_REAL = """
     <div class="container">
       <img src="./logo.png" alt="SW Logo" class="logo" />
       <img src="{file_path}" class="background-image" />
+      <div class="text-overlay">
+        <div class="blue-bar"></div>
+        <div class="text-content">
+          {headline}
+          {sub_text}
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+"""
+
+HTML_TEMPLATE_OVERLAY_TEXT = """
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title></title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Golos+Text:wght@400..900&display=swap");
+      body,
+      html {{
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        font-family: "Golos Text", sans-serif;
+        background-color: #000000;
+      }}
+      .container {{
+        position: relative;
+        width: 1080px;
+        height: 1350px;
+        margin: auto;
+        overflow: hidden;
+      }}
+      .background-image {{
+        width: 100%;
+        height: 100%;
+        display: block;
+        object-fit: cover;
+        object-position: center 1%;
+      }}
+      .logo {{
+        position: absolute;
+        top: 40px;
+        left: 40px;
+        width: 110px;
+        filter: brightness(0) invert(1);
+      }}
+      .text-overlay {{
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 60px 10px 80px 30px;
+        color: white;
+        display: flex;
+      }}
+      .blue-bar {{
+        flex-shrink: 0;
+        width: 18px;
+        background-color: #007de1;
+        margin-right: 20px;
+        margin-left: 40px;
+      }}
+      .text-content {{
+        display: flex; /* Added */
+        flex-direction: column; /* Added */
+        justify-content: flex-end; /* Added to push text to the bottom */
+        /* margin: 0px 0 100px 0; */
+      }}
+      .text-content h1 {{
+        margin: 0;
+        font-size: 3.8em; /* Increased font size */
+        font-weight: 700;
+        line-height: 1.1;
+      }}
+      .text-content h1 .yellow {{
+        color: #ffee04;
+      }}
+      .text-content p {{
+        margin: 20px 0 0;
+        font-size: 2em; /* Increased font size */
+      }}
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <img src="./logo.png" alt="SW Logo" class="logo" />
       <div class="text-overlay">
         <div class="blue-bar"></div>
         <div class="text-content">
