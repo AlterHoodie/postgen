@@ -327,9 +327,7 @@ def update_html_content(original_html, new_headline, new_sub_text):
 
 
 if __name__ == "__main__":
-    # print(convert_simple_text_to_html("""**Liam Neeson**  Tacaskes
-    #                                   cas
-    #                                   ascsac A Break From  **Action Movies**""","")[0])
-    # with open("./data_/test_cropped.png","wb") as f:
-    #     f.write(crop_image(image_bytes=open("./data_/test.png","rb").read(),bias=0.5))
-    capture_html_screenshot(file_path="./data_/overlay_test.html",element_selector=".container",output="./data_/test_out.png",delay=0.1,headless=True)
+    print(convert_simple_text_to_html("""POV: When Your **Wallet** has more **Personality** than **Money**""","UPI Id in the description, please **gib money**")[1])
+    # # with open("./data_/test_cropped.png","wb") as f:
+    # #     f.write(crop_image(image_bytes=open("./data_/test.png","rb").read(),bias=0.5))
+    # capture_html_screenshot(file_path="./data_/overlay_test.html",element_selector=".container",output="./data_/test_out.png",delay=0.1,headless=True)

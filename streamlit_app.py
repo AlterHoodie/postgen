@@ -61,7 +61,7 @@ def main():
     # Navigation
     page = st.sidebar.selectbox(
         "Choose a page:",
-        ["Generate Posts", "History"],
+        ["Generate Posts", "Post Editor", "History"],
         key="page_selector"
     )
     
@@ -73,6 +73,9 @@ def main():
     if page == "Generate Posts":
         from streamlit_pages.generate_page import show_generate_page
         show_generate_page()
+    elif page == "Post Editor":
+        from streamlit_pages.post_editor_page import show_post_editor_page
+        show_post_editor_page()
     elif page == "History":
         from streamlit_pages.history_page import show_history_page
         show_history_page()

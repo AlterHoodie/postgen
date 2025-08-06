@@ -272,6 +272,10 @@ HTML_TEMPLATE_PROMPT_REAL = """
         margin: 20px 0 0;
         font-size: 2em; /* Increased font size */
       }}
+
+      .text-content p .yellow {{
+        color: #ffee04;
+      }}
     </style>
   </head>
   <body>
@@ -362,6 +366,9 @@ HTML_TEMPLATE_OVERLAY_TEXT = """
       .text-content p {{
         margin: 20px 0 0;
         font-size: 2em; /* Increased font size */
+      }}
+      .text-content p .yellow {{
+        color: #ffee04;
       }}
     </style>
   </head>
