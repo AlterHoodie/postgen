@@ -160,7 +160,7 @@ def create_final_video(video_path, overlay_image_path, output_path, add_gradient
             output_path, 
             codec='libx264', 
             audio_codec='aac', 
-            threads=1, 
+            threads=4, 
             fps=15,
             preset='ultrafast', 
             bitrate='1500k', 
