@@ -44,7 +44,8 @@ def create_image_post():
                 placeholder="Enter your headline here...",
                 help="Use **text** to highlight words in yellow",
                 height=100,
-                key="image_headline"
+                key="image_headline",
+                value=""
             )
             
             subtext = st.text_area(
@@ -56,10 +57,10 @@ def create_image_post():
             
             # Generate button
             if st.button("🚀 Generate Image Post", type="primary", use_container_width=True, key="generate_image"):
-                if headline.strip() and subtext.strip():
-                    generate_image_post(uploaded_image, headline, subtext)
+                if subtext.strip():
+                    generate_image_post(uploaded_image, subtext, headline)
                 else:
-                    st.error("Please enter both headline and subtext")
+                    st.error("Please enter subtext")
             
             # Clear button (only show if generated image exists)
             if 'generated_image' in st.session_state:
@@ -114,7 +115,8 @@ def create_video_post():
                 placeholder="Enter your headline here...",
                 help="Use **text** to highlight words in yellow",
                 height=100,
-                key="video_headline"
+                key="video_headline",
+                value=""
             )
             
             subtext = st.text_area(
@@ -126,10 +128,10 @@ def create_video_post():
             
             # Generate button
             if st.button("🚀 Generate Video Post", type="primary", use_container_width=True, key="generate_video"):
-                if headline.strip() and subtext.strip():
-                    generate_video_post(uploaded_video, headline, subtext)
+                if subtext.strip():
+                    generate_video_post(uploaded_video, subtext, headline)
                 else:
-                    st.error("Please enter both headline and subtext")
+                    st.error("Please enter subtext")
             
             # Clear button (only show if generated video exists)
             if 'generated_video' in st.session_state:

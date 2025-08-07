@@ -5,7 +5,7 @@ from src.prompts import HTML_TEMPLATE_PROMPT_REAL
 from src.utils import convert_simple_text_to_html, capture_html_screenshot, cleanup_files
 
 
-def workflow(image_bytes, headline, subtext):
+def workflow(image_bytes, subtext, headline=""):
     try:
         temp_dir = Path("./data/scoopwhoop/temp")
         temp_dir.mkdir(exist_ok=True)
@@ -21,11 +21,18 @@ def workflow(image_bytes, headline, subtext):
 
         headline_html, subtext_html = convert_simple_text_to_html(headline, subtext)
         html_path = f"./data/scoopwhoop/temp/temp_overlay_{session_id}.html"
-        html_content = HTML_TEMPLATE_PROMPT_REAL.format(
-            file_path=input_image_name,
-            headline=headline_html,
-            sub_text=subtext_html
-        )
+        if headline:
+            html_content = HTML_TEMPLATE_PROMPT_REAL.format(
+                file_path=input_image_name,
+                headline=headline_html,
+                sub_text=subtext_html
+            )
+        else:
+            html_content = HTML_TEMPLATE_PROMPT_REAL.format(
+                file_path=input_image_name,
+                headline="",
+                sub_text=subtext_html
+            )
         with open(html_path, "w", encoding="utf-8") as f:
             f.write(html_content)
         temp_files.append(html_path)
@@ -51,7 +58,6 @@ if __name__ == "__main__":
         image_bytes = f.read()
     result = workflow(
         image_bytes=image_bytes,
-        headline="India Post Ends **50-Year-Old** Registered Mail Service!",
         subtext="No more snail mail—India Post goes digital. A smarter era begins."
     )
     with open("./data_/test_out.png", "wb") as f:

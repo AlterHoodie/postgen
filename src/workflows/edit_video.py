@@ -33,10 +33,16 @@ def create_overlay_image(headline, subtext, session_id):
     headline_html, subtext_html = convert_simple_text_to_html(headline, subtext)
     
     # Create HTML content using template
-    html_content = HTML_TEMPLATE_OVERLAY_TEXT.format(
-        headline=headline_html,
-        sub_text=subtext_html
-    )
+    if headline:
+        html_content = HTML_TEMPLATE_OVERLAY_TEXT.format(
+            headline=headline_html,
+            sub_text=subtext_html
+        )
+    else:
+        html_content = HTML_TEMPLATE_OVERLAY_TEXT.format(
+            headline="",
+            sub_text=subtext_html
+        )
     
     # Save HTML template
     html_path = f"./data/scoopwhoop/temp/temp_overlay_{session_id}.html"
@@ -168,7 +174,7 @@ def create_final_video(video_path, overlay_image_path, output_path, add_gradient
         return None
 
 
-def workflow(video_bytes, headline, subtext):
+def workflow(video_bytes, subtext, headline=""):
     """
     Complete workflow to create edited video with text overlay
     
@@ -255,7 +261,6 @@ if __name__ == "__main__":
     
     result = workflow(
         video_bytes=video_bytes,
-        headline="India Post Ends **50-Year-Old** Registered Mail Service!",
         subtext="No more snail mail—India Post goes digital. A smarter era begins."
     )
     with open("./data_/final_video.mp4", "wb") as f:
