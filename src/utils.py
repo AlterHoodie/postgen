@@ -194,7 +194,7 @@ def convert_simple_text_to_html(headline_text, subtext_text):
                 subtext_html_parts.append(processed_line)
         
         # Join with <br /> tags
-        subtext_html = f"<p>{('<br />').join(subtext_html_parts)}</p>"
+        subtext_html = f"<p class='subtext'>{('<br />').join(subtext_html_parts)}</p>"
         
         return headline_html, subtext_html
         
@@ -228,7 +228,7 @@ def extract_text_from_html(html_content):
                 span.replace_with(f"**{span.get_text()}**")
             
             # Get text content, replace <br/> with newlines
-            sub_text = subtext_tag.get_text(separator='\n').strip()
+            sub_text = subtext_tag.get_text(separator=' ').strip()
             sub_text = re.sub(r'<br\s*/?>', '\n', sub_text)
         
         return headline, sub_text

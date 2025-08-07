@@ -75,8 +75,8 @@ Your output should contain the following sections:
             Temples and <span class="yellow">Gurdwaras</span><br />Created
             Inside A Game!
         </h1>
-- sub_text: A short p tag for the post, one sentence max.
-    Ex: <p>Gamers have made fully-functional religious<br />places INSIDE AGAME! 😲</p>
+- sub_text: A short p tag with classname-"subtext" for the post, one sentence max.
+    Ex: <p class="subtext">Gamers have made fully-functional religious<br />places INSIDE AGAME! 😲</p>
 
 Note: 
 - Dont Use any Emojis
@@ -223,7 +223,7 @@ HTML_TEMPLATE_PROMPT_REAL = """
         position: absolute;
         top: 40px;
         left: 40px;
-        width: 110px; /* Increased logo size */
+        width: 120px; /* Increased logo size */
         filter: brightness(0) invert(1);
       }}
       .text-overlay {{
@@ -268,13 +268,28 @@ HTML_TEMPLATE_PROMPT_REAL = """
       .text-content h1 .yellow {{
         color: #ffee04;
       }}
-      .text-content p {{
+      .text-content .subtext {{
+        margin: 20px 0 0;
+        font-size: 2.5em; /* Increased font size */
+      }}
+      .text-content .subtext .yellow {{
+        color: #ffee04;
+      }}
+      
+      .text-content .source {{
         margin: 20px 0 0;
         font-size: 2em; /* Increased font size */
       }}
-
-      .text-content p .yellow {{
-        color: #ffee04;
+      .trigger-warning {{
+        background-color: #a22513;
+        color: white;
+        padding: 6px 22px 12px;
+        border-radius: 30px;
+        font-size: 2.3em;
+        font-weight: 700;
+        width: fit-content;
+        margin-top: 15px;
+        margin-bottom: 20px;
       }}
     </style>
   </head>
@@ -285,8 +300,7 @@ HTML_TEMPLATE_PROMPT_REAL = """
       <div class="text-overlay">
         <div class="blue-bar"></div>
         <div class="text-content">
-          {headline}
-          {sub_text}
+          {html_snippet_code}
         </div>
       </div>
     </div>
@@ -363,12 +377,27 @@ HTML_TEMPLATE_OVERLAY_TEXT = """
       .text-content h1 .yellow {{
         color: #ffee04;
       }}
-      .text-content p {{
+      .text-content .subtext {{
+        margin: 20px 0 0;
+        font-size: 2.5em; /* Increased font size */
+      }}
+      .text-content .subtext .yellow {{
+        color: #ffee04;
+      }}
+      .text-content .source {{
         margin: 20px 0 0;
         font-size: 2em; /* Increased font size */
       }}
-      .text-content p .yellow {{
-        color: #ffee04;
+      .trigger-warning {{
+        background-color: #a22513;
+        color: white;
+        padding: 6px 22px 12px;
+        border-radius: 30px;
+        font-size: 2.3em;
+        font-weight: 700;
+        width: fit-content;
+        margin-top: 15px;
+        margin-bottom: 20px;
       }}
     </style>
   </head>
@@ -378,8 +407,7 @@ HTML_TEMPLATE_OVERLAY_TEXT = """
       <div class="text-overlay">
         <div class="blue-bar"></div>
         <div class="text-content">
-          {headline}
-          {sub_text}
+          {html_snippet_code}
         </div>
       </div>
     </div>

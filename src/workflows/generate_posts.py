@@ -4,7 +4,6 @@ import uuid
 from typing import List, Optional, Tuple, Dict
 from pathlib import Path
 import json
-import io
 
 from src.agents import copy_extractor, image_desc_generator, image_generator, html_template_generator, image_query_creator, image_search_agent, image_cropper
 from src.mongo_client import get_mongo_client
@@ -45,8 +44,7 @@ async def generate_single_image( analysis: dict, session_id: str,model:str) -> T
         html_template = await html_template_generator(
             image=[image_without_text_path], 
             file_path=f"./image_generated_{session_id}_{model}.png",
-            analysis=analysis,
-            real=True
+            analysis=analysis
         )
         # Save HTML template    
         with open(html_path, "w", encoding="utf-8") as f:
@@ -121,8 +119,7 @@ async def process_single_image(analysis:dict,image_query:str, image_data:dict, s
         html_template = await html_template_generator(
             image=[image_without_text_path], 
             file_path=f"./real_image_{session_id}_{index}.png",
-            analysis=analysis,
-            real=True
+            analysis=analysis
         )
 
         # Save HTML template
@@ -138,7 +135,7 @@ async def process_single_image(analysis:dict,image_query:str, image_data:dict, s
 
         # Return both image paths
         image_paths = {
-            "without_text": image_without_text_path_og,
+            "without_text": image_without_text_path,
             "with_text": image_with_text_path
         }
 
@@ -224,11 +221,11 @@ async def generate_posts_workflow(image_bytes: bytes, store_in_db: bool = True) 
         tasks = [
             fetch_multiple_images( analysis, session_id, image_bytes),
             generate_single_image( analysis, f"{session_id}_0",model="gpt-image-1"),
-            generate_single_image( analysis, f"{session_id}_1",model="gpt-image-1"),
-            generate_single_image( analysis, f"{session_id}_2",model="gpt-image-1"),
+            # generate_single_image( analysis, f"{session_id}_1",model="gpt-image-1"),
+            # generate_single_image( analysis, f"{session_id}_2",model="gpt-image-1"),
             generate_single_image( analysis, f"{session_id}_0",model="imagen-4.0-ultra-generate-preview-06-06"),
-            generate_single_image( analysis, f"{session_id}_1",model="imagen-4.0-ultra-generate-preview-06-06"),
-            generate_single_image( analysis, f"{session_id}_2",model="imagen-4.0-ultra-generate-preview-06-06"),
+            # generate_single_image( analysis, f"{session_id}_1",model="imagen-4.0-ultra-generate-preview-06-06"),
+            # generate_single_image( analysis, f"{session_id}_2",model="imagen-4.0-ultra-generate-preview-06-06"),
         ]
         
         # Wait for all images to be processed in parallel
@@ -276,4 +273,4 @@ async def generate_posts_workflow(image_bytes: bytes, store_in_db: bool = True) 
 if __name__ == "__main__":
     with open("./data_/image_12.png", "rb") as f:
         image_bytes = f.read()
-    print(asyncio.run(workflow(image_bytes, store_in_db=True)))
+    print(asyncio.run(generate_posts_workflow(image_bytes, store_in_db=True)))

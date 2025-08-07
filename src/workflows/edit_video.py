@@ -25,25 +25,30 @@ def create_gradient_overlay(width, height, gradient_height_ratio=0.35):
     return img
 
 
-def create_overlay_image(headline, subtext, session_id):
+def create_overlay_image( subtext, session_id, headline="",is_trigger=False, source=""):
     """
     Create the overlay image with text using HTML template
     """
     # Convert simple text to styled HTML
     headline_html, subtext_html = convert_simple_text_to_html(headline, subtext)
+    html_tags = []
     
-    # Create HTML content using template
+    if is_trigger:
+            html_tags.append("<div class='trigger-warning'>Trigger Warning</div>")
+
     if headline:
-        html_content = HTML_TEMPLATE_OVERLAY_TEXT.format(
-            headline=headline_html,
-            sub_text=subtext_html
-        )
-    else:
-        html_content = HTML_TEMPLATE_OVERLAY_TEXT.format(
-            headline="",
-            sub_text=subtext_html
-        )
+        html_tags.append(headline_html)
+        html_tags.append(subtext_html)
     
+    else:
+        html_tags.append(subtext_html)
+    
+    if source:
+        html_tags.append(f"<p class='source'>Source: {source}</p>")
+
+    html_content = HTML_TEMPLATE_OVERLAY_TEXT.format(
+        html_snippet_code="\n".join(html_tags)
+    )
     # Save HTML template
     html_path = f"./data/scoopwhoop/temp/temp_overlay_{session_id}.html"
     with open(html_path, "w", encoding="utf-8") as f:
@@ -174,7 +179,7 @@ def create_final_video(video_path, overlay_image_path, output_path, add_gradient
         return None
 
 
-def workflow(video_bytes, subtext, headline=""):
+def video_workflow(video_bytes, subtext, headline="", source="", is_trigger=False):
     """
     Complete workflow to create edited video with text overlay
     
@@ -205,6 +210,8 @@ def workflow(video_bytes, subtext, headline=""):
             headline=headline, 
             subtext=subtext, 
             session_id=session_id,
+            is_trigger=is_trigger,
+            source=source
         )
         temp_files.extend([overlay_image_path, html_path])
         
@@ -259,9 +266,12 @@ if __name__ == "__main__":
     with open("./data_/2.mp4", "rb") as f:
         video_bytes = f.read()
     
-    result = workflow(
+    result = video_workflow(
         video_bytes=video_bytes,
-        subtext="No more snail mail—India Post goes digital. A smarter era begins."
+        subtext="No more snail mail—India Post goes digital. A smarter era begins.",
+        headline="**India Post** goes digital. A **smarter era** begins.",
+        source="Financial Express",
+        is_trigger=True
     )
     with open("./data_/final_video.mp4", "wb") as f:
         f.write(result)

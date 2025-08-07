@@ -5,12 +5,27 @@ from src.prompts import HTML_TEMPLATE_PROMPT_REAL
 from src.utils import convert_simple_text_to_html, capture_html_screenshot, cleanup_files
 
 
-def workflow(image_bytes, subtext, headline=""):
+def image_workflow(image_bytes, subtext, headline="", source="",is_trigger=False):
     try:
         temp_dir = Path("./data/scoopwhoop/temp")
         temp_dir.mkdir(exist_ok=True)
 
         temp_files = []
+        html_tags = []
+
+        headline_html, subtext_html = convert_simple_text_to_html(headline, subtext)
+
+        if is_trigger:
+            html_tags.append("<div class='trigger-warning'>Trigger Warning</div>")
+
+        if headline:
+            html_tags.append(headline_html)
+            html_tags.append(subtext_html)
+        else:
+            html_tags.append(subtext_html)
+
+        if source:
+            html_tags.append(f"<p class='source'>Source: {source}</p>")
 
         session_id = str(uuid.uuid4())[:8]
         input_image_name = f"input_image_{session_id}.png"
@@ -19,20 +34,11 @@ def workflow(image_bytes, subtext, headline=""):
             f.write(image_bytes)
         temp_files.append(input_image_path)
 
-        headline_html, subtext_html = convert_simple_text_to_html(headline, subtext)
         html_path = f"./data/scoopwhoop/temp/temp_overlay_{session_id}.html"
-        if headline:
-            html_content = HTML_TEMPLATE_PROMPT_REAL.format(
-                file_path=input_image_name,
-                headline=headline_html,
-                sub_text=subtext_html
-            )
-        else:
-            html_content = HTML_TEMPLATE_PROMPT_REAL.format(
-                file_path=input_image_name,
-                headline="",
-                sub_text=subtext_html
-            )
+        html_content = HTML_TEMPLATE_PROMPT_REAL.format(
+            file_path=input_image_name,
+            html_snippet_code="\n".join(html_tags)
+        )
         with open(html_path, "w", encoding="utf-8") as f:
             f.write(html_content)
         temp_files.append(html_path)
@@ -56,9 +62,12 @@ def workflow(image_bytes, subtext, headline=""):
 if __name__ == "__main__":
     with open("./data_/test.png", "rb") as f:
         image_bytes = f.read()
-    result = workflow(
+    result = image_workflow(
         image_bytes=image_bytes,
-        subtext="No more snail mail—India Post goes digital. A smarter era begins."
+        # headline="**India Post** goes digital. A **smarter era** begins.",
+        subtext="No more snail mail—India Post goes digital. A smarter era begins.",
+        # is_trigger=True,
+        source="Financial Express"
     )
     with open("./data_/test_out.png", "wb") as f:
         f.write(result)

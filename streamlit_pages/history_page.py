@@ -1,12 +1,12 @@
 import streamlit as st
 import time
-from datetime import datetime
 import base64
 import logging
 import pytz
 
 from src.mongo_client import get_mongo_client
-from src.utils import extract_text_from_html, regenerate_image_from_html, update_html_content, convert_simple_text_to_html
+from src.workflows.edit_image import image_workflow
+from src.utils import extract_text_from_html
 
 def show_history_page():
     st.title("📜 Generation History")
@@ -223,6 +223,9 @@ def show_edit_form(img_data, unique_key):
                 height=80,
                 help="Type your sub-text. Use multiple lines for line breaks."
             )
+
+            new_source = st.text_input("Source:", value="")
+            is_trigger = st.checkbox("Trigger Warning", value=False)
             
             col1, col2 = st.columns(2)
             with col1:
@@ -236,27 +239,20 @@ def show_edit_form(img_data, unique_key):
             
             if regenerate_clicked:
                 with st.spinner("Regenerating image..."):
-                    # Convert simple text to styled HTML
-                    new_headline_html, new_sub_text_html = convert_simple_text_to_html(new_headline, new_sub_text)
-                    
-                    # Update HTML with new content
-                    updated_html = update_html_content(html_content, new_headline_html, new_sub_text_html)
-                    
-                    # Regenerate image (pass original image data for background image extraction)
-                    new_image_bytes = regenerate_image_from_html(
-                        updated_html, 
-                        unique_key.split('_')[0], 
-                        unique_key.split('_')[1], 
-                        original_image_data=img_data
-                    )
-                    
-                    if new_image_bytes:
+                    if "images" in img_data and "without_text" in img_data["images"]:
+                        old_image_bytes = img_data["images"]["without_text"]["image_base64"]
+                        old_image_bytes = base64.b64decode(old_image_bytes)
+                        
+                        new_image_bytes = image_workflow(image_bytes=old_image_bytes, subtext=new_sub_text, headline=new_headline, source=new_source, is_trigger=is_trigger)
+                        if new_image_bytes:
                         # Store the edited image in session state
-                        st.session_state[f"edited_image_{unique_key}"] = new_image_bytes
-                        st.success("✅ Image regenerated successfully!")
-                        st.rerun()
+                            st.session_state[f"edited_image_{unique_key}"] = new_image_bytes
+                            st.success("✅ Image regenerated successfully!")
+                            st.rerun()
+                        else:
+                            st.error("❌ Failed to regenerate image")
                     else:
-                        st.error("❌ Failed to regenerate image")
+                        st.error("No image data available")
             
             if clear_clicked:
                 # Clear the edited image and show original

@@ -3,8 +3,8 @@ import base64
 from PIL import Image
 from io import BytesIO
 
-from src.workflows.edit_image import workflow as image_workflow
-from src.workflows.edit_video import workflow as video_workflow
+from src.workflows.edit_image import image_workflow
+from src.workflows.edit_video import video_workflow
 
 def show_post_editor_page():
     st.title("🎨 Post Editor")
@@ -55,10 +55,13 @@ def create_image_post():
                 key="image_subtext"
             )
             
+            new_source = st.text_input("Source:", value="", key="image_source")
+            is_trigger = st.checkbox("Trigger Warning", value=False, key="image_trigger")
+            
             # Generate button
             if st.button("🚀 Generate Image Post", type="primary", use_container_width=True, key="generate_image"):
                 if subtext.strip():
-                    generate_image_post(uploaded_image, subtext, headline)
+                    generate_image_post(uploaded_image, headline=headline, subtext=subtext, source=new_source, is_trigger=is_trigger)
                 else:
                     st.error("Please enter subtext")
             
@@ -125,11 +128,14 @@ def create_video_post():
                 height=80,
                 key="video_subtext"
             )
+
+            new_source = st.text_input("Source:", value="", key="video_source")
+            is_trigger = st.checkbox("Trigger Warning", value=False, key="video_trigger")
             
             # Generate button
             if st.button("🚀 Generate Video Post", type="primary", use_container_width=True, key="generate_video"):
                 if subtext.strip():
-                    generate_video_post(uploaded_video, subtext, headline)
+                    generate_video_post(uploaded_video, subtext=subtext, headline=headline, source=new_source, is_trigger=is_trigger)
                 else:
                     st.error("Please enter subtext")
             
@@ -159,7 +165,7 @@ def create_video_post():
                     mime="video/mp4"
                     )
 
-def generate_image_post(uploaded_image, headline, subtext):
+def generate_image_post(uploaded_image, headline, subtext, source, is_trigger):
     """Generate image post with text overlay"""
     
     # Create progress tracking
@@ -186,7 +192,7 @@ def generate_image_post(uploaded_image, headline, subtext):
         status_text.text("🎨 Creating text overlay...")
         
         # Call the image workflow
-        result_bytes = image_workflow(image_bytes, headline, subtext)
+        result_bytes = image_workflow(image_bytes, subtext, headline, source, is_trigger)
         
         if result_bytes:
             # Step 3: Complete
@@ -208,7 +214,7 @@ def generate_image_post(uploaded_image, headline, subtext):
         time.sleep(2)
         progress_container.empty()
 
-def generate_video_post(uploaded_video, headline, subtext):
+def generate_video_post(uploaded_video, headline, subtext, source, is_trigger):
     """Generate video post with text overlay"""
     
     # Create progress tracking
@@ -236,7 +242,7 @@ def generate_video_post(uploaded_video, headline, subtext):
         status_text.text("🔄 Processing video (this may take a few minutes)...")
         
         # Call the video workflow
-        result_bytes = video_workflow(video_bytes, headline, subtext)
+        result_bytes = video_workflow(video_bytes, subtext, headline, source, is_trigger)
         
         if result_bytes:
             # Step 4: Complete

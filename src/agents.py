@@ -25,14 +25,12 @@ async def copy_extractor(image:List[str] = []) -> str:
     response = await openai_response(prompt=prompt, images=image, model = "gpt-4.1")
     return json.loads(extract_x(response,"json"))
 
-async def html_template_generator(image:List[str] = [],file_path:str = "", analysis:dict = {}, real:bool = False) -> str:
+async def html_template_generator(image:List[str] = [],file_path:str = "", analysis:dict = {}) -> str:
     prompt = TEMPLATE_PROMPT.format(analysis)
     response = await openai_response(prompt=prompt, images=image, model = "gpt-4.1")
     input_json = json.loads(extract_x(response,"json"))
-    if real:
-        html_template = HTML_TEMPLATE_PROMPT_REAL.format(**input_json, file_path=file_path)
-    else:
-        html_template = HTML_TEMPLATE_PROMPT.format(**input_json, file_path=file_path)
+    html_tags = [input_json['headline'],input_json['sub_text']] 
+    html_template = HTML_TEMPLATE_PROMPT_REAL.format(file_path=file_path, html_snippet_code="\n".join(html_tags))
     return html_template
 
 async def image_desc_generator(query:str = "") -> List[str]:
