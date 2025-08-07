@@ -133,7 +133,7 @@ def create_final_video(video_path, overlay_image_path, output_path, add_gradient
         # Add gradient overlay if requested
         if add_gradient:
             gradient_img = create_gradient_overlay(target_width, target_height)
-            gradient_path = f"./data_/gradient_{uuid.uuid4().hex[:8]}.png"
+            gradient_path = f"./data/scoopwhoop/temp/gradient_{uuid.uuid4().hex[:8]}.png"
             gradient_img.save(gradient_path, "PNG")
             
             gradient_clip = ImageClip(gradient_path).with_duration(final_clip.duration)
@@ -145,7 +145,7 @@ def create_final_video(video_path, overlay_image_path, output_path, add_gradient
         # Process overlay image to match target dimensions
         overlay_img = Image.open(overlay_image_path)
         overlay_resized = overlay_img.resize((target_width, target_height), Image.Resampling.LANCZOS)
-        overlay_resized_path = f"./data_/overlay_resized_{uuid.uuid4().hex[:8]}.png"
+        overlay_resized_path = f"./data/scoopwhoop/temp/overlay_resized_{uuid.uuid4().hex[:8]}.png"
         overlay_resized.save(overlay_resized_path, "PNG")
         
         overlay_clip = ImageClip(overlay_resized_path)
