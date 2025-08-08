@@ -107,7 +107,7 @@ async def image_search_agent(query: str, reference_image:bytes = None) -> List[d
         search = GoogleSearch(params)
         results = search.get_dict()
         
-        if "error" in results:
+        if (not results) or ("error" in results):
             logging.error(f"SERP API error: {results['error']}")
             return []
         

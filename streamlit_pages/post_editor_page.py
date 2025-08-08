@@ -52,7 +52,8 @@ def create_image_post():
                 "Subtext:",
                 placeholder="Enter your subtext here...",
                 height=80,
-                key="image_subtext"
+                key="image_subtext",
+                value=""
             )
             
             new_source = st.text_input("Source:", value="", key="image_source")
@@ -60,7 +61,7 @@ def create_image_post():
             
             # Generate button
             if st.button("🚀 Generate Image Post", type="primary", use_container_width=True, key="generate_image"):
-                if subtext.strip():
+                if subtext.strip() or headline.strip() or new_source.strip():
                     generate_image_post(uploaded_image, headline=headline, subtext=subtext, source=new_source, is_trigger=is_trigger)
                 else:
                     st.error("Please enter subtext")
@@ -126,7 +127,8 @@ def create_video_post():
                 "Subtext:",
                 placeholder="Enter your subtext here...",
                 height=80,
-                key="video_subtext"
+                key="video_subtext",
+                value=""
             )
 
             new_source = st.text_input("Source:", value="", key="video_source")
@@ -134,7 +136,7 @@ def create_video_post():
             
             # Generate button
             if st.button("🚀 Generate Video Post", type="primary", use_container_width=True, key="generate_video"):
-                if subtext.strip():
+                if subtext.strip() or headline.strip() or new_source.strip() or is_trigger:
                     generate_video_post(uploaded_video, subtext=subtext, headline=headline, source=new_source, is_trigger=is_trigger)
                 else:
                     st.error("Please enter subtext")
