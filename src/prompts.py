@@ -217,13 +217,13 @@ HTML_TEMPLATE_PROMPT_REAL = """
         /* 'cover' scales the image to fill the container, cropping sides or top/bottom as needed */
         object-fit: cover;
         /* Aligns the image. 'center' horizontally, and 25% from the top vertically to shift it up. */
-        object-position: center 1%;
+        object-position: center 25%;
       }}
       .logo {{
         position: absolute;
         top: 40px;
         left: 40px;
-        width: 120px; /* Increased logo size */
+        width: 110px; /* Increased logo size */
         filter: brightness(0) invert(1);
       }}
       .text-overlay {{
@@ -234,13 +234,12 @@ HTML_TEMPLATE_PROMPT_REAL = """
         /* Gradient from semi-transparent black to fully transparent */
         background: linear-gradient(
           to top,
-          rgba(0, 0, 0, 0.95) 30%,
-          rgba(0, 0, 0, 0.8) 60%,
-          rgba(0, 0, 0, 0.4) 80%,
+          rgba(0, 0, 0, 0.95) 40%,
+          rgba(0, 0, 0, 0.5) 75%,
           transparent 100%
         );
         /* Pushed content up using bottom padding */
-        padding: 60px 10px 45px 30px;
+        padding: 100px 10px 45px 30px;
         color: white;
         display: flex;
         /* align-items: flex-end; */ /* Removed this to allow stretching */
@@ -269,7 +268,7 @@ HTML_TEMPLATE_PROMPT_REAL = """
         color: #ffee04;
       }}
       .text-content .subtext {{
-        margin: 20px 0 0;
+        margin: 5px 0 0;
         font-size: 2.5em; /* Increased font size */
       }}
       .text-content .subtext .yellow {{
@@ -278,18 +277,18 @@ HTML_TEMPLATE_PROMPT_REAL = """
       
       .text-content .source {{
         margin: 20px 0 0;
-        font-size: 2em; /* Increased font size */
+        font-size: 1.7em; /* Increased font size */
       }}
       .trigger-warning {{
         background-color: #a22513;
         color: white;
-        padding: 6px 22px 12px;
+        padding: 4px 20px 9px;
         border-radius: 30px;
-        font-size: 2.3em;
+        font-size: 1.8em;
         font-weight: 700;
         width: fit-content;
-        margin-top: 15px;
-        margin-bottom: 20px;
+        margin-top: 10px;
+        margin-bottom: 15px;
       }}
     </style>
   </head>
@@ -336,28 +335,40 @@ HTML_TEMPLATE_OVERLAY_TEXT = """
         width: 100%;
         height: 100%;
         display: block;
+        /* 'cover' scales the image to fill the container, cropping sides or top/bottom as needed */
         object-fit: cover;
-        object-position: center 1%;
+        /* Aligns the image. 'center' horizontally, and 25% from the top vertically to shift it up. */
+        object-position: center 25%;
       }}
       .logo {{
         position: absolute;
         top: 40px;
         left: 40px;
-        width: 110px;
+        width: 110px; /* Increased logo size */
         filter: brightness(0) invert(1);
       }}
       .text-overlay {{
         position: absolute;
-        bottom: 0;
+        bottom: 0; /* Anchored overlay to the bottom */
         left: 0;
         right: 0;
-        padding: 60px 10px 80px 30px;
+        /* Gradient from semi-transparent black to fully transparent */
+        background: linear-gradient(
+          to top,
+          rgba(0, 0, 0, 0.95) 40%,
+          rgba(0, 0, 0, 0.5) 75%,
+          transparent 100%
+        );
+        /* Pushed content up using bottom padding */
+        padding: 100px 10px 55px 30px;
         color: white;
         display: flex;
+        /* align-items: flex-end; */ /* Removed this to allow stretching */
       }}
       .blue-bar {{
-        flex-shrink: 0;
+        flex-shrink: 0; /* Prevents the bar from shrinking */
         width: 18px;
+        /* height: 155px; */ /* Removed fixed height */
         background-color: #007de1;
         margin-right: 20px;
         margin-left: 40px;
@@ -378,26 +389,27 @@ HTML_TEMPLATE_OVERLAY_TEXT = """
         color: #ffee04;
       }}
       .text-content .subtext {{
-        margin: 20px 0 0;
+        margin: 5px 0 0;
         font-size: 2.5em; /* Increased font size */
       }}
       .text-content .subtext .yellow {{
         color: #ffee04;
       }}
+      
       .text-content .source {{
         margin: 20px 0 0;
-        font-size: 2em; /* Increased font size */
+        font-size: 1.7em; /* Increased font size */
       }}
       .trigger-warning {{
         background-color: #a22513;
         color: white;
-        padding: 6px 22px 12px;
+        padding: 4px 20px 9px;
         border-radius: 30px;
-        font-size: 2.3em;
+        font-size: 1.8em;
         font-weight: 700;
         width: fit-content;
-        margin-top: 15px;
-        margin-bottom: 20px;
+        margin-top: 10px;
+        margin-bottom: 15px;
       }}
     </style>
   </head>

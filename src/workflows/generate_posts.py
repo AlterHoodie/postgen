@@ -221,11 +221,11 @@ async def generate_posts_workflow(image_bytes: bytes, store_in_db: bool = True) 
         tasks = [
             fetch_multiple_images( analysis, session_id, image_bytes),
             generate_single_image( analysis, f"{session_id}_0",model="gpt-image-1"),
-            # generate_single_image( analysis, f"{session_id}_1",model="gpt-image-1"),
-            # generate_single_image( analysis, f"{session_id}_2",model="gpt-image-1"),
+            generate_single_image( analysis, f"{session_id}_1",model="gpt-image-1"),
+            generate_single_image( analysis, f"{session_id}_2",model="gpt-image-1"),
             generate_single_image( analysis, f"{session_id}_0",model="imagen-4.0-ultra-generate-preview-06-06"),
-            # generate_single_image( analysis, f"{session_id}_1",model="imagen-4.0-ultra-generate-preview-06-06"),
-            # generate_single_image( analysis, f"{session_id}_2",model="imagen-4.0-ultra-generate-preview-06-06"),
+            generate_single_image( analysis, f"{session_id}_1",model="imagen-4.0-ultra-generate-preview-06-06"),
+            generate_single_image( analysis, f"{session_id}_2",model="imagen-4.0-ultra-generate-preview-06-06"),
         ]
         
         # Wait for all images to be processed in parallel
