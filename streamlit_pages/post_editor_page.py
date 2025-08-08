@@ -78,7 +78,7 @@ def create_image_post():
             with sub_col1:
                 st.subheader("Original Image")
                 image = Image.open(uploaded_image)
-                st.image(image, caption="Uploaded Image", width=400)
+                st.image(image, caption="Uploaded Image", width=300)
             
             # Show generated image below original if it exists
             if 'generated_image' in st.session_state:
