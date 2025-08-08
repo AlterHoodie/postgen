@@ -246,7 +246,7 @@ def show_edit_form_generate(img_data, unique_key):
             if regenerate_clicked:
                 with st.spinner("Regenerating image..."):
                     if (not new_sub_text) and (not new_headline) and (not new_source) and (not is_trigger):
-                        st.error("Please enter all fields")
+                        st.error("Please enter a field")
                         return
                     if "images" in img_data and "without_text" in img_data["images"]:
                         old_image_bytes = img_data["images"]["without_text"]["image_base64"]

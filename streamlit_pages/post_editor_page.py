@@ -64,7 +64,7 @@ def create_image_post():
                 if subtext.strip() or headline.strip() or new_source.strip():
                     generate_image_post(uploaded_image, headline=headline, subtext=subtext, source=new_source, is_trigger=is_trigger)
                 else:
-                    st.error("Please enter subtext")
+                    st.error("Please enter a field")
             
             # Clear button (only show if generated image exists)
             if 'generated_image' in st.session_state:
@@ -139,7 +139,7 @@ def create_video_post():
                 if subtext.strip() or headline.strip() or new_source.strip() or is_trigger:
                     generate_video_post(uploaded_video, subtext=subtext, headline=headline, source=new_source, is_trigger=is_trigger)
                 else:
-                    st.error("Please enter subtext")
+                    st.error("Please enter a field")
             
             # Clear button (only show if generated video exists)
             if 'generated_video' in st.session_state:
