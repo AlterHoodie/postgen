@@ -151,7 +151,7 @@ def create_video_post():
             sub_col1, sub_col2 = st.columns([1, 1])
             with sub_col1:
                 st.subheader("Original Video")
-                st.video(uploaded_video, width=400)
+                st.video(uploaded_video, width=300)
             
             # Show generated video below original if it exists
             if 'generated_video' in st.session_state:
