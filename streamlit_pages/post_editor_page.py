@@ -61,7 +61,7 @@ def create_image_post():
             
             # Generate button
             if st.button("🚀 Generate Image Post", type="primary", use_container_width=True, key="generate_image"):
-                if subtext.strip() or headline.strip() or new_source.strip():
+                if subtext.strip() or headline.strip() or new_source.strip() or is_trigger:
                     generate_image_post(uploaded_image, headline=headline, subtext=subtext, source=new_source, is_trigger=is_trigger)
                 else:
                     st.error("Please enter a field")
