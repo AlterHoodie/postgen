@@ -21,7 +21,7 @@ class SimpleMongoClient:
         
         self.client = MongoClient(mongo_uri)
         self.db = self.client[database_name]
-        self.collection = self.db.ig_posts
+        self.collection = self.db.workflows
     
     def _encode_image_to_base64(self, image_path: str) -> str:
         """Convert image file to base64 string"""
@@ -34,62 +34,58 @@ class SimpleMongoClient:
             logger.error(f"Error encoding image {image_path}: {e}")
             return ""
     
-    def store_workflow_result(self, 
-                            session_id: str,
-                            analysis: Dict,
-                            image_results: List[Dict]) -> str:
-        """Store complete workflow result in MongoDB with both image versions"""
+    
+    def store_content_workflow(self, 
+                              session_id: str,
+                              headline: str,
+                              template_type: str,
+                              story_board: Dict,
+                              slide_images: List[List[Dict]],
+                              error: Optional[str] = None) -> str:
+        """Store content creator workflow result in MongoDB"""
         
-        # Process each image result (contains both with and without text versions)
-        images_data = []
-        for result in image_results:
-            type = result["type"]
-            description = result["description"]
-            paths = result["paths"]
-            model = result["model"]
-            html = result["html"]
-            error = result.get("error", None)
-            # Encode both versions to base64
-            without_text_base64 = self._encode_image_to_base64(paths["without_text"])
-            with_text_base64 = self._encode_image_to_base64(paths["with_text"])
+        # Prepare slides data with images
+        slides_data = []
+        for idx, (slide_info, images) in enumerate(zip(story_board['storyboard'], slide_images)):
+            # Convert image bytes to base64 for storage with type information
+            images_with_type = []
+            for img_data in images:
+                img_b64 = base64.b64encode(img_data['image_bytes']).decode('utf-8')
+                images_with_type.append({
+                    "image_base64": img_b64,
+                    "type": img_data['type'],  # 'real' or 'generated'
+                    "model": img_data.get('model', 'unknown')
+                })
             
-            image_data = {
-                "type": type,
-                "model": model,
-                "description": description,
-                "images": {
-                    "without_text": {
-                        "filename": Path(paths["without_text"]).name if paths["without_text"] is not None else "",
-                        "image_base64": without_text_base64
-                    },
-                    "with_text": {
-                        "filename": Path(paths["with_text"]).name if paths["with_text"] is not None else "",
-                        "image_base64": with_text_base64
-                    }
-                },
-                "html": html,
-                "error": error
+            slide_data = {
+                "slide_index": idx,
+                "name": slide_info.get('name', f'slide_{idx}'),
+                "text_template": slide_info.get('text_template', ''),
+                "image_description": slide_info.get('image_description', ''),
+                "images": images_with_type,
+                "total_images": len(images_with_type)
             }
-            images_data.append(image_data)
+            slides_data.append(slide_data)
         
-        # Create document to store
+        # Create MongoDB document
         document = {
             "session_id": session_id,
+            "template_type": template_type,
             "created_at": datetime.now(),
-            "analysis": {
-                "headline": analysis.get("headline", ""),
-                "subtext": analysis.get("subtext", "")
-            },
-            "images": images_data,
-            "total_images": len(images_data)
+            "workflow_type": "content_creator",
+            "headline": headline,
+            "story_board": story_board,
+            "slides": slides_data,
+            "total_slides": len(slides_data),
+            "error": error
         }
         
         # Insert into MongoDB
         result = self.collection.insert_one(document)
         document_id = str(result.inserted_id)
         
-        logger.info(f"Stored workflow result with session_id: {session_id}, document_id: {document_id}")
-        logger.info(f"Stored {len(images_data)} image sets with both versions (with/without text)")
+        logger.info(f"Stored content workflow with session_id: {session_id}, document_id: {document_id}")
+        logger.info(f"Stored {len(slides_data)} slides with image type information")
         return document_id
     
     def get_workflow_result(self, session_id: str) -> Optional[Dict]:
@@ -152,31 +148,6 @@ class SimpleMongoClient:
         except Exception as e:
             logger.error(f"Error saving image: {e}")
             return False
-
-        logger.warning(f"Image {image_index} not found for session {session_id}")
-        return False
-    
-    def save_both_image_versions(self, session_id: str, image_index: int, output_dir: str = "./") -> Dict[str, bool]:
-        """Save both versions of an image (with and without text)
-        
-        Returns:
-            Dict with success status for both versions
-        """
-        results = {}
-        
-        # Save without text version
-        without_text_path = f"{output_dir}/image_{session_id}_{image_index}_without_text.png"
-        results["without_text"] = self.save_image_to_file(
-            session_id, image_index, without_text_path, with_text=False
-        )
-        
-        # Save with text version  
-        with_text_path = f"{output_dir}/image_{session_id}_{image_index}_with_text.png"
-        results["with_text"] = self.save_image_to_file(
-            session_id, image_index, with_text_path, with_text=True
-        )
-        
-        return results
     
     def close(self):
         """Close MongoDB connection"""
