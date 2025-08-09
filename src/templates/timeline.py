@@ -87,6 +87,9 @@ TEXT_TEMPLATE = """
         "body_text": "<html_snippet_code>"
       }
     }
+
+NOTE:
+- 3-4 slides is the maximum number of slides you can have.
 """
 
 HEADLINE_SLIDE_HTML_TEMPLATE = """<!DOCTYPE html>
@@ -673,6 +676,8 @@ timeline_template = {
     "html_template": {
         "headline_slide": HEADLINE_SLIDE_HTML_TEMPLATE,
         "timeline_start_slide": TIMELINE_START_SLIDE_TEMPLATE,
+        "timeline_middle_slide": TIMELINE_MIDDLE_SLIDE_TEMPLATE,
+        "timeline_end_slide": TIMELINE_END_SLIDE_TEMPLATE
     }
 }
 

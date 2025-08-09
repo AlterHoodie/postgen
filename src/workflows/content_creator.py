@@ -1,10 +1,12 @@
 import logging
 from typing import List, Dict
 import uuid
-
+import asyncio
+    
 from src.agents import story_board_generator
 from src.workflows.editors import image_editor
 from src.services.mongo_client import get_mongo_client
+from src.workflows.image_gen import fetch_multiple_images, generate_single_image
 
 logger = logging.getLogger(__name__)
 
@@ -24,49 +26,45 @@ async def slide_creator(slide_template: dict, html_template: dict) -> List[Dict]
         session_id = str(uuid.uuid4())[:8]
         
         # Generate images from different sources
-        # image_tasks = [
-        #     fetch_multiple_images(
-        #         headline=slide_template['image_description'], 
-        #         reference_image=None, 
-        #         session_id=session_id
-        #     ),
-        #     generate_single_image(
-        #         headline=slide_template['image_description'], 
-        #         session_id=session_id,
-        #         model="gpt-image-1"
-        #     ),
-        #     generate_single_image(
-        #         headline=slide_template['image_description'], 
-        #         session_id=session_id,
-        #         model="imagen-4.0-ultra-generate-preview-06-06"
-        #     ),
-        # ]
+        image_tasks = [
+            fetch_multiple_images(
+                headline=slide_template['image_description'], 
+                reference_image=None, 
+                session_id=session_id
+            ),
+            generate_single_image(
+                headline=slide_template['image_description'], 
+                session_id=session_id,
+                model="gpt-image-1"
+            ),
+            # generate_single_image(
+            #     headline=slide_template['image_description'], 
+            #     session_id=session_id,
+            #     model="imagen-4.0-ultra-generate-preview-06-06"
+            # ),
+        ]
 
-        # results = await asyncio.gather(*image_tasks, return_exceptions=True)
+        results = await asyncio.gather(*image_tasks, return_exceptions=True)
         
-        # # Process results and handle individual failures
-        # all_images = []
-        
-        # # Process real images (from fetch_multiple_images)
-        # if not isinstance(results[0], Exception) and results[0]:
-        #     for img in results[0]:
-        #         img['type'] = 'real'
-        #         all_images.append(img)
-        
-        # # Process generated images
-        # for i, result in enumerate(results[1:], 1):
-        #     if not isinstance(result, Exception) and result:
-        #         if isinstance(result, list):
-        #             for img in result:
-        #                 img['type'] = 'generated'
-        #                 all_images.append(img)
-        #         else:
-        #             result['type'] = 'generated'
-        #             all_images.append(result)
-
+        # Process results and handle individual failures
         all_images = []
-        with open("./data_/test.png", "rb") as f:
-            all_images = [{"image_bytes": f.read(), "type": "real"}]
+        
+        # Process real images (from fetch_multiple_images)
+        if not isinstance(results[0], Exception) and results[0]:
+            for img in results[0]:
+                img['type'] = 'real'
+                all_images.append(img)
+        
+        # Process generated images
+        for i, result in enumerate(results[1:], 1):
+            if not isinstance(result, Exception) and result:
+                if isinstance(result, list):
+                    for img in result:
+                        img['type'] = 'generated'
+                        all_images.append(img)
+                else:
+                    result['type'] = 'generated'
+                    all_images.append(result)
         
         # If no images were generated, return empty list
         if not all_images:
@@ -77,13 +75,21 @@ async def slide_creator(slide_template: dict, html_template: dict) -> List[Dict]
         processed_images = []
         for img_data in all_images:
             try:
-                image_bytes = image_editor(
+                # Original image without text overlay
+                without_text_bytes = img_data['image_bytes']
+                
+                # Create image with text overlay using editor
+                with_text_bytes = image_editor(
                     image_bytes=img_data['image_bytes'], 
                     text_template=slide_template['text_template'], 
                     html_template=html_template[slide_template['name']]
                 )
+                
                 processed_images.append({
-                    'image_bytes': image_bytes,
+                    'images': {
+                        "without_text": without_text_bytes,
+                        "with_text": with_text_bytes
+                    },
                     'type': img_data['type'],
                     'model': img_data.get('model', 'unknown')
                 })
@@ -161,7 +167,7 @@ async def workflow(headline: str, template: dict, save: bool = True) -> str:
                     session_id=session_id,
                     headline=headline,
                     template_type=template.get('template_type', 'unknown'),
-                    story_board={},
+                    story_board={"storyboard":[]},
                     slide_images=[],
                     error=str(e)
                 )

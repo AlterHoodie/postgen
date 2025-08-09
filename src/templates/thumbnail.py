@@ -31,7 +31,7 @@ NOTE:
 - DO NOT COMPLICATE THE IMAGE DESCRIPTIONS, KEEP IT SIMPLE AND DIRECT.
 - DO NOT CITE SOURCES USING <a> tags. 
 - Use Source tag to only cite external sources NOT SCOOPWHOOP
-- This template should have only one slide and that is the thumbnail slide.
+- This template should have only one slide and that is the thumbnail slide. Generate only one slide.
 """
 
 HEADLINE_SLIDE_HTML_TEMPLATE = """

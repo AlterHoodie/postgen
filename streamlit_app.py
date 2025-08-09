@@ -61,7 +61,7 @@ def main():
     # Navigation
     page = st.sidebar.selectbox(
         "Choose a page:",
-        ["Generate Posts", "Post Editor", "History"],
+        ["Generate Posts", "History"],
         key="page_selector"
     )
     

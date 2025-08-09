@@ -187,6 +187,5 @@ TEMPLATE: {}
 ```
 
 NOTE: 
-- 3-4 slides is the maximum number of slides you can have.
 - KEEP The StoryBoard Concise and straight to the point.
 """

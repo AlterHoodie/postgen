@@ -29,7 +29,7 @@ class SimpleMongoClient:
             if image_path is None:
                 return ""
             with open(image_path, "rb") as image_file:
-                return base64.b64encode(compress_image(image_file.read(),quality=70)).decode('utf-8')
+                return base64.b64encode(compress_image(image_file.read(),quality=75)).decode('utf-8')
         except Exception as e:
             logger.error(f"Error encoding image {image_path}: {e}")
             return ""
@@ -50,9 +50,21 @@ class SimpleMongoClient:
             # Convert image bytes to base64 for storage with type information
             images_with_type = []
             for img_data in images:
-                img_b64 = base64.b64encode(img_data['image_bytes']).decode('utf-8')
+                # Handle both with and without text versions
+                without_text_b64 = self._encode_image_to_base64(img_data['images']['without_text'])
+                with_text_b64 = self._encode_image_to_base64(img_data['images']['with_text'])
+                
                 images_with_type.append({
-                    "image_base64": img_b64,
+                    "images": {
+                        "without_text": {
+                            "image_base64": without_text_b64,
+                            "filename": f"slide_{idx}_{img_data['type']}_without_text.png"
+                        },
+                        "with_text": {
+                            "image_base64": with_text_b64,
+                            "filename": f"slide_{idx}_{img_data['type']}_with_text.png"
+                        }
+                    },
                     "type": img_data['type'],  # 'real' or 'generated'
                     "model": img_data.get('model', 'unknown')
                 })
@@ -103,7 +115,7 @@ class SimpleMongoClient:
     def get_recent_workflows(self, limit: int = 10) -> List[Dict]:
         """Get recent workflow results"""
         pipeline = [
-            {"$sort": {"created_at": -1}},
+            # {"$sort": {"created_at": -1}},
             {"$limit": limit}
         ]
 
@@ -116,13 +128,14 @@ class SimpleMongoClient:
         logger.info(f"Retrieved {len(documents)} recent workflows")
         return documents
     
-    def save_image_to_file(self, session_id: str, image_index: int, 
+    def save_image_to_file(self, session_id: str, slide_index: int, image_index: int,
                           output_path: str, with_text: bool = True) -> bool:
         """Save a specific image from database to file
         
         Args:
             session_id: Session identifier
-            image_index: Index of the image (1-based)
+            slide_index: Index of the slide (0-based)
+            image_index: Index of the image within the slide (0-based)
             output_path: Where to save the image
             with_text: True for image with text overlay, False for without text
         """
@@ -130,12 +143,36 @@ class SimpleMongoClient:
         if not document:
             return False
         
-        # Find the specific image
-        image_data = document.get("images", [])[image_index]
         try:
-            # Choose the right version
-            version_key = "with_text" if with_text else "without_text"
-            image_info = image_data["images"][version_key]
+            # Handle both old and new document structures
+            if "slides" in document:
+                # New content workflow structure
+                slides = document.get("slides", [])
+                if slide_index >= len(slides):
+                    logger.warning(f"Slide {slide_index} not found for session {session_id}")
+                    return False
+                
+                slide = slides[slide_index]
+                images = slide.get("images", [])
+                if image_index >= len(images):
+                    logger.warning(f"Image {image_index} not found in slide {slide_index} for session {session_id}")
+                    return False
+                
+                image_data = images[image_index]
+                # Choose the right version
+                version_key = "with_text" if with_text else "without_text"
+                image_info = image_data["images"][version_key]
+                
+            else:
+                # Old structure (for backward compatibility)
+                images = document.get("images", [])
+                if image_index >= len(images):
+                    logger.warning(f"Image {image_index} not found for session {session_id}")
+                    return False
+                
+                image_data = images[image_index]
+                version_key = "with_text" if with_text else "without_text"
+                image_info = image_data["images"][version_key]
             
             # Decode base64 and save to file
             image_bytes = base64.b64decode(image_info["image_base64"])
@@ -145,9 +182,33 @@ class SimpleMongoClient:
             version_desc = "with text" if with_text else "without text"
             logger.info(f"Saved image ({version_desc}) to {output_path}")
             return True
+            
         except Exception as e:
             logger.error(f"Error saving image: {e}")
             return False
+    
+    def save_both_image_versions(self, session_id: str, slide_index: int, image_index: int, 
+                                 output_dir: str = "./") -> Dict[str, bool]:
+        """Save both versions of an image (with and without text) for content workflows
+        
+        Returns:
+            Dict with success status for both versions
+        """
+        results = {}
+        
+        # Save without text version
+        without_text_path = f"{output_dir}/slide_{slide_index}_img_{image_index}_without_text.png"
+        results["without_text"] = self.save_image_to_file(
+            session_id, slide_index, image_index, without_text_path, with_text=False
+        )
+        
+        # Save with text version  
+        with_text_path = f"{output_dir}/slide_{slide_index}_img_{image_index}_with_text.png"
+        results["with_text"] = self.save_image_to_file(
+            session_id, slide_index, image_index, with_text_path, with_text=True
+        )
+        
+        return results
     
     def close(self):
         """Close MongoDB connection"""
@@ -165,4 +226,4 @@ if __name__ == "__main__":
     # client.collection.create_index("session_id")
     # logger.info("Database indexes created successfully")
     # print(len(client.get_recent_workflows(10)))
-    client.save_image_to_file("90c852fc",0,"./data_/test.png",with_text=False)
+    # client.save_image_to_file("90c852fc", 0, 0, "./data_/test.png", with_text=False)

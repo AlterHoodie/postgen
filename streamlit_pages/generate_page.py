@@ -148,82 +148,104 @@ def show_content_results(session_id: str):
             st.warning("No slides found in results")
             return
         
-        # Two column layout: original image (left) and slides (right)
-        col1, col2 = st.columns([1, 1])
+        # Slide selection dropdown
+        slide_options = [f"Slide {i+1}: {slide.get('name', f'slide_{i}')}" for i, slide in enumerate(slides)]
+        selected_slide_idx = st.selectbox(
+            "Select a slide:",
+            range(len(slide_options)),
+            format_func=lambda i: slide_options[i]
+        )
         
-        with col1:
-            st.subheader("📋 Original Reference")
-            # Show headline and template info
-            st.info(f"**Headline:** {result.get('headline', 'N/A')}")
-            st.info(f"**Template:** {result.get('template_type', 'N/A').title()}")
+        # Show selected slide details
+        if selected_slide_idx is not None and selected_slide_idx < len(slides):
+            selected_slide = slides[selected_slide_idx]
             
-            # Show first slide's first image as reference (if available)
-            if slides and slides[0].get('images'):
-                first_image = slides[0]['images'][0]
-                try:
-                    img_data = base64.b64decode(first_image['image_base64'])
-                    st.image(img_data, caption="Reference Image", use_container_width=True)
-                except:
-                    st.error("Failed to load reference image")
-        
-        with col2:
-            st.subheader("🎬 Generated Slides")
-            
-            # Slide selection dropdown
-            slide_options = [f"Slide {i+1}: {slide.get('name', f'slide_{i}')}" for i, slide in enumerate(slides)]
-            selected_slide_idx = st.selectbox(
-                "Select a slide:",
-                range(len(slide_options)),
-                format_func=lambda i: slide_options[i]
-            )
-            
-            # Show selected slide details
-            if selected_slide_idx is not None and selected_slide_idx < len(slides):
-                selected_slide = slides[selected_slide_idx]
+            # Show images with radio button selection
+            slide_images = selected_slide.get('images', [])
+            if slide_images:
                 
-                # Display slide info
-                st.write(f"**Name:** {selected_slide.get('name', 'N/A')}")
-                st.write(f"**Description:** {selected_slide.get('image_description', 'N/A')}")
-                
-                # Show images with radio button selection
-                slide_images = selected_slide.get('images', [])
-                if slide_images:
-                    st.markdown("#### Select an image:")
+                # Create tabs for image selection
+                if len(slide_images) > 1:
+                    tab_names = [f"Image {i+1}" for i in range(len(slide_images))]
+                    tabs = st.tabs(tab_names)
                     
-                    # Radio button for image selection
-                    image_options = [f"{img.get('type', 'unknown').title()} ({img.get('model', 'unknown')})" for img in slide_images]
-                    
-                    if len(image_options) > 1:
-                        selected_img_idx = st.radio(
-                            "Choose image:",
-                            range(len(image_options)),
-                            format_func=lambda i: image_options[i],
-                            key=f"img_select_{session_id}_{selected_slide_idx}"
-                        )
-                    else:
-                        selected_img_idx = 0
-                    
-                    # Display selected image
-                    if selected_img_idx is not None and selected_img_idx < len(slide_images):
-                        selected_image = slide_images[selected_img_idx]
-                        
-                        try:
-                            img_data = base64.b64decode(selected_image['image_base64'])
-                            st.image(img_data, use_container_width=True)
+                    for tab_idx, (tab, img_data) in enumerate(zip(tabs, slide_images)):
+                        with tab:
+                            # Show image type and model info
+                            st.caption(f"{img_data.get('type', 'unknown').title()} ({img_data.get('model', 'unknown')})")
                             
-                            # Download button
+                            # Show both versions side by side
+                            col1, col2 = st.columns(2)
+                            
+                            with col1:
+                                st.markdown("**Without Text Overlay**")
+                                try:
+                                    without_text_data = base64.b64decode(img_data['images']['without_text']['image_base64'])
+                                    st.image(without_text_data, width=400)
+                                    st.download_button(
+                                        label="⬇️ Download",
+                                        data=without_text_data,
+                                        file_name=f"slide_{selected_slide_idx+1}_post_{tab_idx+1}_without_text.png",
+                                        mime="image/png",
+                                        key=f"download_without_{session_id}_{selected_slide_idx}_{tab_idx}"
+                                    )
+                                except Exception as e:
+                                    st.error(f"Failed to load image without text: {e}")
+                            
+                            with col2:
+                                st.markdown("**With Text Overlay**")
+                                try:
+                                    with_text_data = base64.b64decode(img_data['images']['with_text']['image_base64'])
+                                    st.image(with_text_data, width=400)
+                                    st.download_button(
+                                        label="⬇️ Download",
+                                        data=with_text_data,
+                                        file_name=f"slide_{selected_slide_idx+1}_post_{tab_idx+1}_with_text.png",
+                                        mime="image/png",
+                                        key=f"download_with_{session_id}_{selected_slide_idx}_{tab_idx}"
+                                    )
+                                except Exception as e:
+                                    st.error(f"Failed to load image with text: {e}")
+                else:
+                    # Single image - no tabs needed
+                    img_data = slide_images[0]
+                    st.caption(f"{img_data.get('type', 'unknown').title()} ({img_data.get('model', 'unknown')})")
+                    
+                    # Show both versions side by side
+                    col1, col2 = st.columns(2)
+                    
+                    with col1:
+                        st.markdown("**Without Text Overlay**")
+                        try:
+                            without_text_data = base64.b64decode(img_data['images']['without_text']['image_base64'])
+                            st.image(without_text_data, width=400)
                             st.download_button(
-                                label="⬇️ Download Image",
-                                data=img_data,
-                                file_name=f"slide_{selected_slide_idx+1}_{selected_image.get('type', 'image')}.png",
+                                label="⬇️ Download",
+                                data=without_text_data,
+                                file_name=f"slide_{selected_slide_idx+1}_post_1_without_text.png",
                                 mime="image/png",
-                                key=f"download_{session_id}_{selected_slide_idx}_{selected_img_idx}"
+                                key=f"download_without_{session_id}_{selected_slide_idx}_0"
                             )
                         except Exception as e:
-                            st.error(f"Failed to load image: {e}")
-                else:
-                    st.warning("No images found for this slide")
+                            st.error(f"Failed to load image without text: {e}")
                     
+                    with col2:
+                        st.markdown("**With Text Overlay**")
+                        try:
+                            with_text_data = base64.b64decode(img_data['images']['with_text']['image_base64'])
+                            st.image(with_text_data, width=400)
+                            st.download_button(
+                                label="⬇️ Download",
+                                data=with_text_data,
+                                file_name=f"slide_{selected_slide_idx+1}_post_1_with_text.png",
+                                mime="image/png",
+                                key=f"download_with_{session_id}_{selected_slide_idx}_0"
+                            )
+                        except Exception as e:
+                            st.error(f"Failed to load image with text: {e}")
+            else:
+                st.warning("No images found for this slide")
+                
         # Clear results button
         if st.button("🗑️ Clear Results", type="secondary"):
             # Clear session state

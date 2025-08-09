@@ -16,6 +16,14 @@ async def generate_single_image( headline: str, session_id: str,model:str) -> Di
     
     try:
         # Generate image from description
+        with open("./data_/test.png", "rb") as f:
+            image_bytes = f.read()
+            return {
+                "type":"real",
+                "model": "test",
+                "description": None,
+                "image_bytes": image_bytes,
+            }
         image_descriptions = await image_desc_generator(query=headline)
         image_bytes = await image_generator(query=image_descriptions[0],model=model)
         
@@ -47,6 +55,14 @@ async def fetch_multiple_images(headline: str, session_id: str, reference_image:
         image_paths_dict contains both 'without_text' and 'with_text' image paths
     """
     try:
+        with open("./data_/test.png", "rb") as f:
+            image_bytes = f.read()
+            return [{
+                "type":"real",
+                "model": "test",
+                "description": None,
+                "image_bytes": image_bytes,
+            }]
         image_query = await image_query_creator(headline=headline, image=reference_image)
 
         # Generate image from description

@@ -47,6 +47,7 @@ NOTE:
 - DO NOT COMPLICATE THE IMAGE DESCRIPTIONS, KEEP IT SIMPLE AND DIRECT.
 - DO NOT CITE SOURCES USING <a> tags. 
 - Use Source tag to only cite external sources NOT SCOOPWHOOP
+- 3-4 slides is the maximum number of slides you can have.
 """
 
 

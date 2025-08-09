@@ -5,12 +5,10 @@ import logging
 import pytz
 
 from src.services.mongo_client import get_mongo_client
-from src.utils import extract_text_from_html
-from src.workflows.editors import image_editor
 
 def show_history_page():
-    st.title("📜 Generation History")
-    st.markdown("View previously generated social media posts")
+    st.title("📜 Content Generation History")
+    st.markdown("View previously generated content slides and workflows")
     
     # Loading overlay while fetching data
     if 'history_loaded' not in st.session_state:
@@ -73,203 +71,154 @@ def display_history():
     history_data = st.session_state.get('history_data', [])
     
     if not history_data:
-        st.info("📭 No generation history found. Generate some posts first!")
+        st.info("📭 No generation history found. Generate some content first!")
         return
     
-    st.success(f"📊 Found {len(history_data)} previous generations")
+    # Filter for content creator workflows
+    content_workflows = [w for w in history_data if w.get('workflow_type') == 'content_creator']
+    
+    if not content_workflows:
+        st.info("📭 No content workflows found. Generate some content first!")
+        return
+    
+    st.success(f"📊 Found {len(content_workflows)} content generations")
     
     # Display each workflow result
-    for i, workflow_result in enumerate(history_data):
+    for i, workflow_result in enumerate(content_workflows):
+        headline = workflow_result.get('headline', 'Unknown')
+        template_type = workflow_result.get('template_type', 'Unknown')
+        total_slides = workflow_result.get('total_slides', 0)
+        
         with st.expander(
-            f"🎨 Generation {i+1} - {workflow_result.get('session_id', 'Unknown')} "
-            f"({format_date(workflow_result.get('created_at'))})",
+            f"🎬 {headline} - {template_type.title()} ({total_slides} slides) - "
+            f"{format_date(workflow_result.get('created_at'))}",
             expanded=(i == 0)
         ):
-            display_workflow_result(workflow_result)
+            display_content_workflow(workflow_result)
 
-def display_workflow_result(workflow_result):
-    """Display a single workflow result"""
+def display_content_workflow(workflow_result):
+    """Display a content creator workflow result with similar layout to generate page"""
     # Basic info
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        st.write(f"**Session ID:** {workflow_result.get('session_id', 'N/A')}")
+        st.write(f"**Template:** {workflow_result.get('template_type', 'N/A').title()}")
     with col2:
-        st.write(f"**Date:** {format_date(workflow_result.get('created_at'))}")
+        st.write(f"**Total Slides:** {workflow_result.get('total_slides', 0)}")
     with col3:
-        st.write(f"**Total Images:** {workflow_result.get('total_images', 0)}")
+        st.write(f"**Session ID:** {workflow_result.get('session_id', 'N/A')}")
     
-    # Images
-    images = workflow_result.get('images', [])
-    if images:
-        st.markdown("#### 🖼️ Generated Images")
+    # Check for errors
+    if workflow_result.get('error'):
+        st.error(f"❌ **Error:** {workflow_result['error']}")
+        return
+    
+    # Get slides data
+    slides = workflow_result.get('slides', [])
+    if not slides:
+        st.warning("No slides found in this workflow")
+        return
+    
+    # Slide selection dropdown
+    slide_options = [f"Slide {i+1}: {slide.get('name', f'slide_{i}')}" for i, slide in enumerate(slides)]
+    session_id = workflow_result.get('session_id', 'unknown')
+    
+    selected_slide_idx = st.selectbox(
+        "Select a slide:",
+        range(len(slide_options)),
+        format_func=lambda i: slide_options[i],
+        key=f"history_slide_select_{session_id}"
+    )
+    
+    # Show selected slide details
+    if selected_slide_idx is not None and selected_slide_idx < len(slides):
+        selected_slide = slides[selected_slide_idx]
         
-        # Create tabs for each image
-        if len(images) > 1:
-            tab_names = [f"Post {i+1}" for i in range(len(images))]
-            tabs = st.tabs(tab_names)
+        # Show images with tabs selection
+        slide_images = selected_slide.get('images', [])
+        if slide_images:
             
-            for idx, (tab, img_data) in enumerate(zip(tabs, images)):
-                with tab:
-                    display_image_pair(img_data, workflow_result_index=workflow_result.get('session_id', 'unknown'), image_index=idx)
-        else:
-            # Single image
-            display_image_pair(images[0], workflow_result_index=workflow_result.get('session_id', 'unknown'), image_index=0)
-
-def display_image_pair(img_data, workflow_result_index=0, image_index=0):
-    """Display a pair of images (with and without text)"""
-    col1, col2 = st.columns(2)
-    
-    # Create unique keys for this specific image
-    session_id = workflow_result_index
-    unique_key = f"{session_id}_{image_index}"
-    
-    # Without text
-    if img_data.get('type', ''):
-        st.write(f"**Type**: **{img_data.get('type', '').capitalize()} Image**")
-    with col1:
-        st.write("**Without Text Overlay**")
-        try:
-            without_text_b64 = img_data["images"]["without_text"]["image_base64"]
-            without_text_img = base64.b64decode(without_text_b64)
-            st.image(without_text_img, width=450)
-            
-            # Download button
-            st.download_button(
-                label="⬇️ Download",
-                data=without_text_img,
-                file_name=img_data["images"]["without_text"]["filename"],
-                mime="image/png",
-                key=f"download_without_{unique_key}"
-            )
-        except Exception as e:
-            logging.error(f"Failed to load image without text: {e}")
-            st.error("Failed to load image without text")
-    
-    # With text
-    with col2:
-        st.write("**With Text Overlay**")
-        
-        # Create unique key for this image's edited version
-        edited_key = f"edited_image_{unique_key}"
-        
-        # Check if we have an edited version in session state
-        if edited_key in st.session_state:
-            # Show the edited image
-            st.image(st.session_state[edited_key], width=450)
-            st.download_button(
-                label="⬇️ Download Edited",
-                data=st.session_state[edited_key],
-                file_name=f"edited_{img_data['images']['with_text']['filename']}",
-                mime="image/png",
-                key=f"download_edited_{unique_key}"
-            )
-        else:
-            # Show the original image
-            try:
-                with_text_b64 = img_data["images"]["with_text"]["image_base64"]
-                with_text_img = base64.b64decode(with_text_b64)
-                st.image(with_text_img, width=450)
+            # Create tabs for image selection
+            if len(slide_images) > 1:
+                tab_names = [f"Image {i+1}" for i in range(len(slide_images))]
+                tabs = st.tabs(tab_names)
                 
-                # Download button
-                st.download_button(
-                    label="⬇️ Download",
-                    data=with_text_img,
-                    file_name=img_data["images"]["with_text"]["filename"],
-                    mime="image/png",
-                    key=f"download_with_{unique_key}"
-                )
-            except Exception as e:
-                st.error("Failed to load image with text")
-        
-        # Add Edit button
-        if st.button("✏️ Edit Text", key=f"edit_btn_{unique_key}"):
-            st.session_state[f"show_edit_{unique_key}"] = True
-        
-        # Show edit form if button was clicked
-        if st.session_state.get(f"show_edit_{unique_key}", False):
-            show_edit_form(img_data, unique_key)
-
-def show_edit_form(img_data, unique_key):
-    """Show the edit form for modifying text"""
-    try:
-        html_content = img_data.get("html", "")
-        if not html_content:
-            st.error("No HTML content available for editing")
-            return
-        
-        # Extract current text (with \highlight syntax)
-        current_headline, current_sub_text = extract_text_from_html(html_content)
-        
-        st.markdown("---")
-        st.markdown("**✏️ Edit Text Content**")
-        
-        # Show simple syntax info
-        st.info("💡 **Simple Highlighting:** Use `**text**` to make text yellow.")
-        
-        # Create edit form
-        with st.form(key=f"edit_form_{unique_key}"):
-            # Text inputs with current values
-            new_headline = st.text_area(
-                "Headline:", 
-                value=current_headline,
-                height=100,
-                help="Type your headline. Use **text** around words you want highlighted in yellow. Use multiple lines for line breaks."
-            )
-            
-            new_sub_text = st.text_area(
-                "Sub Text:", 
-                value=current_sub_text,
-                height=80,
-                help="Type your sub-text. Use multiple lines for line breaks."
-            )
-
-            new_source = st.text_input("Source:", value="")
-            is_trigger = st.checkbox("Trigger Warning", value=False)
-            
-            col1, col2 = st.columns(2)
-            with col1:
-                regenerate_clicked = st.form_submit_button("🔄 Regenerate Image", type="primary")
-            with col2:
-                # Only show clear button if there's an edited version
-                edited_key = f"edited_image_{unique_key}"
-                clear_clicked = False
-                if edited_key in st.session_state:
-                    clear_clicked = st.form_submit_button("🔄 Show Original", type="secondary")
-            
-            if regenerate_clicked:
-                with st.spinner("Regenerating image..."):
-                    if (not new_sub_text) and (not new_headline) and (not new_source) and (not is_trigger):
-                        st.error("Please enter a field")
-                        return
-                    if "images" in img_data and "without_text" in img_data["images"]:
-                        old_image_bytes = img_data["images"]["without_text"]["image_base64"]
-                        old_image_bytes = base64.b64decode(old_image_bytes)
+                for tab_idx, (tab, img_data) in enumerate(zip(tabs, slide_images)):
+                    with tab:
+                        # Show image type and model info
+                        st.caption(f"{img_data.get('type', 'unknown').title()} ({img_data.get('model', 'unknown')})")
                         
-                        new_image_bytes = image_workflow(image_bytes=old_image_bytes, subtext=new_sub_text, headline=new_headline, source=new_source, is_trigger=is_trigger)
-                        if new_image_bytes:
-                        # Store the edited image in session state
-                            st.session_state[f"edited_image_{unique_key}"] = new_image_bytes
-                            st.success("✅ Image regenerated successfully!")
-                            st.rerun()
-                        else:
-                            st.error("❌ Failed to regenerate image")
-                    else:
-                        st.error("No image data available")
-            
-            if clear_clicked:
-                # Clear the edited image and show original
-                edited_key = f"edited_image_{unique_key}"
-                if edited_key in st.session_state:
-                    del st.session_state[edited_key]
-                # Hide the edit form
-                st.session_state[f"show_edit_{unique_key}"] = False
-                st.success("✅ Cleared edit - showing original image")
-                st.rerun()
+                        # Show both versions side by side
+                        col1, col2 = st.columns(2)
+                        
+                        with col1:
+                            st.markdown("**Without Text**")
+                            try:
+                                without_text_data = base64.b64decode(img_data['images']['without_text']['image_base64'])
+                                st.image(without_text_data, width=400)
+                                st.download_button(
+                                    label="⬇️ Download",
+                                    data=without_text_data,
+                                    file_name=f"history_{session_id}_slide_{selected_slide_idx+1}_post_{tab_idx+1}_without_text.png",
+                                    mime="image/png",
+                                    key=f"history_download_without_{session_id}_{selected_slide_idx}_{tab_idx}"
+                                )
+                            except Exception as e:
+                                st.error(f"Failed to load image without text: {e}")
+                        
+                        with col2:
+                            st.markdown("**With Text**")
+                            try:
+                                with_text_data = base64.b64decode(img_data['images']['with_text']['image_base64'])
+                                st.image(with_text_data, width=400)
+                                st.download_button(
+                                    label="⬇️ Download",
+                                    data=with_text_data,
+                                    file_name=f"history_{session_id}_slide_{selected_slide_idx+1}_post_{tab_idx+1}_with_text.png",
+                                    mime="image/png",
+                                    key=f"history_download_with_{session_id}_{selected_slide_idx}_{tab_idx}"
+                                )
+                            except Exception as e:
+                                st.error(f"Failed to load image with text: {e}")
+            else:
+                # Single image - no tabs needed
+                img_data = slide_images[0]
+                st.caption(f"{img_data.get('type', 'unknown').title()} ({img_data.get('model', 'unknown')})")
                 
-    except Exception as e:
-        st.error(f"Error in edit form: {e}")
-
+                # Show both versions side by side
+                col1, col2 = st.columns(2)
+                
+                with col1:
+                    st.markdown("**Without Text**")
+                    try:
+                        without_text_data = base64.b64decode(img_data['images']['without_text']['image_base64'])
+                        st.image(without_text_data, width=400)
+                        st.download_button(
+                            label="⬇️ Download",
+                            data=without_text_data,
+                            file_name=f"history_{session_id}_slide_{selected_slide_idx+1}_post_1_without_text.png",
+                            mime="image/png",
+                            key=f"history_download_without_{session_id}_{selected_slide_idx}_0"
+                        )
+                    except Exception as e:
+                        st.error(f"Failed to load image without text: {e}")
+                
+                with col2:
+                    st.markdown("**With Text**")
+                    try:
+                        with_text_data = base64.b64decode(img_data['images']['with_text']['image_base64'])
+                        st.image(with_text_data, width=400)
+                        st.download_button(
+                            label="⬇️ Download",
+                            data=with_text_data,
+                            file_name=f"history_{session_id}_slide_{selected_slide_idx+1}_post_1_with_text.png",
+                            mime="image/png",
+                            key=f"history_download_with_{session_id}_{selected_slide_idx}_0"
+                        )
+                    except Exception as e:
+                        st.error(f"Failed to load image with text: {e}")
+        else:
+            st.warning("No images found for this slide")
 
 def format_date(date_obj):
     """Format UTC datetime object to IST and return a readable string"""
