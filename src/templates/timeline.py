@@ -667,6 +667,15 @@ TIMELINE_END_SLIDE_TEMPLATE = """
 </html>
 """
 
+timeline_template = {
+    "template_type": "timeline",
+    "text_template": TEXT_TEMPLATE,
+    "html_template": {
+        "headline_slide": HEADLINE_SLIDE_HTML_TEMPLATE,
+        "timeline_start_slide": TIMELINE_START_SLIDE_TEMPLATE,
+    }
+}
+
 if __name__ == "__main__":
     text = {
             "name": "headline_slide",

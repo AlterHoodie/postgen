@@ -2,300 +2,239 @@ import streamlit as st
 import asyncio
 import time
 import base64
-from PIL import Image
 
-from src.workflows.generate_posts import generate_posts_workflow
-from src.workflows.edit_image import image_workflow
-from services.mongo_client import get_mongo_client
-from src.utils import pil_image_to_bytes, extract_text_from_html
+from src.workflows.content_creator import workflow
+from src.services.mongo_client import get_mongo_client
 import concurrent.futures
+from src.templates.timeline import timeline_template
+from src.templates.thumbnail import thumbnail_template
+from src.templates.writeup import writeup_template
+
+def get_template_config(template_type: str) -> dict:
+    """Get template configuration based on type"""
+    if template_type == "timeline":
+        return timeline_template
+    elif template_type == "thumbnail":
+        return thumbnail_template
+    elif template_type == "writeup":
+        return writeup_template
+    else:
+        raise ValueError(f"Unknown template type: {template_type}")
 
 def show_generate_page():
-    st.title("🎨 Generate Social Media Posts")
-    st.markdown("Upload a reference image to generate 3 unique social media posts")
+    st.title("🎨 Generate Content Slides")
+    st.markdown("Enter a headline to generate content slides with images")
     
-    # File uploader
-    uploaded_file = st.file_uploader(
-        "Choose a reference image",
-        type=['png', 'jpg', 'jpeg'],
-        help="Upload an image that contains text or content you want to transform into social media posts"
+    # Input for headline
+    headline = st.text_input(
+        "Enter Headline",
+        placeholder="e.g., UttarKashi Cloud Burst India",
+        help="Enter the headline for your content"
     )
     
-    if uploaded_file is not None:
-        # Display uploaded image
-        col1, col2 = st.columns([1, 2])
+    # Template selection
+    template_options = {
+        "Timeline": "timeline",
+        "Thumbnail": "thumbnail", 
+        "Writeup": "writeup"
+    }
+    
+    selected_template = st.selectbox(
+        "Select Template",
+        options=list(template_options.keys()),
+        help="Choose the template style for your content"
+    )
+    
+    if headline:
+        col1, col2 = st.columns([1, 1])
         
         with col1:
-            st.subheader("Reference Image")
-            image = Image.open(uploaded_file)
-            st.image(image, caption="Uploaded Image", use_container_width=True)
+            # Generate button
+            if st.button("🚀 Generate Content", type="primary", use_container_width=True):
+                generate_content(headline, template_options[selected_template])
         
         with col2:
-
-            def on_click():
-                with col2:
-                    generate_posts(pil_image_to_bytes(image), store_in_db)
-            
-            st.subheader("Generation Settings")
-            store_in_db = True
-            # Generate button
-            st.button("🚀 Generate Posts", type="primary", use_container_width=True, on_click=on_click)
+            # Show latest results link
+            if st.session_state.get('latest_session_id'):
+                if st.button("📱 Show Latest Results", use_container_width=True):
+                    st.session_state['show_results'] = True
     
-    # Always show the latest generated results if they exist
-            show_latest_results()
+    # Show results if available
+    if st.session_state.get('show_results') and st.session_state.get('latest_session_id'):
+        show_content_results(st.session_state['latest_session_id'])
 
-def generate_posts(image_bytes: bytes, store_in_db):
-    """Generate posts with loading progress"""
+def generate_content(headline: str, template_type: str):
+    """Generate content slides with loading progress"""
     
     # Create progress tracking
     progress_container = st.empty()
-    status_container = st.empty()
     
     with progress_container.container():
-        st.markdown("### 🔄 Generating Posts...")
+        st.markdown("### 🔄 Generating Content...")
         progress_bar = st.progress(0)
         status_text = st.empty()
     
     try:
+        # Get template configuration
+        template = get_template_config(template_type)
+        
         # Step 1: Initialize
-        progress_bar.progress(10)
-        status_text.text("📋 Analyzing reference image...")
-        time.sleep(1)  # Small delay for UI feedback
+        progress_bar.progress(20)
+        status_text.text("📋 Creating story board...")
+        time.sleep(1)
         
         # Step 2: Start workflow
-        progress_bar.progress(30)
-        status_text.text("🤖 Extracting content and generating descriptions...")
+        progress_bar.progress(40)
+        status_text.text("🎨 Generating images...")
         
-        # Run async workflow in a separate thread with its own event loop
+        # Run async workflow
         def run_workflow():
-            return asyncio.run(generate_posts_workflow(image_bytes, store_in_db=store_in_db))
+            return asyncio.run(workflow(headline=headline, template=template, save=True))
         
         with concurrent.futures.ThreadPoolExecutor() as executor:
             future = executor.submit(run_workflow)
-            document_id = future.result()  # This will block until completion
+            session_id = future.result()
         
         # Step 3: Progress updates
-        progress_bar.progress(60)
-        status_text.text("🎨 Creating images...")
-        time.sleep(1)
-        
         progress_bar.progress(80)
-        status_text.text("📱 Generating final posts...")
+        status_text.text("📱 Finalizing slides...")
         time.sleep(1)
         
         # Step 4: Complete
         progress_bar.progress(100)
-        status_text.text("✅ Posts generated successfully!")
+        status_text.text("✅ Content generated successfully!")
         
-        # Display results if available
-        if store_in_db and document_id:
-            # Store the latest document_id in session state
-            st.session_state['latest_document_id'] = document_id
+        # Store session_id in session state
+        st.session_state['latest_session_id'] = session_id
+        st.session_state['show_results'] = True
+        
+        time.sleep(1)
+        st.rerun()
             
     except Exception as e:
         progress_bar.progress(0)
-        st.error(f"❌ Error generating posts: {str(e)}")
+        st.error(f"❌ Error generating content: {str(e)}")
         status_text.text("Generation failed")
     
     finally:
-        # Clear progress after 3 seconds
-        time.sleep(3)
+        # Clear progress after 2 seconds
+        time.sleep(2)
         progress_container.empty()
-        status_container.empty()
 
-def show_generated_results(document_id, show_title=True):
-    """Display the generated results"""
+def show_content_results(session_id: str):
+    """Display the generated content results with original image on left and slides dropdown on right"""
     try:
-        # Check if we already have the result in session state
-        result_key = f"generated_result_{document_id}"
+        # Fetch results from database
+        result_key = f"content_result_{session_id}"
         
         if result_key not in st.session_state:
-            # Fetch from database and store in session state
             mongo_client = get_mongo_client()
-            result = mongo_client.get_workflow_result(document_id)
+            result = mongo_client.get_workflow_result(session_id)
             mongo_client.close()
             st.session_state[result_key] = result
         else:
-            # Use cached result from session state
             result = st.session_state[result_key]
         
-        if result:
-            if show_title:
-                st.markdown("### 📱 Generated Posts Preview")
+        if not result:
+            st.error("No results found for this session")
+            return
             
-            # Display images
-            images = result.get("images", [])
-            if images:
-                st.markdown("#### Images")
-                
-                for i, img_data in enumerate(images):  # Show first 3
-                    with st.expander(f"Post {i+1}", expanded=i==0):
-                        col1, col2 = st.columns(2)
-                        
-                        # Show without text
-                        st.write(f"**Type**: **{img_data.get('type', '').capitalize()} Image**")
-                        with col1:
-                            st.write("**Without Text Overlay**")
-                            try:
-                                without_text_b64 = img_data["images"]["without_text"]["image_base64"]
-                                without_text_img = base64.b64decode(without_text_b64)
-                                st.image(without_text_img, use_container_width=True)
-                                st.download_button(
-                                    label="⬇️ Download",
-                                    data=without_text_img,
-                                    file_name=img_data["images"]["without_text"]["filename"],
-                                    mime="image/png",
-                                    key=img_data["images"]["without_text"]["filename"]
-                                )
-                            except:
-                                st.error("Failed to load image without text")
-                        
-                        # Show with text
-                        with col2:
-                            st.write("**With Text Overlay**")
-                            
-                            # Create unique key for this image
-                            unique_key = f"{document_id}_{i}"
-                            edited_key = f"edited_image_{unique_key}"
-                            
-                            # Check if we have an edited version in session state
-                            if edited_key in st.session_state:
-                                # Show the edited image
-                                st.image(st.session_state[edited_key], use_container_width=True)
-                                st.download_button(
-                                    label="⬇️ Download Edited",
-                                    data=st.session_state[edited_key],
-                                    file_name=f"edited_{img_data['images']['with_text']['filename']}",
-                                    mime="image/png",
-                                    key=f"download_edited_{unique_key}"
-                                )
-                            else:
-                                # Show the original image
-                                try:
-                                    with_text_b64 = img_data["images"]["with_text"]["image_base64"]
-                                    with_text_img = base64.b64decode(with_text_b64)
-                                    st.image(with_text_img, use_container_width=True)
-                                    st.download_button(
-                                        label="⬇️ Download",
-                                        data=with_text_img,
-                                        file_name=img_data["images"]["with_text"]["filename"],
-                                        mime="image/png",
-                                        key=f"download_original_{unique_key}"
-                                    )
-                                except:
-                                    st.error("Failed to load image with text")
-                            
-                            # Add Edit button
-                            if st.button("✏️ Edit Text", key=f"edit_btn_{unique_key}"):
-                                st.session_state[f"show_edit_{unique_key}"] = True
-                            
-                            # Show edit form if button was clicked
-                            if st.session_state.get(f"show_edit_{unique_key}", False):
-                                show_edit_form_generate(img_data, unique_key)
-                        
-                        # st.write(f"**Description:** {img_data['description']}")
-    except Exception as e:
-        st.error(f"Error displaying results: {str(e)}")
-
-def show_edit_form_generate(img_data, unique_key):
-    """Show the edit form for modifying text in generate page"""
-    try:
-        html_content = img_data.get("html", "")
-        if not html_content:
-            st.error("No HTML content available for editing")
+        st.markdown("---")
+        st.markdown("### 📱 Generated Content Results")
+        
+        # Get slides data
+        slides = result.get("slides", [])
+        if not slides:
+            st.warning("No slides found in results")
             return
         
-        # Extract current text (with \highlight syntax)
-        current_headline, current_sub_text = extract_text_from_html(html_content)
+        # Two column layout: original image (left) and slides (right)
+        col1, col2 = st.columns([1, 1])
         
-        # Show simple syntax info
-        st.info("💡 **Simple Highlighting:** Use `**text**` to make text yellow.")
+        with col1:
+            st.subheader("📋 Original Reference")
+            # Show headline and template info
+            st.info(f"**Headline:** {result.get('headline', 'N/A')}")
+            st.info(f"**Template:** {result.get('template_type', 'N/A').title()}")
+            
+            # Show first slide's first image as reference (if available)
+            if slides and slides[0].get('images'):
+                first_image = slides[0]['images'][0]
+                try:
+                    img_data = base64.b64decode(first_image['image_base64'])
+                    st.image(img_data, caption="Reference Image", use_container_width=True)
+                except:
+                    st.error("Failed to load reference image")
         
-        # Create edit form
-        with st.form(key=f"edit_form_{unique_key}"):
-            # Text inputs with current values
-            new_headline = st.text_area(
-                "Headline:", 
-                value=current_headline,
-                height=100,
-                help="Type your headline. Use **text** around words you want highlighted in yellow. Use multiple lines for line breaks."
+        with col2:
+            st.subheader("🎬 Generated Slides")
+            
+            # Slide selection dropdown
+            slide_options = [f"Slide {i+1}: {slide.get('name', f'slide_{i}')}" for i, slide in enumerate(slides)]
+            selected_slide_idx = st.selectbox(
+                "Select a slide:",
+                range(len(slide_options)),
+                format_func=lambda i: slide_options[i]
             )
             
-            new_sub_text = st.text_area(
-                "Sub Text:", 
-                value=current_sub_text,
-                height=80,
-                help="Type your sub-text. Use multiple lines for line breaks.",
-            )
-            new_source = st.text_input("Source:", value="")
-            is_trigger = st.checkbox("Trigger Warning", value=False)
-
-            
-            
-            col1, col3 = st.columns(2)
-            with col1:
-                regenerate_clicked = st.form_submit_button("🔄 Regenerate Image", type="primary")
-
-            with col3:
-                # Only show clear button if there's an edited version
-                edited_key = f"edited_image_{unique_key}"
-                clear_clicked = False
-                if edited_key in st.session_state:
-                    clear_clicked = st.form_submit_button("🔄 Show Original", type="secondary")
-            
-            if regenerate_clicked:
-                with st.spinner("Regenerating image..."):
-                    if (not new_sub_text) and (not new_headline) and (not new_source) and (not is_trigger):
-                        st.error("Please enter a field")
-                        return
-                    if "images" in img_data and "without_text" in img_data["images"]:
-                        old_image_bytes = img_data["images"]["without_text"]["image_base64"]
-                        old_image_bytes = base64.b64decode(old_image_bytes)
-                        new_image_bytes = image_workflow(old_image_bytes, new_sub_text, new_headline, new_source, is_trigger)
-                        if new_image_bytes:
-                        # Store the edited image in session state
-                            st.session_state[f"edited_image_{unique_key}"] = new_image_bytes
-                            st.success("✅ Image regenerated successfully!")
-                            st.rerun()
-                        else:
-                            st.error("❌ Failed to regenerate image")
+            # Show selected slide details
+            if selected_slide_idx is not None and selected_slide_idx < len(slides):
+                selected_slide = slides[selected_slide_idx]
+                
+                # Display slide info
+                st.write(f"**Name:** {selected_slide.get('name', 'N/A')}")
+                st.write(f"**Description:** {selected_slide.get('image_description', 'N/A')}")
+                
+                # Show images with radio button selection
+                slide_images = selected_slide.get('images', [])
+                if slide_images:
+                    st.markdown("#### Select an image:")
+                    
+                    # Radio button for image selection
+                    image_options = [f"{img.get('type', 'unknown').title()} ({img.get('model', 'unknown')})" for img in slide_images]
+                    
+                    if len(image_options) > 1:
+                        selected_img_idx = st.radio(
+                            "Choose image:",
+                            range(len(image_options)),
+                            format_func=lambda i: image_options[i],
+                            key=f"img_select_{session_id}_{selected_slide_idx}"
+                        )
                     else:
-                        st.error("No image data available")
-            
-            if clear_clicked:
-                # Clear the edited image and show original
-                edited_key = f"edited_image_{unique_key}"
-                if edited_key in st.session_state:
-                    del st.session_state[edited_key]
-                # Hide the edit form
-                st.session_state[f"show_edit_{unique_key}"] = False
-                st.success("✅ Cleared edit - showing original image")
+                        selected_img_idx = 0
+                    
+                    # Display selected image
+                    if selected_img_idx is not None and selected_img_idx < len(slide_images):
+                        selected_image = slide_images[selected_img_idx]
+                        
+                        try:
+                            img_data = base64.b64decode(selected_image['image_base64'])
+                            st.image(img_data, use_container_width=True)
+                            
+                            # Download button
+                            st.download_button(
+                                label="⬇️ Download Image",
+                                data=img_data,
+                                file_name=f"slide_{selected_slide_idx+1}_{selected_image.get('type', 'image')}.png",
+                                mime="image/png",
+                                key=f"download_{session_id}_{selected_slide_idx}_{selected_img_idx}"
+                            )
+                        except Exception as e:
+                            st.error(f"Failed to load image: {e}")
+                else:
+                    st.warning("No images found for this slide")
+                    
+        # Clear results button
+        if st.button("🗑️ Clear Results", type="secondary"):
+            # Clear session state
+            keys_to_clear = [key for key in st.session_state.keys() if key.startswith(f'content_result_{session_id}')]
+            for key in keys_to_clear:
+                del st.session_state[key]
+            if 'latest_session_id' in st.session_state:
+                del st.session_state['latest_session_id']
+            if 'show_results' in st.session_state:
+                del st.session_state['show_results']
                 st.rerun()
                 
     except Exception as e:
-        st.error(f"Error in edit form: {e}")
-
-def show_latest_results():
-    """Always show the latest generated results if they exist"""
-    latest_document_id = st.session_state.get('latest_document_id')
-    
-    if latest_document_id:
-        st.markdown("---")  # Visual separator
-        
-        # Add a header with clear button
-        col1, col2 = st.columns([3, 1])
-        with col1:
-            st.markdown("### 📱 Latest Generated Posts")
-        with col2:
-            if st.button("🗑️ Clear Results", type="secondary", help="Clear the latest results from view"):
-                # Clear all related session state
-                keys_to_clear = [key for key in st.session_state.keys() 
-                               if key.startswith(f'generated_result_{latest_document_id}') 
-                               or key.startswith(f'edited_image_{latest_document_id}')
-                               or key.startswith(f'show_edit_{latest_document_id}')]
-                for key in keys_to_clear:
-                    del st.session_state[key]
-                del st.session_state['latest_document_id']
-                st.rerun()
-        
-        show_generated_results(latest_document_id, show_title=False) 
+        st.error(f"Error displaying results: {str(e)}")

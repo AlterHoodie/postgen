@@ -271,7 +271,7 @@ def video_editor(video_bytes:bytes, text_template:dict, html_template:str) -> by
 
 # Test function for development
 if __name__ == "__main__":
-    from src.templates.basic import HTML_TEMPLATE_PROMPT_REAL
+    from templates.writeup import HTML_TEMPLATE_PROMPT_REAL
     ## Test Image Workflow
     with open("./data_/test.png", "rb") as f:
         image_bytes = f.read()
