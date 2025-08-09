@@ -6,7 +6,7 @@ from PIL import Image
 
 from src.workflows.generate_posts import generate_posts_workflow
 from src.workflows.edit_image import image_workflow
-from src.mongo_client import get_mongo_client
+from services.mongo_client import get_mongo_client
 from src.utils import pil_image_to_bytes, extract_text_from_html
 import concurrent.futures
 

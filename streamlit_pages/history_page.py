@@ -4,9 +4,9 @@ import base64
 import logging
 import pytz
 
-from src.mongo_client import get_mongo_client
-from src.workflows.edit_image import image_workflow
+from src.services.mongo_client import get_mongo_client
 from src.utils import extract_text_from_html
+from src.workflows.editors import image_editor
 
 def show_history_page():
     st.title("📜 Generation History")

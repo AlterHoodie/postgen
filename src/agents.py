@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import List
+from typing import List, Tuple
 import os
 import io
 import asyncio
@@ -8,7 +8,7 @@ import asyncio
 from PIL import Image
 from serpapi import GoogleSearch
 
-from src.prompts import IMAGE_DESCRIPTION_PROMPT, COPY_EXTRACTOR_PROMPT, TEMPLATE_PROMPT, HTML_TEMPLATE_PROMPT, IMAGE_QUERY_PROMPT, IMAGE_SCORER_PROMPT, HTML_TEMPLATE_PROMPT_REAL, IMAGE_CROPPER_PROMPT
+from src.prompts import IMAGE_DESCRIPTION_PROMPT, IMAGE_QUERY_PROMPT, IMAGE_SCORER_PROMPT, STORY_BOARD_PROMPT
 from src.utils import extract_x
 from src.clients import openai_response, openai_image_response, download_image, google_image_response, flux_image_response
 
@@ -20,18 +20,10 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-async def copy_extractor(image:List[str] = []) -> str:
-    prompt = COPY_EXTRACTOR_PROMPT
-    response = await openai_response(prompt=prompt, images=image, model = "gpt-4.1")
+async def story_board_generator(headline:str, template:str) -> dict:
+    prompt = STORY_BOARD_PROMPT.format(headline, template)
+    response = await openai_response(prompt=prompt, model = "gpt-4.1",tools=[{"type":"web_search_preview"}])
     return json.loads(extract_x(response,"json"))
-
-async def html_template_generator(image:List[str] = [],file_path:str = "", analysis:dict = {}) -> str:
-    prompt = TEMPLATE_PROMPT.format(analysis)
-    response = await openai_response(prompt=prompt, images=image, model = "gpt-4.1")
-    input_json = json.loads(extract_x(response,"json"))
-    html_tags = [input_json['headline'],input_json['sub_text']] 
-    html_template = HTML_TEMPLATE_PROMPT_REAL.format(file_path=file_path, html_snippet_code="\n".join(html_tags))
-    return html_template
 
 async def image_desc_generator(query:str = "") -> List[str]:
     prompt = IMAGE_DESCRIPTION_PROMPT.format(query)
@@ -48,22 +40,16 @@ async def image_generator(query:str = "",model="gpt-image-1") -> bytes:
         response = await openai_image_response(prompt=query,model=model)
     return response
 
-async def image_cropper(image_bytes:bytes,headline:str) -> dict:
-    prompt = IMAGE_CROPPER_PROMPT.format(headline)
-    response = await openai_response(prompt=prompt,images=[image_bytes],model="gpt-4.1",type="bytes")
-    return json.loads(extract_x(response,'json'))
-
-async def image_scorer_agent(images:List[io.BytesIO],query:str)->List[dict]:
+async def image_scorer_agent(images:List[io.BytesIO],query:str)->Tuple[dict,str]:
     resolution = Image.open(images[0]).size
     prompt = IMAGE_SCORER_PROMPT.format(query,resolution)
     response = await openai_response(prompt,images=images,model="gpt-4.1",type="bytes")
-    return extract_x(response,'json'), response
+    return json.loads(extract_x(response,'json')), response
 
 async def image_query_creator(headline:str, image:bytes)->dict:
     prompt = IMAGE_QUERY_PROMPT.format(headline)
     response = await openai_response(prompt,model="gpt-4.1", tools=[{"type":"web_search_preview"}], type="bytes", images=[image])
-    print(response)
-    return extract_x(response,'json')
+    return json.loads(extract_x(response,'json'))
 
 async def image_search_agent(query: str, reference_image:bytes = None) -> List[dict]:
     """
@@ -123,10 +109,10 @@ async def image_search_agent(query: str, reference_image:bytes = None) -> List[d
             })
         
         if not images_data:
-            logging.warning("No images found from SERP API")
+            logger.warning("No images found from SERP API")
             return []
         
-        logging.info(f"Found {len(images_data)} images, downloading...")
+        logger.info(f"Found {len(images_data)} images, downloading...")
         
         # Step 2: Download images to memory
         downloaded_images = []
@@ -138,14 +124,14 @@ async def image_search_agent(query: str, reference_image:bytes = None) -> List[d
                     "image_data": image_data
                 })
             else:
-                logging.warning(f"Failed to download image {i+1}")
+                logger.warning(f"Failed to download image {i+1}")
             
             if len(downloaded_images) == 20:
                 break
         
         # Step 3: Score all downloaded images using AI concurrently
         if downloaded_images:
-            logging.info(f"Scoring {len(downloaded_images)} images concurrently...")
+            logger.info(f"Scoring {len(downloaded_images)} images concurrently...")
             
             try:
                 # Create individual scoring tasks for each image
@@ -164,11 +150,11 @@ async def image_search_agent(query: str, reference_image:bytes = None) -> List[d
                 # Process results and assign scores
                 for i, ((img_data, _), response) in enumerate(zip(scoring_tasks, scoring_responses)):
                     if isinstance(response, Exception):
-                        logging.error(f"Failed to score image {i+1}: {response}")
+                        logger.error(f"Failed to score image {i+1}: {response}")
                         img_data['score'] = 5  # Default score
                     else:
                         try:
-                            scoring_result = json.loads(response[0])
+                            scoring_result = response[0]
                             score = scoring_result.get('image_score', [])
                             reasoning = response[1]
                             if score:
@@ -177,44 +163,32 @@ async def image_search_agent(query: str, reference_image:bytes = None) -> List[d
                                 img_data['score'] = 0.5  # Default score
                             img_data['reasoning'] = reasoning
                         except Exception as e:
-                            logging.error(f"Failed to parse score for image {i+1}: {e}")
+                            logger.error(f"Failed to parse score for image {i+1}: {e}")
                             img_data['score'] = 0.1  # Default score
                 
-                logging.info(f"Successfully scored {len(downloaded_images)} images concurrently")
+                logger.info(f"Successfully scored {len(downloaded_images)} images concurrently")
                 
             except Exception as e:
-                logging.error(f"Failed to score images: {e}")
+                logger.error(f"Failed to score images: {e}")
                 # Assign default scores if scoring fails
                 for img_data in downloaded_images:
                     img_data['score'] = 0.5  # Default score
         
         # Step 4: Filter out low-quality images (score < 6)
         filtered_images = [img for img in downloaded_images if img.get('score', 0) >= 0.6]
-        logging.info(f"Filtered images: {len(filtered_images)}")
+        logger.info(f"Filtered images: {len(filtered_images)}")
         if not filtered_images:
-            logging.warning("No images passed quality threshold (score >= 0.6), using all images")
+            logger.warning("No images passed quality threshold (score >= 0.6), using all images")
             filtered_images = downloaded_images
         
         # Step 5: Select top 5 images based on score
-        top_image = sorted(filtered_images, key=lambda x: x.get('score', 0), reverse=True)[:3]
+        top_image = sorted(filtered_images, key=lambda x: x.get('score', 0), reverse=True)[:1]
 
         if not top_image:
-            logging.error("No images could be processed")
-            return None 
+            logger.error("No images could be processed")
+            return []
         
         return top_image
     except Exception as e:
-        logging.error(f"Error in image search agent: {e}")
-        return None
-
-async def test_workflow(headline:str):
-    image_query = await image_desc_generator(headline)
-    print(image_query)
-    # image_bytes = await image_generator(image_query[0],model="imagen-4.0-generate-preview-06-06")
-    # return image_bytes
-
-if __name__ == "__main__":
-    import asyncio
-    image = asyncio.run(test_workflow("Haryana Makes Gita Recitation a Must in Schools', 'subtext': 'New rule aims to build focus and discipline among young students statewide"))
-    # with open("./data_/google_image_1.png", "wb") as f:
-    #     f.write(image)
+        logger.error(f"Error in image search agent: {e}")
+        return []
