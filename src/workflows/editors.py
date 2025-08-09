@@ -2,6 +2,7 @@ import logging
 import uuid
 from pathlib import Path
 from typing import Tuple
+import re
 
 from PIL import Image, ImageDraw
 from moviepy import VideoFileClip, ImageClip, CompositeVideoClip
@@ -269,20 +270,55 @@ def video_editor(video_bytes:bytes, text_template:dict, html_template:str) -> by
         logger.info(f"Cleaned up {len(temp_files)} temporary files")
 
 
+def build_html(tag:str, class_name:str, text:str) -> str:
+    """
+    Build HTML for a text element
+    """
+    text_lines = text.strip().split("\n")
+    html_parts = []
+    for line in text_lines:
+        line = line.strip()
+        if line:
+            processed_line = re.sub(
+                r'\*\*([^*]+?)\*\*', 
+                r'<span class="yellow">\1</span>', 
+                line
+            )
+            html_parts.append(processed_line)
+    
+    return f"<{tag} class='{class_name}'>{('<br />').join(html_parts)}</{tag}>"
+
+def text_editor(template:dict, slide_name:str, text_input:dict, image_bytes:bytes) -> bytes:
+    """
+    Editor for text-based templates
+    """
+    text_json = template['slides'][slide_name]['text_json']
+    html_template = template['slides'][slide_name]['html_template']
+    
+    text_template = {}
+    for key, value in text_input.items():
+        if key not in text_json['text_template']:
+            continue
+            
+        template_config = text_json['text_template'][key]
+        if template_config['type'] == 'text':
+            text_template[key] = build_html(
+                tag=template_config['tag'],
+                class_name=template_config['class'],
+                text=value
+            )
+        elif template_config['type'] == 'checkbox':
+            text_template[key] = template_config['html_snippet'] if value else ""
+
+    new_image_bytes = image_editor(image_bytes=image_bytes, text_template=text_template, html_template=html_template)
+    return new_image_bytes
+
 # Test function for development
 if __name__ == "__main__":
-    from templates.writeup import HTML_TEMPLATE_PROMPT_REAL
+    from src.templates.writeup import writeup_template
     ## Test Image Workflow
     with open("./data_/test.png", "rb") as f:
         image_bytes = f.read()
-    result = image_editor(
-        image_bytes=image_bytes,
-        text_template={
-            "headline": "<h1><span class='yellow'>India Post</span> goes digital. A <span class='yellow'>smarter era</span> begins.</h1>",
-            "subtext": "<p class='subtext'>No more snail mail—India Post goes digital. A smarter era begins.</p>",
-            "is_trigger": ""
-        },
-        html_template=HTML_TEMPLATE_PROMPT_REAL
-    )
+    result = text_editor(writeup_template,"headline_slide",{"headline":"India Post goes digital. A smarter era begins.","subtext":"No more **snail mail**—India Post goes digital. A **smarter era begins**.","is_trigger":False},image_bytes)
     with open("./data_/test_out.png", "wb") as f:
         f.write(result)

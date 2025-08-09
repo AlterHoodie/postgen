@@ -673,12 +673,49 @@ TIMELINE_END_SLIDE_TEMPLATE = """
 timeline_template = {
     "template_type": "timeline",
     "text_template": TEXT_TEMPLATE,
-    "html_template": {
-        "headline_slide": HEADLINE_SLIDE_HTML_TEMPLATE,
-        "timeline_start_slide": TIMELINE_START_SLIDE_TEMPLATE,
-        "timeline_middle_slide": TIMELINE_MIDDLE_SLIDE_TEMPLATE,
-        "timeline_end_slide": TIMELINE_END_SLIDE_TEMPLATE
-    }
+    "slides": {
+        "headline_slide": {"html_template": HEADLINE_SLIDE_HTML_TEMPLATE, 
+                           "overlay_template": "",
+                           "text_json":{
+                                "name": "headline_slide",
+                                "image_description": "str",
+                                "text_template":{
+                                "first_line": {"type":"text","tag":"div","class":"first-line"},
+                                "highlight": {"type":"text","tag":"div","class":"highlight"},
+                                "sub_heading": {"type":"text","tag":"div","class":"sub-heading"}
+                                }
+                           }},
+        "timeline_start_slide": {"html_template": TIMELINE_START_SLIDE_TEMPLATE, 
+                                 "overlay_template": "",
+                                 "text_json":{
+                                    "name": "timeline_start_slide",
+                                    "image_description": "str",
+                                    "text_template":{
+                                        "timeline_highlight": {"type":"text","tag":"div","class":"timeline-highlight"},
+                                        "body_text": {"type":"text","tag":"p","class":"body-text"}
+                                    }
+                                }},
+        "timeline_middle_slide": {"html_template": TIMELINE_MIDDLE_SLIDE_TEMPLATE, 
+                                 "overlay_template": "",
+                                 "text_json":{
+                                    "name": "timeline_middle_slide",
+                                    "image_description": "str",
+                                    "text_template":{
+                                        "timeline_highlight": {"type":"text","tag":"div","class":"timeline-highlight"},
+                                        "body_text": {"type":"text","tag":"p","class":"body-text"}
+                                    }
+                                }},
+        "timeline_end_slide": {"html_template": TIMELINE_END_SLIDE_TEMPLATE, 
+                                 "overlay_template": "",
+                                 "text_json":{
+                                    "name": "timeline_end_slide",
+                                    "image_description": "str",
+                                    "text_template":{
+                                        "timeline_highlight": {"type":"text","tag":"div","class":"timeline-highlight"},
+                                        "body_text": {"type":"text","tag":"p","class":"body-text"}
+                                    }
+                                }},
+        }
 }
 
 if __name__ == "__main__":

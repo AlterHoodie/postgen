@@ -5,6 +5,22 @@ import logging
 import pytz
 
 from src.services.mongo_client import get_mongo_client
+from src.templates.timeline import timeline_template
+from src.templates.thumbnail import thumbnail_template
+from src.templates.writeup import writeup_template
+from streamlit_pages.editor import text_editor_form
+
+
+def get_template_config(template_type: str) -> dict:
+    """Get template configuration based on type"""
+    if template_type == "timeline":
+        return timeline_template
+    elif template_type == "thumbnail":
+        return thumbnail_template
+    elif template_type == "writeup":
+        return writeup_template
+    else:
+        raise ValueError(f"Unknown template type: {template_type}")
 
 def show_history_page():
     st.title("📜 Content Generation History")
@@ -137,37 +153,55 @@ def display_content_workflow(workflow_result):
         # Show images with tabs selection
         slide_images = selected_slide.get('images', [])
         if slide_images:
+            tab_names = [f"Image {i+1}" for i in range(len(slide_images))]
+            tabs = st.tabs(tab_names)
             
-            # Create tabs for image selection
-            if len(slide_images) > 1:
-                tab_names = [f"Image {i+1}" for i in range(len(slide_images))]
-                tabs = st.tabs(tab_names)
-                
-                for tab_idx, (tab, img_data) in enumerate(zip(tabs, slide_images)):
-                    with tab:
-                        # Show image type and model info
-                        st.caption(f"{img_data.get('type', 'unknown').title()} ({img_data.get('model', 'unknown')})")
+            for tab_idx, (tab, img_data) in enumerate(zip(tabs, slide_images)):
+                with tab:
+                    # Show image type and model info
+                    st.caption(f"{img_data.get('type', 'unknown').title()} ({img_data.get('model', 'unknown')})")
+                    
+                    # Show both versions side by side
+                    col1, col2 = st.columns(2)
+                    
+                    with col1:
+                        st.markdown("**Without Text**")
+                        try:
+                            without_text_data = base64.b64decode(img_data['images']['without_text']['image_base64'])
+                            st.image(without_text_data, width=400)
+                            st.download_button(
+                                label="⬇️ Download",
+                                data=without_text_data,
+                                file_name=f"history_{session_id}_slide_{selected_slide_idx+1}_post_{tab_idx+1}_without_text.png",
+                                mime="image/png",
+                                key=f"history_download_without_{session_id}_{selected_slide_idx}_{tab_idx}"
+                            )
+                        except Exception as e:
+                            st.error(f"Failed to load image without text: {e}")
+                    
+                    with col2:
+                        st.markdown("**With Text Overlay**")
                         
-                        # Show both versions side by side
-                        col1, col2 = st.columns(2)
+                        # Check if there's an edited version in session state
+                        edit_key = f"history_edited_{session_id}_{selected_slide_idx}_{tab_idx}"
                         
-                        with col1:
-                            st.markdown("**Without Text**")
-                            try:
-                                without_text_data = base64.b64decode(img_data['images']['without_text']['image_base64'])
-                                st.image(without_text_data, width=400)
-                                st.download_button(
-                                    label="⬇️ Download",
-                                    data=without_text_data,
-                                    file_name=f"history_{session_id}_slide_{selected_slide_idx+1}_post_{tab_idx+1}_without_text.png",
-                                    mime="image/png",
-                                    key=f"history_download_without_{session_id}_{selected_slide_idx}_{tab_idx}"
-                                )
-                            except Exception as e:
-                                st.error(f"Failed to load image without text: {e}")
-                        
-                        with col2:
-                            st.markdown("**With Text**")
+                        if edit_key in st.session_state:
+                            # Show edited image
+                            st.image(st.session_state[edit_key], width=400)
+                            st.download_button(
+                                label="⬇️ Download Edited",
+                                data=st.session_state[edit_key],
+                                file_name=f"history_{session_id}_slide_{selected_slide_idx+1}_post_{tab_idx+1}_edited.png",
+                                mime="image/png",
+                                key=f"history_download_edited_{session_id}_{selected_slide_idx}_{tab_idx}"
+                            )
+                            
+                            # Clear edit button
+                            if st.button("🗑️ Clear Edit", key=f"history_clear_{session_id}_{selected_slide_idx}_{tab_idx}"):
+                                del st.session_state[edit_key]
+                                st.rerun()
+                        else:
+                            # Show original with text
                             try:
                                 with_text_data = base64.b64decode(img_data['images']['with_text']['image_base64'])
                                 st.image(with_text_data, width=400)
@@ -180,43 +214,43 @@ def display_content_workflow(workflow_result):
                                 )
                             except Exception as e:
                                 st.error(f"Failed to load image with text: {e}")
-            else:
-                # Single image - no tabs needed
-                img_data = slide_images[0]
-                st.caption(f"{img_data.get('type', 'unknown').title()} ({img_data.get('model', 'unknown')})")
-                
-                # Show both versions side by side
-                col1, col2 = st.columns(2)
-                
-                with col1:
-                    st.markdown("**Without Text**")
-                    try:
-                        without_text_data = base64.b64decode(img_data['images']['without_text']['image_base64'])
-                        st.image(without_text_data, width=400)
-                        st.download_button(
-                            label="⬇️ Download",
-                            data=without_text_data,
-                            file_name=f"history_{session_id}_slide_{selected_slide_idx+1}_post_1_without_text.png",
-                            mime="image/png",
-                            key=f"history_download_without_{session_id}_{selected_slide_idx}_0"
-                        )
-                    except Exception as e:
-                        st.error(f"Failed to load image without text: {e}")
-                
-                with col2:
-                    st.markdown("**With Text**")
-                    try:
-                        with_text_data = base64.b64decode(img_data['images']['with_text']['image_base64'])
-                        st.image(with_text_data, width=400)
-                        st.download_button(
-                            label="⬇️ Download",
-                            data=with_text_data,
-                            file_name=f"history_{session_id}_slide_{selected_slide_idx+1}_post_1_with_text.png",
-                            mime="image/png",
-                            key=f"history_download_with_{session_id}_{selected_slide_idx}_0"
-                        )
-                    except Exception as e:
-                        st.error(f"Failed to load image with text: {e}")
+                        
+                        # Text editor section
+                        st.markdown("---")
+                        st.markdown("**Edit Text**")
+                        
+                        # Get template and slide info for text editor
+                        template_type = workflow_result.get('template_type', 'timeline')
+                        template = get_template_config(template_type)
+                        slide_name = selected_slide.get('name', 'headline_slide')
+                        
+                        if 'slides' in template and slide_name in template['slides']:
+                            text_json = template['slides'][slide_name]['text_json']
+                            
+                            # Get original image without text for editing
+                            try:
+                                without_text_bytes = base64.b64decode(img_data['images']['without_text']['image_base64'])
+                                
+                                # Extract current text values from slide data
+                                current_text_values = selected_slide.get('text_template', {})
+                                
+                                new_image = text_editor_form(
+                                    text_values=current_text_values,
+                                    image_bytes=without_text_bytes,
+                                    template=template,
+                                    slide_name=slide_name,
+                                    form_key=f"history_edit_form_{session_id}_{selected_slide_idx}_{tab_idx}"
+                                )
+                                
+                                if new_image[0]:  # new_image is a tuple (bytes, bool)
+                                    st.session_state[edit_key] = new_image[0]
+                                    st.success("✅ Text edited successfully!")
+                                    st.rerun()
+                                    
+                            except Exception as e:
+                                st.error(f"Text editor error: {e}")
+                        else:
+                            st.info("Text editing not available for this slide type")
         else:
             st.warning("No images found for this slide")
 

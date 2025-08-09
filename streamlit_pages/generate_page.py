@@ -9,6 +9,7 @@ import concurrent.futures
 from src.templates.timeline import timeline_template
 from src.templates.thumbnail import thumbnail_template
 from src.templates.writeup import writeup_template
+from streamlit_pages.editor import text_editor_form
 
 def get_template_config(template_type: str) -> dict:
     """Get template configuration based on type"""
@@ -163,9 +164,6 @@ def show_content_results(session_id: str):
             # Show images with radio button selection
             slide_images = selected_slide.get('images', [])
             if slide_images:
-                
-                # Create tabs for image selection
-                if len(slide_images) > 1:
                     tab_names = [f"Image {i+1}" for i in range(len(slide_images))]
                     tabs = st.tabs(tab_names)
                     
@@ -194,69 +192,86 @@ def show_content_results(session_id: str):
                             
                             with col2:
                                 st.markdown("**With Text Overlay**")
-                                try:
-                                    with_text_data = base64.b64decode(img_data['images']['with_text']['image_base64'])
-                                    st.image(with_text_data, width=400)
+                                
+                                # Check if there's an edited version in session state
+                                edit_key = f"edited_{session_id}_{selected_slide_idx}_{tab_idx}"
+                                
+                                if edit_key in st.session_state:
+                                    # Show edited image
+                                    st.image(st.session_state[edit_key], width=400)
                                     st.download_button(
-                                        label="⬇️ Download",
-                                        data=with_text_data,
-                                        file_name=f"slide_{selected_slide_idx+1}_post_{tab_idx+1}_with_text.png",
+                                        label="⬇️ Download Edited",
+                                        data=st.session_state[edit_key],
+                                        file_name=f"slide_{selected_slide_idx+1}_post_{tab_idx+1}_edited.png",
                                         mime="image/png",
-                                        key=f"download_with_{session_id}_{selected_slide_idx}_{tab_idx}"
+                                        key=f"download_edited_{session_id}_{selected_slide_idx}_{tab_idx}"
                                     )
-                                except Exception as e:
-                                    st.error(f"Failed to load image with text: {e}")
-                else:
-                    # Single image - no tabs needed
-                    img_data = slide_images[0]
-                    st.caption(f"{img_data.get('type', 'unknown').title()} ({img_data.get('model', 'unknown')})")
-                    
-                    # Show both versions side by side
-                    col1, col2 = st.columns(2)
-                    
-                    with col1:
-                        st.markdown("**Without Text Overlay**")
-                        try:
-                            without_text_data = base64.b64decode(img_data['images']['without_text']['image_base64'])
-                            st.image(without_text_data, width=400)
-                            st.download_button(
-                                label="⬇️ Download",
-                                data=without_text_data,
-                                file_name=f"slide_{selected_slide_idx+1}_post_1_without_text.png",
-                                mime="image/png",
-                                key=f"download_without_{session_id}_{selected_slide_idx}_0"
-                            )
-                        except Exception as e:
-                            st.error(f"Failed to load image without text: {e}")
-                    
-                    with col2:
-                        st.markdown("**With Text Overlay**")
-                        try:
-                            with_text_data = base64.b64decode(img_data['images']['with_text']['image_base64'])
-                            st.image(with_text_data, width=400)
-                            st.download_button(
-                                label="⬇️ Download",
-                                data=with_text_data,
-                                file_name=f"slide_{selected_slide_idx+1}_post_1_with_text.png",
-                                mime="image/png",
-                                key=f"download_with_{session_id}_{selected_slide_idx}_0"
-                            )
-                        except Exception as e:
-                            st.error(f"Failed to load image with text: {e}")
+                                    
+                                    # Clear edit button
+                                    if st.button("🗑️ Clear Edit", key=f"clear_{session_id}_{selected_slide_idx}_{tab_idx}"):
+                                        del st.session_state[edit_key]
+                                        st.rerun()
+                                else:
+                                    # Show original with text
+                                    try:
+                                        with_text_data = base64.b64decode(img_data['images']['with_text']['image_base64'])
+                                        st.image(with_text_data, width=400)
+                                        st.download_button(
+                                            label="⬇️ Download",
+                                            data=with_text_data,
+                                            file_name=f"slide_{selected_slide_idx+1}_post_{tab_idx+1}_with_text.png",
+                                            mime="image/png",
+                                            key=f"download_with_{session_id}_{selected_slide_idx}_{tab_idx}"
+                                        )
+                                    except Exception as e:
+                                        st.error(f"Failed to load image with text: {e}")
+                                
+                                # Text editor section
+                                st.markdown("---")
+                                st.markdown("**Edit Text**")
+                                
+                                # Get template and slide info for text editor
+                                template_type = result.get('template_type', 'timeline')
+                                template = get_template_config(template_type)
+                                slide_name = selected_slide.get('name', 'headline_slide')
+                                
+                                if 'slides' in template and slide_name in template['slides']:
+                                    try:
+                                        current_text_values = img_data.get('text_template', {})
+                                        without_text_bytes = base64.b64decode(img_data['images']['without_text']['image_base64'])
+                                        # Get original image without text for editing
+                                        
+                                        new_image = text_editor_form(
+                                            text_values=current_text_values,
+                                            image_bytes=without_text_bytes,
+                                            template=template,
+                                            slide_name=slide_name,
+                                            form_key=f"edit_form_{session_id}_{selected_slide_idx}_{tab_idx}"
+                                        )
+                                        
+                                        if new_image:
+                                            st.session_state[edit_key] = new_image
+                                            st.success("✅ Text edited successfully!")
+                                            st.rerun()
+                                            
+                                    except Exception as e:
+                                        st.error(f"Text editor error: {e}")
+                                else:
+                                    st.info("Text editing not available for this slide type")
             else:
                 st.warning("No images found for this slide")
-                
-        # Clear results button
-        if st.button("🗑️ Clear Results", type="secondary"):
-            # Clear session state
-            keys_to_clear = [key for key in st.session_state.keys() if key.startswith(f'content_result_{session_id}')]
-            for key in keys_to_clear:
-                del st.session_state[key]
-            if 'latest_session_id' in st.session_state:
-                del st.session_state['latest_session_id']
-            if 'show_results' in st.session_state:
-                del st.session_state['show_results']
-                st.rerun()
-                
+
+                # Clear results button
+                if st.button("🗑️ Clear Results", type="secondary"):
+                    # Clear session state
+                    keys_to_clear = [key for key in st.session_state.keys() if key.startswith(f'content_result_{session_id}')]
+                    for key in keys_to_clear:
+                        del st.session_state[key]
+                    if 'latest_session_id' in st.session_state:
+                        del st.session_state['latest_session_id']
+                    if 'show_results' in st.session_state:
+                        del st.session_state['show_results']
+                        st.rerun()
+
     except Exception as e:
         st.error(f"Error displaying results: {str(e)}")
