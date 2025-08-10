@@ -15,13 +15,22 @@ logger = logging.getLogger(__name__)
 async def story_board_creator(headline: str, text_template: str) -> Dict:
     """Generate story board from headline and template"""
     try:
-        research_result = await content_research_agent(headline=headline, template=text_template['template_description'])
-
-        story_board = await story_board_generator(headline=headline,research_result=research_result, template=text_template['template_description'] + "\n" + text_template['json_description'])
-
-        logger.info(
-            f"Story board created with {len(story_board.get('storyboard', []))} slides"
+        # Research the headline
+        research_result = await content_research_agent(
+            headline=headline, 
+            template=text_template['template_description']
         )
+
+        # Generate story board with research context
+        template_context = f"{text_template['template_description']}\n{text_template['json_description']}"
+        story_board = await story_board_generator(
+            headline=headline,
+            research_result=research_result, 
+            template=template_context
+        )
+
+        slide_count = len(story_board.get('storyboard', []))
+        logger.info(f"Story board created with {slide_count} slides")
         return story_board
     except Exception as e:
         logger.error(f"Failed to generate story board: {e}")
@@ -45,11 +54,11 @@ async def slide_creator(slide_template: dict, html_template: dict) -> List[Dict]
                 session_id=session_id,
                 model="gpt-image-1",
             ),
-            # generate_single_image(
-            #     headline=slide_template['image_description'],
-            #     session_id=session_id,
-            #     model="imagen-4.0-ultra-generate-preview-06-06"
-            # ),
+            generate_single_image(
+                headline=slide_template['image_description'],
+                session_id=session_id,
+                model="imagen-4.0-ultra-generate-preview-06-06"
+            ),
         ]
 
         results = await asyncio.gather(*image_tasks, return_exceptions=True)
@@ -57,22 +66,23 @@ async def slide_creator(slide_template: dict, html_template: dict) -> List[Dict]
         # Process results and handle individual failures
         all_images = []
 
-        # Process real images (from fetch_multiple_images)
+        # Collect all successful images
+        # Real images from fetch_multiple_images
         if not isinstance(results[0], Exception) and results[0]:
             for img in results[0]:
                 img["type"] = "real"
                 all_images.append(img)
 
-        # Process generated images
-        for i, result in enumerate(results[1:], 1):
-            if not isinstance(result, Exception) and result:
-                if isinstance(result, list):
-                    for img in result:
-                        img["type"] = "generated"
-                        all_images.append(img)
-                else:
-                    result["type"] = "generated"
-                    all_images.append(result)
+        # Generated images from AI models
+        for result in results[1:]:
+            if isinstance(result, Exception) or not result:
+                continue
+            
+            # Handle both single images and lists
+            images_to_add = result if isinstance(result, list) else [result]
+            for img in images_to_add:
+                img["type"] = "generated"
+                all_images.append(img)
 
         # If no images were generated, return empty list
         if not all_images:
@@ -81,37 +91,35 @@ async def slide_creator(slide_template: dict, html_template: dict) -> List[Dict]
             )
             return []
 
-        # Process images with editor
-        processed_images = []
-        # Process images in parallel using thread pool
-        with ThreadPoolExecutor(max_workers=3) as executor:
-            futures = []
-            for img_data in all_images:
-                future = executor.submit(
-                    lambda x: {
-                        "images": {
-                            "without_text": x["image_bytes"],
-                            "with_text": image_editor(
-                                image_bytes=x["image_bytes"],
-                                text_template=slide_template["text_template"], 
-                                html_template=html_template[slide_template["name"]]["html_template"]
-                            )
-                        },
-                        "type": x["type"],
-                        "model": x.get("model", "unknown")
-                    },
-                    img_data
+        # Process all images in parallel
+        async def process_image(img_data):
+            """Add text overlay to image"""
+            try:
+                loop = asyncio.get_event_loop()
+                with_text_bytes = await loop.run_in_executor(
+                    None,
+                    image_editor,
+                    img_data["image_bytes"],
+                    slide_template["text_template"],
+                    html_template[slide_template["name"]]["html_template"]
                 )
-                futures.append(future)
+                
+                return {
+                    "images": {
+                        "without_text": img_data["image_bytes"],
+                        "with_text": with_text_bytes
+                    },
+                    "type": img_data["type"],
+                    "model": img_data.get("model", "unknown")
+                }
+            except Exception as e:
+                logger.warning(f"Failed to process image: {e}")
+                return None
 
-            # Collect results
-            for future in futures:
-                try:
-                    result = future.result()
-                    processed_images.append(result)
-                except Exception as e:
-                    logger.warning(f"Failed to process image: {e}")
-                    continue
+        # Process all images concurrently and filter out failures
+        tasks = [process_image(img) for img in all_images]
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+        processed_images = [r for r in results if r and not isinstance(r, Exception)]
 
         return processed_images
 
@@ -120,15 +128,9 @@ async def slide_creator(slide_template: dict, html_template: dict) -> List[Dict]
         return []
 
 
-async def save_to_mongo(
-    session_id: str,
-    headline: str,
-    template_type: str,
-    story_board: dict,
-    slide_images: list,
-    error: str = None,
-) -> str:
-    """Helper function to save workflow results to MongoDB"""
+async def save_to_mongo(session_id: str, headline: str, template_type: str, 
+                      story_board: dict, slide_images: list, error: str = None) -> str:
+    """Save workflow results to MongoDB"""
     try:
         mongo_client = get_mongo_client()
         document_id = mongo_client.store_content_workflow(
@@ -140,7 +142,7 @@ async def save_to_mongo(
             error=error,
         )
         mongo_client.close()
-        logger.info(f"Saved to MongoDB. Document ID: {document_id}")
+        logger.info(f"Saved to MongoDB: {document_id}")
         return document_id
     except Exception as e:
         logger.error(f"MongoDB save failed: {e}")
@@ -157,13 +159,29 @@ async def workflow(headline: str, template: dict, save: bool = True) -> str:
             headline=headline, text_template=template["text_template"]
         )
 
-        # Generate slides with images
-        slide_results = []
-        for slide in story_board.get("storyboard", []):
-            slide_images = await slide_creator(
-                slide_template=slide, html_template=template["slides"]
-            )
-            slide_results.append(slide_images)
+        # Generate all slides in parallel using threads
+        slides = story_board.get("storyboard", [])
+        if not slides:
+            slide_results = []
+        else:
+            def create_slide(slide):
+                """Run slide creator in thread"""
+                return asyncio.run(slide_creator(slide, template["slides"]))
+            
+            # Run each slide in its own thread
+            loop = asyncio.get_event_loop()
+            with ThreadPoolExecutor(max_workers=len(slides)) as executor:
+                tasks = [loop.run_in_executor(executor, create_slide, slide) for slide in slides]
+                results = await asyncio.gather(*tasks, return_exceptions=True)
+                
+                # Handle failures
+                slide_results = []
+                for i, result in enumerate(results):
+                    if isinstance(result, Exception):
+                        logger.error(f"Slide {i} failed: {result}")
+                        slide_results.append([])
+                    else:
+                        slide_results.append(result)
 
         # Save to MongoDB if requested
         if save:

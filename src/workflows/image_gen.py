@@ -24,14 +24,14 @@ async def generate_single_image(
 
     try:
         # Generate image from description
-        with open("./data_/test.png", "rb") as f:
-            image_bytes = f.read()
-            return {
-                "type": "real",
-                "model": "test",
-                "description": None,
-                "image_bytes": image_bytes,
-            }
+        # with open("./data_/test.png", "rb") as f:
+        #     image_bytes = f.read()
+        #     return {
+        #         "type": "real",
+        #         "model": "test",
+        #         "description": None,
+        #         "image_bytes": image_bytes,
+        #     }
         image_descriptions = await image_desc_generator(query=headline)
         image_bytes = await image_generator(query=image_descriptions[0], model=model)
 
