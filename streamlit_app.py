@@ -2,6 +2,10 @@ import streamlit as st
 import asyncio
 from pathlib import Path
 
+from streamlit_pages.generate_page import show_generate_page
+from streamlit_pages.page_editor import show_post_editor_page
+from streamlit_pages.history_page import show_history_page
+
 # Configure page
 st.set_page_config(
     page_title="Scoopwhoop Post Generator",
@@ -61,7 +65,7 @@ def main():
     # Navigation
     page = st.sidebar.selectbox(
         "Choose a page:",
-        ["Generate Posts", "History"],
+        ["Generate Posts", "Post Editor", "History"],
         key="page_selector"
     )
     
@@ -71,13 +75,11 @@ def main():
     
     # Route to appropriate page
     if page == "Generate Posts":
-        from streamlit_pages.generate_page import show_generate_page
+        
         show_generate_page()
     elif page == "Post Editor":
-        from streamlit_pages.post_editor_page import show_post_editor_page
         show_post_editor_page()
     elif page == "History":
-        from streamlit_pages.history_page import show_history_page
         show_history_page()
 
 if __name__ == "__main__":

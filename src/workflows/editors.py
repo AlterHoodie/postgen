@@ -228,12 +228,13 @@ def video_editor(video_bytes:bytes, text_template:dict, html_template:str) -> by
         cleanup_files(temp_files)
         logger.info(f"Cleaned up {len(temp_files)} temporary files")
 
-def text_editor(template:dict, slide_name:str, text_input:dict, image_bytes:bytes) -> bytes:
+def text_editor(template:dict, slide_name:str, text_input:dict, content_bytes:bytes, is_video:bool = False) -> bytes:
     """
     Editor for text-based templates
     """
     text_json = template['slides'][slide_name]['text_json']
     html_template = template['slides'][slide_name]['html_template']
+    overlay_template = template['slides'][slide_name]['overlay_template']
     
     text_template = {}
     for key, value in text_input.items():
@@ -241,7 +242,7 @@ def text_editor(template:dict, slide_name:str, text_input:dict, image_bytes:byte
             continue
             
         template_config = text_json['text_template'][key]
-        if template_config['type'] == 'text':
+        if template_config['type'] in ['text', 'text_area']:
             text_template[key] = convert_text_to_html(
                 tag=template_config['tag'],
                 class_name=template_config['class'],
@@ -250,15 +251,18 @@ def text_editor(template:dict, slide_name:str, text_input:dict, image_bytes:byte
         elif template_config['type'] == 'checkbox':
             text_template[key] = template_config['html_snippet'] if value else ""
 
-    new_image_bytes = image_editor(image_bytes=image_bytes, text_template=text_template, html_template=html_template)
-    return new_image_bytes
+    if is_video:
+        new_content_bytes = video_editor(video_bytes=content_bytes, text_template=text_template, html_template=overlay_template)
+    else:
+        new_content_bytes = image_editor(image_bytes=content_bytes, text_template=text_template, html_template=html_template)
+    return new_content_bytes
 
 # Test function for development
 if __name__ == "__main__":
     from src.templates.writeup import writeup_template
     ## Test Image Workflow
-    with open("./data_/test.png", "rb") as f:
-        image_bytes = f.read()
-    result = text_editor(writeup_template,"headline_slide",{"headline":"India Post goes digital. A smarter era begins.","subtext":"No more **snail mail**—India Post goes digital. A **smarter era begins**.","is_trigger":False},image_bytes)
-    with open("./data_/test_out.png", "wb") as f:
+    with open("./data_/2.mp4", "rb") as f:
+        video_bytes = f.read()
+    result = text_editor(writeup_template,"content_slide",{"subtext":"No more **snail mail**—India Post goes digital. A **smarter era begins**."},video_bytes, is_video=True)
+    with open("./data_/test_out.mp4", "wb") as f:
         f.write(result)

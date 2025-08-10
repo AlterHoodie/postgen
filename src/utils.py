@@ -210,7 +210,7 @@ def extract_text_from_html(html_content):
         # Get text content, replace <br/> with newlines
         text = soup.get_text(separator=' ').strip()
         text = re.sub(r'<br\s*/?>', '\n', text)
-        return text
+        return text if text else ""
     except Exception as e:
         logger.error(f"Error extracting text from HTML: {e}")
         return ""
