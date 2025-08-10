@@ -24,17 +24,16 @@ class SimpleMongoClient:
         self.db = self.client[database_name]
         self.collection = self.db.workflows
 
-    def _encode_image_to_base64(self, image_path: str) -> str:
+    def _encode_image_to_base64(self, image_bytes: bytes) -> str:
         """Convert image file to base64 string"""
         try:
-            if image_path is None:
+            if image_bytes is None:
                 return ""
-            with open(image_path, "rb") as image_file:
-                return base64.b64encode(
-                    compress_image(image_file.read(), quality=75)
-                ).decode("utf-8")
+            return base64.b64encode(
+                compress_image(image_bytes, quality=75)
+            ).decode("utf-8")
         except Exception as e:
-            logger.error(f"Error encoding image {image_path}: {e}")
+            logger.error(f"Error encoding image : {e}")
             return ""
 
     def store_content_workflow(

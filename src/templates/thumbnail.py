@@ -1,21 +1,29 @@
-TEXT_TEMPLATE = """
+TEMPLATE_DESCRIPTION = """
 Thumbnail: This ScoopWhoop template creates eye-catching thumbnail images for social media posts. It combines a striking background image with bold, highlighted text overlays to grab attention and drive engagement. The thumbnail should capture the essence of the story while remaining visually appealing and readable at smaller sizes.
+NOTE: Only one slide is required for this template.
+"""
 
+JSON_DESCRIPTION = """
 This template has the following slides/sections:
 Thumbnail Slide:
+  ### Attributes:
   - This should be the opening slide of the storyboard. Must be eye catching and engaging.
     EX: A photo of a temple and a gurdwara created inside a game.
+  
   - image_description: A one line description of the image you would like to use for the slide.
   - headline: The main headline of the story must be given as an html H1 tag 
     EX: <h1>
             Temples and <span class="yellow">Gurdwaras</span><br />Created
             Inside A Game!
         </h1>
+  
   - subtext: A short p tag with classname-"subtext" for the post, one sentence max.
     Ex: <p class="subtext">Gamers have made fully-functional religious<br />places INSIDE AGAME! 😲</p>
+  
   - is_trigger: Use when explicit/graphic visuals are required for the post.
     If required, use <p class='trigger-warning'>Trigger Warning</p> else fill "".
-  Text Input:
+
+  ### Text Input:
     {{
       "name": "headline_slide",
       "image_description": "str",
@@ -31,7 +39,6 @@ NOTE:
 - DO NOT COMPLICATE THE IMAGE DESCRIPTIONS, KEEP IT SIMPLE AND DIRECT.
 - DO NOT CITE SOURCES USING <a> tags. 
 - Use Source tag to only cite external sources NOT SCOOPWHOOP
-- This template should have only one slide and that is the thumbnail slide. Generate only one slide.
 """
 
 HEADLINE_SLIDE_HTML_TEMPLATE = """
@@ -281,7 +288,8 @@ HEADLINE_SLIDE_OVERLAY_TEMPLATE = """
 
 thumbnail_template = {
     "template_type": "thumbnail",
-    "text_template": TEXT_TEMPLATE,
+    "text_template": {"template_description":TEMPLATE_DESCRIPTION,
+            "json_description":JSON_DESCRIPTION},
     "slides": {
         "headline_slide": {
             "html_template": HEADLINE_SLIDE_HTML_TEMPLATE,

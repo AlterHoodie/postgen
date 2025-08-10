@@ -12,6 +12,7 @@ from src.prompts import (
     IMAGE_DESCRIPTION_PROMPT,
     IMAGE_QUERY_PROMPT,
     IMAGE_SCORER_PROMPT,
+    CONTENT_RESEARCH_PROMPT,
     STORY_BOARD_PROMPT,
 )
 from src.utils import extract_x
@@ -32,10 +33,16 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-async def story_board_generator(headline: str, template: str) -> dict:
-    prompt = STORY_BOARD_PROMPT.format(headline, template)
+async def content_research_agent(headline: str, template: str) -> dict:
+    prompt = CONTENT_RESEARCH_PROMPT.format(headline, template)
+    response = await openai_response(prompt=prompt, model="gpt-4.1", tools=[{"type": "web_search_preview"}])
+    return response
+
+
+async def story_board_generator(headline: str, research_result: str, template: str) -> dict:
+    prompt = STORY_BOARD_PROMPT.format(headline, research_result, template)
     response = await openai_response(
-        prompt=prompt, model="gpt-4.1", tools=[{"type": "web_search_preview"}]
+        prompt=prompt, model="gpt-4.1"
     )
     return json.loads(extract_x(response, "json"))
 

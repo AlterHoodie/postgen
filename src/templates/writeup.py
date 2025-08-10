@@ -1,21 +1,31 @@
-TEXT_TEMPLATE = """
+TEMPLATE_DESCRIPTION = """
 Write Ups : This ScoopWhoop template uses a bold, eye-catching design to present engaging narratives in a snackable, multi-slide format for social media. It pairs strong imagery with large, highlighted text to quickly tell a story and is aimed at a young audience that consumes content on the go.
+NOTE: 3-5 slides is the maximum number of slides you can have.
+"""
 
+JSON_DESCRIPTION = """
 This template has the following slides/sections:
 1. 1st Slide/Headline Slide:
   - This should be the opening slide of the storyboard. Must be eye catching and engaging.
-    EX: A photo of a temple and a gurdwara created inside a game.
+
+  ### Attributes:
+
   - image_description: A one line description of the image you would like to use for the slide.
+    EX: A photo of a temple and a gurdwara created inside a game.
+  
   - headline: The main headline of the story must be given as an html H1 tag 
     EX: <h1>
             Temples and <span class="yellow">Gurdwaras</span><br />Created
             Inside A Game!
         </h1>
+  
   - subtext: A short p tag with classname-"subtext" for the post, one sentence max.
     Ex: <p class="subtext">Gamers have made fully-functional religious<br />places INSIDE AGAME! 😲</p>
+  
   - is_trigger: Use when explicit/graphic visuals are required for the post.
     If required, use <p class='trigger-warning'>Trigger Warning</p> else fill "".
-  Text Input:
+
+  ### Text Input:
     {{
       "name": "headline_slide",
       "image_description": "str",
@@ -27,13 +37,21 @@ This template has the following slides/sections:
     }}
 
 2. Content Slide:
-  These are content slides that are used to tell/expand the story behind the main headline. This slide should be text heavy.
+  These are content slides that provide additional context and details about the main headline. Each slide should:
+  - Contain 3-4 concise lines of text that expand on a key aspect of the story
+  - Have visuals that directly complement and reinforce the text content
+  - Maintain a clear narrative flow from the headline slide
+  - Use engaging language while staying informative
+  The goal is to tell a compelling story through a balanced mix of visuals and text, without overwhelming the viewer with too much information at once.
+  
+  ### Attributes:
   - image_description: A one line description of the image you would like to use for the slide.
     EX: A photo of a temple and a gurdwara created inside a game.
-  - subtext: Use this tag to write content using p tags. should be 4-5 lines. use class yellow to highlight sentences.
+  
+  - subtext: Use this tag to write content using p tags. use class yellow to highlight sentences.
     EX: <p class="subtext"><span class="yellow">A 'voter rights yatra' is planned from August17</span>, aiming to rally support and spotlight the claims.</p>
 
-  Text Input:
+  ### Text Input:
     {{
       "name": "content_slide",
       "image_description": "str",
@@ -46,8 +64,6 @@ NOTE:
 - YOU CAN USE class name "yellow" to highlight words and to make the headline more engaging. Use br tags to break the text into multiple lines.
 - DO NOT COMPLICATE THE IMAGE DESCRIPTIONS, KEEP IT SIMPLE AND DIRECT.
 - DO NOT CITE SOURCES USING <a> tags. 
-- Use Source tag to only cite external sources NOT SCOOPWHOOP
-- 3-4 slides is the maximum number of slides you can have.
 """
 
 
@@ -540,7 +556,8 @@ CONTENT_SLIDE_OVERLAY_TEMPLATE = """
 
 writeup_template = {
     "template_type": "writeup",
-    "text_template": TEXT_TEMPLATE,
+    "text_template": {"template_description":TEMPLATE_DESCRIPTION,
+            "json_description":JSON_DESCRIPTION},
     "slides": {
         "headline_slide": {
             "html_template": HEADLINE_SLIDE_HTML_TEMPLATE,

@@ -248,7 +248,7 @@ def display_content_workflow(workflow_result):
 
                                 new_image = text_editor_form(
                                     text_values=current_text_values,
-                                    image_bytes=without_text_bytes,
+                                    content_bytes=without_text_bytes,
                                     template=template,
                                     slide_name=slide_name,
                                     form_key=f"history_edit_form_{session_id}_{selected_slide_idx}_{tab_idx}",

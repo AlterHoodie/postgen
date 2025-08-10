@@ -157,6 +157,19 @@ Image Resolution: {}
 ```
 """
 
+CONTENT_RESEARCH_PROMPT = """
+You are a research assistant. Your task is to research the web for the most important facts, key events, and relevant data about the following headline.
+
+**Headline:**
+{}
+
+Synthesize your findings into [5] distinct points, with each point summarizing a specific fact, event, or core aspect of the topic. Be as detailed as possible about the key events, facts and data.
+
+**Output Format:**
+Slide 1: **[Insert first key fact or event summary]**
+Slide 2: **[Insert second key fact or event summary]**
+Slide n: **[Insert nth key fact or event summary]**
+"""
 
 STORY_BOARD_PROMPT = """
 You are an expert social media storyboard writer for the Indian youth media brand, **ScoopWhoop**.
@@ -168,11 +181,15 @@ You are an expert social media storyboard writer for the Indian youth media bran
 
 HEADLINE: {}
 
-TEMPLATE: {}
+RESEARCH RESULT:
+{}
+
+TEMPLATE: 
+{}
 
 **Your Task:**
 1.  **Analyze the provided headline** and the given template.
-2.  Search the web for more information about the headline.
+2.  **Analyze the provided research result** and use it to create a storyboard.
 3.  Create a storyboard following the given template
 4.  Give the output in the following format:
 

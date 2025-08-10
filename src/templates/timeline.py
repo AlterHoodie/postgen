@@ -1,4 +1,4 @@
-TEXT_TEMPLATE = """
+TEMPLATE_DESCRIPTION = """
 **Template Name:** TimeLine
 
 **Primary Goal:** To generate content for a multi-slide visual storyboard that presents chronological stories, updates, or milestones. The output must follow a strict JSON format for each slide, detailing text and image descriptions.
@@ -8,13 +8,18 @@ TEXT_TEMPLATE = """
 *   Pay close attention to the word and line count limits for each field.
 *   Image descriptions should be concise yet evocative, suitable for an AI image generator.
 *   Ensure all text is proofread and fits the narrative context of a timeline.
+NOTE:
+* Use Date and Time in the format of "Time, Date" (e.g., `10:30 PM, 9TH JUNE`), To explain each event in the timeline.
+- 3-6 slides is the maximum number of slides you can have.
+"""
 
----
-
+JSON_DESCRIPTION = """
 ### Slide / Section Definitions
 
 **1. Headline Slide**
 *   **Purpose:** The opening slide of the storyboard. It must be eye-catching and create a strong first impression of the story.
+
+### Attributes:
 *   **`image_description`:** A clear, one-line description of the desired background image. Focus on the mood, subject, and style. (e.g., "A dramatic, wide-angle shot of a crowded city street at night").
 *   **`first_line`:** The main headline of the story. Must be a powerful statement of **no more than 3-4 words**.
     *   **Format:** `<div class="first-line">YOUR HEADLINE HERE</div>`
@@ -23,7 +28,7 @@ TEXT_TEMPLATE = """
 *   **`sub_heading`:** A concise subheading that provides additional context to the headline. **Must not exceed one line or 8-10 words.**
     *   **Format:** `<div class="sub-heading">Your sub-heading here</div>`
 
-*   **Text Input Structure:**
+### Text Input Structure:
     {
       "name": "headline_slide",
       "image_description": "str",
@@ -36,13 +41,15 @@ TEXT_TEMPLATE = """
 
 **2. Timeline Start Slide**
 *   **Purpose:** This slide marks the first event or the beginning of the chronological sequence.
+
+### Attributes:
 *   **`image_description`:** A one-line description of an image relevant to this specific event in the timeline.
 *   **`timeline_highlight`:** The timestamp for the event. **Must be in a "Time, Date" format** (e.g., `10:30 PM, 9TH JUNE`). This field should only contain the time and date.
     *   **Format:** `<div class="timeline-highlight">10:30 PM, 9TH JUNE</div>`
 *   **`body_text`:** The main descriptive text for this event. Expand on the story in **4-5 lines**, explaining what happened at this point in time.
     *   **Format:** `<p class="body-text">Your full body text goes here...</p>`
 
-*   **Text Input Structure:**
+### Text Input Structure:
     {
       "name": "timeline_start_slide",
       "image_description": "str",
@@ -54,13 +61,15 @@ TEXT_TEMPLATE = """
 
 **3. Timeline Middle Slide**
 *   **Purpose:** This slide is for any subsequent event between the start and the end of the timeline. Use it for all intermediate milestones.
+
+### Attributes:
 *   **`image_description`:** A one-line description of an image relevant to this specific event in the timeline.
 *   **`timeline_highlight`:** The timestamp for the event. **Must be in a "Time, Date" format** (e.g., `11:00 PM, 9TH JUNE`). This field should only contain the time and date.
     *   **Format:** `<div class="timeline-highlight">11:00 PM, 9TH JUNE</div>`
 *   **`body_text`:** The main descriptive text for this event. Expand on the story in **4-5 lines**, explaining what happened at this point in time.
     *   **Format:** `<p class="body-text">Your full body text goes here...</p>`
 
-*   **Text Input Structure:**
+### Text Input Structure:
     {
       "name": "timeline_middle_slide",
       "image_description": "str",
@@ -72,13 +81,15 @@ TEXT_TEMPLATE = """
 
 **4. Timeline End Slide**
 *   **Purpose:** This is the concluding event of the timeline, used to wrap up the story or present the final milestone.
+
+### Attributes:
 *   **`image_description`:** A one-line description of an image relevant to this final event in the timeline.
 *   **`timeline_highlight`:** The timestamp for the final event. **Must be in a "Time, Date" format** (e.g., `1:30 AM, 10TH JUNE`). This field should only contain the time and date.
     *   **Format:** `<div class="timeline-highlight">1:30 AM, 10TH JUNE</div>`
 *   **`body_text`:** The main descriptive text for this final event. Expand on the story's conclusion in **4-5 lines**.
     *   **Format:** `<p class="body-text">Your full body text goes here...</p>`
 
-*   **Text Input Structure:**
+### Text Input Structure:
     {
       "name": "timeline_end_slide",
       "image_description": "str",
@@ -87,12 +98,9 @@ TEXT_TEMPLATE = """
         "body_text": "<html_snippet_code>"
       }
     }
-
-NOTE:
-- 3-4 slides is the maximum number of slides you can have.
 """
 
-HEADLINE_SLIDE_HTML_TEMPLATE = """<!DOCTYPE html>
+HEADLINE_SLIDE_TEMPLATE = """<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -1269,10 +1277,11 @@ TIMELINE_END_SLIDE_OVERLAY_TEMPLATE = """
 
 timeline_template = {
     "template_type": "timeline",
-    "text_template": TEXT_TEMPLATE,
+    "text_template": {"template_description":TEMPLATE_DESCRIPTION,
+            "json_description":JSON_DESCRIPTION},
     "slides": {
         "headline_slide": {
-            "html_template": HEADLINE_SLIDE_OVERLAY_TEMPLATE,
+            "html_template": HEADLINE_SLIDE_TEMPLATE,
             "overlay_template": HEADLINE_SLIDE_OVERLAY_TEMPLATE,
             "text_json": {
                 "name": "headline_slide",
@@ -1309,7 +1318,7 @@ timeline_template = {
             },
         },
         "timeline_middle_slide": {
-            "html_template": TIMELINE_MIDDLE_SLIDE_OVERLAY_TEMPLATE,
+            "html_template": TIMELINE_MIDDLE_SLIDE_TEMPLATE,
             "overlay_template": TIMELINE_MIDDLE_SLIDE_OVERLAY_TEMPLATE,
             "text_json": {
                 "name": "timeline_middle_slide",
@@ -1329,7 +1338,7 @@ timeline_template = {
             },
         },
         "timeline_end_slide": {
-            "html_template": TIMELINE_END_SLIDE_OVERLAY_TEMPLATE,
+            "html_template": TIMELINE_END_SLIDE_TEMPLATE,
             "overlay_template": TIMELINE_END_SLIDE_OVERLAY_TEMPLATE,
             "text_json": {
                 "name": "timeline_end_slide",
@@ -1364,7 +1373,7 @@ if __name__ == "__main__":
 
     with open("./data_/bleh_4.html", "w") as f:
         f.write(
-            HEADLINE_SLIDE_HTML_TEMPLATE.format(
+            HEADLINE_SLIDE_TEMPLATE.format(
                 file_path="./test.png", **text["text_template"]
             )
         )

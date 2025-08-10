@@ -3,7 +3,7 @@ from typing import List, Dict
 import uuid
 import asyncio
 
-from src.agents import story_board_generator
+from src.agents import story_board_generator, content_research_agent
 from src.workflows.editors import image_editor
 from src.services.mongo_client import get_mongo_client
 from src.workflows.image_gen import fetch_multiple_images, generate_single_image
@@ -11,10 +11,13 @@ from src.workflows.image_gen import fetch_multiple_images, generate_single_image
 logger = logging.getLogger(__name__)
 
 
-async def story_board_creator(headline: str, template: str) -> Dict:
+async def story_board_creator(headline: str, text_template: str) -> Dict:
     """Generate story board from headline and template"""
     try:
-        story_board = await story_board_generator(headline=headline, template=template)
+        research_result = await content_research_agent(headline=headline, template=text_template['template_description'])
+
+        story_board = await story_board_generator(headline=headline,research_result=research_result, template=text_template['template_description'] + "\n" + text_template['json_description'])
+
         logger.info(
             f"Story board created with {len(story_board.get('storyboard', []))} slides"
         )
@@ -88,7 +91,7 @@ async def slide_creator(slide_template: dict, html_template: dict) -> List[Dict]
                 with_text_bytes = image_editor(
                     image_bytes=img_data["image_bytes"],
                     text_template=slide_template["text_template"],
-                    html_template=html_template[slide_template["name"]],
+                    html_template=html_template[slide_template["name"]]["html_template"],
                 )
 
                 processed_images.append(
@@ -146,14 +149,14 @@ async def workflow(headline: str, template: dict, save: bool = True) -> str:
     try:
         # Generate story board
         story_board = await story_board_creator(
-            headline=headline, template=template["text_template"]
+            headline=headline, text_template=template["text_template"]
         )
 
         # Generate slides with images
         slide_results = []
         for slide in story_board.get("storyboard", []):
             slide_images = await slide_creator(
-                slide_template=slide, html_template=template["html_template"]
+                slide_template=slide, html_template=template["slides"]
             )
             slide_results.append(slide_images)
 
@@ -194,28 +197,21 @@ async def workflow(headline: str, template: dict, save: bool = True) -> str:
 if __name__ == "__main__":
     import asyncio
     import base64
-    from src.templates.thumbnail import TEXT_TEMPLATE, HEADLINE_SLIDE_HTML_TEMPLATE
-
-    template = {
-        "template_type": "thumbnail",
-        "text_template": TEXT_TEMPLATE,
-        "html_template": {
-            "headline_slide": HEADLINE_SLIDE_HTML_TEMPLATE,
-        },
-    }
+    # from src.templates.timeline import timeline_template
+    from src.templates.timeline import timeline_template
 
     headline = "UttarKashi Cloud Burst India"
 
     try:
-        session_id = asyncio.run(workflow(headline=headline, template=template))
-        # session_id = "45c92cdd"
+        session_id = asyncio.run(workflow(headline=headline, template=timeline_template))
+        # session_id = "5a935915"
         print(f"Workflow completed successfully!")
         print(f"Document ID: {session_id}")
         mongo_client = get_mongo_client()
         result = mongo_client.get_workflow_result(session_id)
         for slide in result["slides"]:
             for img in slide["images"]:
-                b64_img = base64.b64decode(img["image_base64"])
+                b64_img = base64.b64decode(img["images"]["with_text"]["image_base64"])
                 with open(
                     f"./data_/slide_1/test_{slide['slide_index']}.png", "wb"
                 ) as f:
