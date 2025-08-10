@@ -7,7 +7,7 @@ import concurrent.futures
 from src.services.mongo_client import get_mongo_client
 from src.templates import get_template_config
 from src.workflows.content_creator import workflow
-from streamlit_pages.editor import text_editor_form
+from streamlit_pages.page_editor import text_editor_form
 
 
 def show_generate_page():
