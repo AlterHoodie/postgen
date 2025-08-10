@@ -211,6 +211,125 @@ HEADLINE_SLIDE_HTML_TEMPLATE = """<!DOCTYPE html>
 </html>
 """
 
+HEADLINE_SLIDE_OVERLAY_TEMPLATE = """
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SW Template</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Roboto:wght@700&display=swap");
+      @import url("https://fonts.googleapis.com/css2?family=Golos+Text:wght@400..900&display=swap");
+      body,
+      html {{
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        font-family: "Bebas Neue", sans-serif;
+        background-color: #000000;
+      }}
+
+      .container {{
+        position: relative;
+        width: 1080px;
+        height: 1350px;
+        margin: auto;
+        overflow: hidden;
+      }}
+
+      .background-image {{
+        width: 100%;
+        height: 100%;
+        display: block;
+        /* 'cover' scales the image to fill the container, cropping sides or top/bottom as needed */
+        object-fit: cover;
+        /* Aligns the image. 'center' horizontally, and 25% from the top vertically to shift it up. */
+        object-position: center 25%;
+      }}
+
+      .logo {{
+        position: absolute;
+        top: 40px;
+        left: 40px;
+        width: 110px; /* Increased logo size */
+        filter: brightness(0) invert(1);
+      }}
+
+      .text-overlay {{
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(
+          to top,
+          rgba(0, 0, 0, 1) 30%,
+          rgba(0, 0, 0, 0) 100%
+        );
+        padding: 60px 40px 70px 40px;
+        color: white;
+        text-align: center;
+      }}
+
+      .first-line {{
+        font-size: 110px;
+        font-weight: 590;
+        line-height: 1.2;
+        display: inline-block;
+        transform: scaleY(1.1);
+      }}
+
+      .highlight {{
+        background-color: #fbe10a;
+        color: black;
+        padding: 5px 20px 0px 20px;
+        font-size: 110px;
+        display: inline-block;
+        /* margin-top: 2px; Closer to the first line */
+        font-weight: 590;
+        line-height: 1.2;
+        transform: scaleY(1.1);
+      }}
+
+      .dashed-line {{
+        width: 780px;
+        height: 3px; /* thickness of line */
+        margin: 28px auto 20px auto;
+        background-image: repeating-linear-gradient(
+          to right,
+          white 0 3px,
+          /* dash length */ transparent 10px 15px /* gap length */
+        );
+      }}
+
+      .sub-heading {{
+        background-color: white;
+        color: black;
+        font-family: "Golos Text", sans-serif;
+        font-weight: 700;
+        font-size: 32px;
+        padding: 8px 40px;
+        display: inline-block;
+        border-radius: 3px;
+        letter-spacing: 0px;
+      }}
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <img src="./logo.png" alt="SW Logo" class="logo" />
+      <div class="text-overlay">
+        {first_line}
+        {highlight}
+        <div class="dashed-line"></div>
+        {sub_heading}
+      </div>
+      </div>
+    </div>
+  </body>
+</html>
+"""
+
 TIMELINE_START_SLIDE_TEMPLATE = """
 <!DOCTYPE html>
 <html lang="en">
@@ -349,6 +468,158 @@ TIMELINE_START_SLIDE_TEMPLATE = """
     <div class="container">
       <img src="./logo.png" alt="SW Logo" class="logo" />
       <img src="{file_path}" class="background-image" />
+      <div class="text-overlay">
+        <!-- MODIFIED TIMELINE STRUCTURE -->
+        <div class="timeline-track">
+          <div class="no_line"></div>
+          <div class="circle"></div>
+          <div class="line"></div>
+        </div>
+        {timeline_highlight}
+        {body_text}
+      </div>
+    </div>
+  </body>
+</html>
+"""
+
+TIMELINE_START_SLIDE_OVERLAY_TEMPLATE = """
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SW Template - Modular Timeline</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Roboto:wght@700&display=swap");
+      @import url("https://fonts.googleapis.com/css2?family=Golos+Text:wght@400..900&display=swap");
+      body,
+      html {{
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        font-family: "Bebas Neue", sans-serif;
+        background-color: #000000;
+      }}
+
+      .container {{
+        position: relative;
+        width: 1080px;
+        height: 1350px;
+        margin: auto;
+        overflow: hidden;
+      }}
+
+      .background-image {{
+        width: 100%;
+        height: 100%;
+        display: block;
+        /* 'cover' scales the image to fill the container, cropping sides or top/bottom as needed */
+        object-fit: cover;
+        /* Aligns the image. 'center' horizontally, and 25% from the top vertically to shift it up. */
+        object-position: center 25%;
+      }}
+
+      .logo {{
+        position: absolute;
+        top: 40px;
+        left: 40px;
+        width: 110px; /* Increased logo size */
+        filter: brightness(0) invert(1);
+      }}
+
+      .text-overlay {{
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(
+          to top,
+          rgba(0, 0, 0, 0.9) 10%,
+          rgba(0, 0, 0, 0.9) 40%,
+          rgba(0, 0, 0, 0.8) 50%,
+          rgba(0, 0, 0, 0.5) 70%,
+          rgba(0, 0, 0, 0) 100%
+        );
+        padding: 70px 80px 20px 80px;
+        color: white;
+        text-align: center;
+      }}
+
+      /* --- MODULAR TIMELINE STYLES START --- */
+
+      /* This is the flex container for the line-circle-line structure */
+      .timeline-track {{
+        display: flex;
+        align-items: center;
+        /* Use negative margin to break out of the parent's padding */
+        margin: 0 -80px;
+        margin-bottom: 50px; /* Creates space for the connector to connect */
+      }}
+
+      /* Style for the horizontal line elements */
+      .line {{
+        height: 3px;
+        background-color: #fbe10a;
+        flex-grow: 1; /* This makes the lines fill the available space */
+      }}
+      .no_line {{
+        height: 3px;
+        background-color: transparent;
+        flex-grow: 1; /* This makes the lines fill the available space */
+      }}
+
+      /* Style for the circle element */
+      .circle {{
+        width: 25px;
+        height: 25px;
+        background-color: #fbe10a;
+        border-radius: 50%;
+        flex-shrink: 0; /* Prevents the circle from shrinking */
+        position: relative;
+      }}
+
+      /* The vertical line connecting the circle down to the highlight box */
+      .circle::after {{
+        content: "";
+        position: absolute;
+        left: 50%;
+        top: 100%;
+        transform: translateX(-50%);
+        width: 3px;
+        height: 50px; /* Length of the connector line */
+        background-color: #fbe10a;
+      }}
+
+      /* --- MODULAR TIMELINE STYLES END --- */
+
+      .timeline-highlight {{
+        background-color: #fbe10a;
+        color: black;
+        padding: 5px 20px 0px 20px;
+        font-size: 95px;
+        display: inline-block;
+        /* margin-top: 2px; Closer to the first line */
+        font-weight: 590;
+        letter-spacing: 2px;
+        /* line-height: 1.1; */
+        transform: scaleY(1.1);
+      }}
+
+      .body-text {{
+        font-family: "Golos Text", sans-serif;
+        font-weight: 400;
+        font-size: 38px;
+        line-height: 1.4;
+        text-align: center;
+        margin-top: 40px;
+        color: #ffffff;
+      }}
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <img src="./logo.png" alt="SW Logo" class="logo" />
       <div class="text-overlay">
         <!-- MODIFIED TIMELINE STRUCTURE -->
         <div class="timeline-track">
@@ -517,6 +788,158 @@ TIMELINE_MIDDLE_SLIDE_TEMPLATE = """
 </html>
 """
 
+TIMELINE_MIDDLE_SLIDE_OVERLAY_TEMPLATE = """
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SW Template - Modular Timeline</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Roboto:wght@700&display=swap");
+      @import url("https://fonts.googleapis.com/css2?family=Golos+Text:wght@400..900&display=swap");
+      body,
+      html {{
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        font-family: "Bebas Neue", sans-serif;
+        background-color: #000000;
+      }}
+
+      .container {{
+        position: relative;
+        width: 1080px;
+        height: 1350px;
+        margin: auto;
+        overflow: hidden;
+      }}
+
+      .background-image {{
+        width: 100%;
+        height: 100%;
+        display: block;
+        /* 'cover' scales the image to fill the container, cropping sides or top/bottom as needed */
+        object-fit: cover;
+        /* Aligns the image. 'center' horizontally, and 25% from the top vertically to shift it up. */
+        object-position: center 25%;
+      }}
+
+      .logo {{
+        position: absolute;
+        top: 40px;
+        left: 40px;
+        width: 110px; /* Increased logo size */
+        filter: brightness(0) invert(1);
+      }}
+
+      .text-overlay {{
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(
+          to top,
+          rgba(0, 0, 0, 0.9) 10%,
+          rgba(0, 0, 0, 0.9) 40%,
+          rgba(0, 0, 0, 0.8) 50%,
+          rgba(0, 0, 0, 0.5) 70%,
+          rgba(0, 0, 0, 0) 100%
+        );
+        padding: 70px 80px 20px 80px;
+        color: white;
+        text-align: center;
+      }}
+
+      /* --- MODULAR TIMELINE STYLES START --- */
+
+      /* This is the flex container for the line-circle-line structure */
+      .timeline-track {{
+        display: flex;
+        align-items: center;
+        /* Use negative margin to break out of the parent's padding */
+        margin: 0 -80px;
+        margin-bottom: 50px; /* Creates space for the connector to connect */
+      }}
+
+      /* Style for the horizontal line elements */
+      .line {{
+        height: 3px;
+        background-color: #fbe10a;
+        flex-grow: 1; /* This makes the lines fill the available space */
+      }}
+      .no_line {{
+        height: 3px;
+        background-color: transparent;
+        flex-grow: 1; /* This makes the lines fill the available space */
+      }}
+
+      /* Style for the circle element */
+      .circle {{
+        width: 25px;
+        height: 25px;
+        background-color: #fbe10a;
+        border-radius: 50%;
+        flex-shrink: 0; /* Prevents the circle from shrinking */
+        position: relative;
+      }}
+
+      /* The vertical line connecting the circle down to the highlight box */
+      .circle::after {{
+        content: "";
+        position: absolute;
+        left: 50%;
+        top: 100%;
+        transform: translateX(-50%);
+        width: 3px;
+        height: 50px; /* Length of the connector line */
+        background-color: #fbe10a;
+      }}
+
+      /* --- MODULAR TIMELINE STYLES END --- */
+
+      .timeline-highlight {{
+        background-color: #fbe10a;
+        color: black;
+        padding: 5px 20px 0px 20px;
+        font-size: 95px;
+        display: inline-block;
+        /* margin-top: 2px; Closer to the first line */
+        font-weight: 590;
+        letter-spacing: 2px;
+        /* line-height: 1.1; */
+        transform: scaleY(1.1);
+      }}
+
+      .body-text {{
+        font-family: "Golos Text", sans-serif;
+        font-weight: 400;
+        font-size: 38px;
+        line-height: 1.4;
+        text-align: center;
+        margin-top: 40px;
+        color: #ffffff;
+      }}
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <img src="./logo.png" alt="SW Logo" class="logo" />
+      <div class="text-overlay">
+        <!-- MODIFIED TIMELINE STRUCTURE -->
+        <div class="timeline-track">
+          <div class="line"></div>
+          <div class="circle"></div>
+          <div class="line"></div>
+        </div>
+        {timeline_highlight}
+        {body_text}
+      </div>
+    </div>
+  </body>
+</html>
+"""
+
 TIMELINE_END_SLIDE_TEMPLATE = """
 <!DOCTYPE html>
 <html lang="en">
@@ -670,12 +1093,164 @@ TIMELINE_END_SLIDE_TEMPLATE = """
 </html>
 """
 
+TIMELINE_END_SLIDE_OVERLAY_TEMPLATE = """
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SW Template - Modular Timeline</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Roboto:wght@700&display=swap");
+      @import url("https://fonts.googleapis.com/css2?family=Golos+Text:wght@400..900&display=swap");
+      body,
+      html {{
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        font-family: "Bebas Neue", sans-serif;
+        background-color: #000000;
+      }}
+
+      .container {{
+        position: relative;
+        width: 1080px;
+        height: 1350px;
+        margin: auto;
+        overflow: hidden;
+      }}
+
+      .background-image {{
+        width: 100%;
+        height: 100%;
+        display: block;
+        /* 'cover' scales the image to fill the container, cropping sides or top/bottom as needed */
+        object-fit: cover;
+        /* Aligns the image. 'center' horizontally, and 25% from the top vertically to shift it up. */
+        object-position: center 25%;
+      }}
+
+      .logo {{
+        position: absolute;
+        top: 40px;
+        left: 40px;
+        width: 110px; /* Increased logo size */
+        filter: brightness(0) invert(1);
+      }}
+
+      .text-overlay {{
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(
+          to top,
+          rgba(0, 0, 0, 0.9) 10%,
+          rgba(0, 0, 0, 0.9) 40%,
+          rgba(0, 0, 0, 0.8) 50%,
+          rgba(0, 0, 0, 0.5) 70%,
+          rgba(0, 0, 0, 0) 100%
+        );
+        padding: 70px 80px 20px 80px;
+        color: white;
+        text-align: center;
+      }}
+
+      /* --- MODULAR TIMELINE STYLES START --- */
+
+      /* This is the flex container for the line-circle-line structure */
+      .timeline-track {{
+        display: flex;
+        align-items: center;
+        /* Use negative margin to break out of the parent's padding */
+        margin: 0 -80px;
+        margin-bottom: 50px; /* Creates space for the connector to connect */
+      }}
+
+      /* Style for the horizontal line elements */
+      .line {{
+        height: 3px;
+        background-color: #fbe10a;
+        flex-grow: 1; /* This makes the lines fill the available space */
+      }}
+      .no_line {{
+        height: 3px;
+        background-color: transparent;
+        flex-grow: 1; /* This makes the lines fill the available space */
+      }}
+
+      /* Style for the circle element */
+      .circle {{
+        width: 25px;
+        height: 25px;
+        background-color: #fbe10a;
+        border-radius: 50%;
+        flex-shrink: 0; /* Prevents the circle from shrinking */
+        position: relative;
+      }}
+
+      /* The vertical line connecting the circle down to the highlight box */
+      .circle::after {{
+        content: "";
+        position: absolute;
+        left: 50%;
+        top: 100%;
+        transform: translateX(-50%);
+        width: 3px;
+        height: 50px; /* Length of the connector line */
+        background-color: #fbe10a;
+      }}
+
+      /* --- MODULAR TIMELINE STYLES END --- */
+
+      .timeline-highlight {{
+        background-color: #fbe10a;
+        color: black;
+        padding: 5px 20px 0px 20px;
+        font-size: 95px;
+        display: inline-block;
+        /* margin-top: 2px; Closer to the first line */
+        font-weight: 590;
+        letter-spacing: 2px;
+        /* line-height: 1.1; */
+        transform: scaleY(1.1);
+      }}
+
+      .body-text {{
+        font-family: "Golos Text", sans-serif;
+        font-weight: 400;
+        font-size: 38px;
+        line-height: 1.4;
+        text-align: center;
+        margin-top: 40px;
+        color: #ffffff;
+      }}
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <img src="./logo.png" alt="SW Logo" class="logo" />
+      <div class="text-overlay">
+        <!-- MODIFIED TIMELINE STRUCTURE -->
+        <div class="timeline-track">
+          <div class="line"></div>
+          <div class="circle"></div>
+          <div class="no_line"></div>
+        </div>
+        {timeline_highlight}
+        {body_text}
+      </div>
+    </div>
+  </body>
+</html>
+"""
+
 timeline_template = {
     "template_type": "timeline",
     "text_template": TEXT_TEMPLATE,
     "slides": {
-        "headline_slide": {"html_template": HEADLINE_SLIDE_HTML_TEMPLATE, 
-                           "overlay_template": "",
+        "headline_slide": {"html_template": HEADLINE_SLIDE_OVERLAY_TEMPLATE, 
+                           "overlay_template": HEADLINE_SLIDE_OVERLAY_TEMPLATE,
                            "text_json":{
                                 "name": "headline_slide",
                                 "image_description": "str",
@@ -685,8 +1260,8 @@ timeline_template = {
                                 "sub_heading": {"type":"text","tag":"div","class":"sub-heading"}
                                 }
                            }},
-        "timeline_start_slide": {"html_template": TIMELINE_START_SLIDE_TEMPLATE, 
-                                 "overlay_template": "",
+        "timeline_start_slide": {"html_template":TIMELINE_START_SLIDE_TEMPLATE, 
+                                 "overlay_template": TIMELINE_START_SLIDE_OVERLAY_TEMPLATE,
                                  "text_json":{
                                     "name": "timeline_start_slide",
                                     "image_description": "str",
@@ -695,8 +1270,8 @@ timeline_template = {
                                         "body_text": {"type":"text_area","tag":"p","class":"body-text"}
                                     }
                                 }},
-        "timeline_middle_slide": {"html_template": TIMELINE_MIDDLE_SLIDE_TEMPLATE, 
-                                 "overlay_template": "",
+        "timeline_middle_slide": {"html_template": TIMELINE_MIDDLE_SLIDE_OVERLAY_TEMPLATE, 
+                                 "overlay_template": TIMELINE_MIDDLE_SLIDE_OVERLAY_TEMPLATE,
                                  "text_json":{
                                     "name": "timeline_middle_slide",
                                     "image_description": "str",
@@ -705,8 +1280,8 @@ timeline_template = {
                                         "body_text": {"type":"text_area","tag":"p","class":"body-text"}
                                     }
                                 }},
-        "timeline_end_slide": {"html_template": TIMELINE_END_SLIDE_TEMPLATE, 
-                                 "overlay_template": "",
+        "timeline_end_slide": {"html_template": TIMELINE_END_SLIDE_OVERLAY_TEMPLATE, 
+                                 "overlay_template": TIMELINE_END_SLIDE_OVERLAY_TEMPLATE,
                                  "text_json":{
                                     "name": "timeline_end_slide",
                                     "image_description": "str",

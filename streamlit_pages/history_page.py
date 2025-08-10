@@ -5,22 +5,8 @@ import logging
 import pytz
 
 from src.services.mongo_client import get_mongo_client
-from src.templates.timeline import timeline_template
-from src.templates.thumbnail import thumbnail_template
-from src.templates.writeup import writeup_template
+from src.templates import get_template_config
 from streamlit_pages.editor import text_editor_form
-
-
-def get_template_config(template_type: str) -> dict:
-    """Get template configuration based on type"""
-    if template_type == "timeline":
-        return timeline_template
-    elif template_type == "thumbnail":
-        return thumbnail_template
-    elif template_type == "writeup":
-        return writeup_template
-    else:
-        raise ValueError(f"Unknown template type: {template_type}")
 
 def show_history_page():
     st.title("📜 Content Generation History")
