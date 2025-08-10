@@ -558,7 +558,7 @@ writeup_template = {
                                 "name": "content_slide",
                                 "image_description": "str",
                                 "text_template":{
-                                "subtext": {"type":"text","tag":"p","class":"subtext"},
+                                "subtext": {"type":"text_area","tag":"p","class":"subtext"},
                                 }
                            }},
     }

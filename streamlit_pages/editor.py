@@ -28,7 +28,9 @@ def text_editor_form(text_values: Dict, image_bytes: bytes, template: Dict,
             
             if config.get('type') == 'checkbox':
                 text_input[field_name] = st.checkbox(display_name,value=True if text_values.get(field_name) else False)
-            else:
+            elif config.get('type') == 'text_area':
+                text_input[field_name] = st.text_area(f"{display_name}:",value=extract_text_from_html(text_values.get(field_name)))
+            elif config.get('type') == 'text':
                 text_input[field_name] = st.text_input(f"{display_name}:",value=extract_text_from_html(text_values.get(field_name)))
         
         submitted = st.form_submit_button("Generate New Image", type="primary")

@@ -692,7 +692,7 @@ timeline_template = {
                                     "image_description": "str",
                                     "text_template":{
                                         "timeline_highlight": {"type":"text","tag":"div","class":"timeline-highlight"},
-                                        "body_text": {"type":"text","tag":"p","class":"body-text"}
+                                        "body_text": {"type":"text_area","tag":"p","class":"body-text"}
                                     }
                                 }},
         "timeline_middle_slide": {"html_template": TIMELINE_MIDDLE_SLIDE_TEMPLATE, 
@@ -702,7 +702,7 @@ timeline_template = {
                                     "image_description": "str",
                                     "text_template":{
                                         "timeline_highlight": {"type":"text","tag":"div","class":"timeline-highlight"},
-                                        "body_text": {"type":"text","tag":"p","class":"body-text"}
+                                        "body_text": {"type":"text_area","tag":"p","class":"body-text"}
                                     }
                                 }},
         "timeline_end_slide": {"html_template": TIMELINE_END_SLIDE_TEMPLATE, 
@@ -712,7 +712,7 @@ timeline_template = {
                                     "image_description": "str",
                                     "text_template":{
                                         "timeline_highlight": {"type":"text","tag":"div","class":"timeline-highlight"},
-                                        "body_text": {"type":"text","tag":"p","class":"body-text"}
+                                        "body_text": {"type":"text_area","tag":"p","class":"body-text"}
                                     }
                                 }},
         }
