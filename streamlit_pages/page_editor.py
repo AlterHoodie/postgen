@@ -137,6 +137,15 @@ def show_post_editor_page():
         format_func=lambda x: x.replace("_", " ").title(),
     )
 
+    # Check if a new file was uploaded (different from previous)
+    current_file_info = f"{uploaded_file.name}_{len(file_bytes)}_{file_type}"
+    if "current_file_info" not in st.session_state:
+        st.session_state.current_file_info = current_file_info
+    elif st.session_state.current_file_info != current_file_info:
+        # New file uploaded - clear all slide data
+        st.session_state.slide_data = {}
+        st.session_state.current_file_info = current_file_info
+
     # Initialize slide data in session state
     if "slide_data" not in st.session_state:
         st.session_state.slide_data = {}
