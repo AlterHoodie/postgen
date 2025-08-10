@@ -104,6 +104,10 @@ def compress_image(
         ```
     """
     try:
+        # Validate image data is not empty
+        if not image_data:
+            raise ValueError("Image data is empty")
+        
         # Open image from bytes
         img = Image.open(io.BytesIO(image_data))
 
@@ -146,6 +150,10 @@ def crop_image(
     Returns:
         Path to the cropped image.
     """
+    # Validate image bytes is not empty
+    if not image_bytes:
+        raise ValueError("Image bytes is empty")
+    
     img = Image.open(io.BytesIO(image_bytes))
     scale_factor = output_height / img.height
     resized_width = int(img.width * scale_factor)

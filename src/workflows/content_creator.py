@@ -2,6 +2,7 @@ import logging
 from typing import List, Dict
 import uuid
 import asyncio
+from concurrent.futures import ThreadPoolExecutor
 
 from src.agents import story_board_generator, content_research_agent
 from src.workflows.editors import image_editor
@@ -82,31 +83,35 @@ async def slide_creator(slide_template: dict, html_template: dict) -> List[Dict]
 
         # Process images with editor
         processed_images = []
-        for img_data in all_images:
-            try:
-                # Original image without text overlay
-                without_text_bytes = img_data["image_bytes"]
-
-                # Create image with text overlay using editor
-                with_text_bytes = image_editor(
-                    image_bytes=img_data["image_bytes"],
-                    text_template=slide_template["text_template"],
-                    html_template=html_template[slide_template["name"]]["html_template"],
-                )
-
-                processed_images.append(
-                    {
+        # Process images in parallel using thread pool
+        with ThreadPoolExecutor(max_workers=3) as executor:
+            futures = []
+            for img_data in all_images:
+                future = executor.submit(
+                    lambda x: {
                         "images": {
-                            "without_text": without_text_bytes,
-                            "with_text": with_text_bytes,
+                            "without_text": x["image_bytes"],
+                            "with_text": image_editor(
+                                image_bytes=x["image_bytes"],
+                                text_template=slide_template["text_template"], 
+                                html_template=html_template[slide_template["name"]]["html_template"]
+                            )
                         },
-                        "type": img_data["type"],
-                        "model": img_data.get("model", "unknown"),
-                    }
+                        "type": x["type"],
+                        "model": x.get("model", "unknown")
+                    },
+                    img_data
                 )
-            except Exception as e:
-                logger.warning(f"Failed to process image: {e}")
-                continue
+                futures.append(future)
+
+            # Collect results
+            for future in futures:
+                try:
+                    result = future.result()
+                    processed_images.append(result)
+                except Exception as e:
+                    logger.warning(f"Failed to process image: {e}")
+                    continue
 
         return processed_images
 

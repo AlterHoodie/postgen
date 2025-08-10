@@ -179,9 +179,15 @@ def show_content_results(session_id: str):
                         with col1:
                             st.markdown("**Without Text Overlay**")
                             try:
-                                without_text_data = base64.b64decode(
-                                    img_data["images"]["without_text"]["image_base64"]
-                                )
+                                # Validate base64 data exists
+                                base64_data = img_data.get("images", {}).get("without_text", {}).get("image_base64")
+                                if not base64_data:
+                                    raise ValueError("No base64 image data found")
+                                
+                                without_text_data = base64.b64decode(base64_data)
+                                if not without_text_data:
+                                    raise ValueError("Decoded image data is empty")
+                                
                                 st.image(without_text_data, width=400)
                                 st.download_button(
                                     label="⬇️ Download",
@@ -222,9 +228,15 @@ def show_content_results(session_id: str):
                             else:
                                 # Show original with text
                                 try:
-                                    with_text_data = base64.b64decode(
-                                        img_data["images"]["with_text"]["image_base64"]
-                                    )
+                                    # Validate base64 data exists
+                                    base64_data = img_data.get("images", {}).get("with_text", {}).get("image_base64")
+                                    if not base64_data:
+                                        raise ValueError("No base64 image data found")
+                                    
+                                    with_text_data = base64.b64decode(base64_data)
+                                    if not with_text_data:
+                                        raise ValueError("Decoded image data is empty")
+                                    
                                     st.image(with_text_data, width=400)
                                     st.download_button(
                                         label="⬇️ Download",
@@ -250,17 +262,21 @@ def show_content_results(session_id: str):
                                 and slide_name in template["slides"]
                             ):
                                 try:
-                                    current_text_values = img_data.get(
+                                    current_text_values = selected_slide.get(
                                         "text_template", {}
                                     )
-                                    without_text_bytes = base64.b64decode(
-                                        img_data["images"]["without_text"][
-                                            "image_base64"
-                                        ]
-                                    )
+                                    
+                                    # Validate base64 data exists
+                                    base64_data = img_data.get("images", {}).get("without_text", {}).get("image_base64")
+                                    if not base64_data:
+                                        raise ValueError("No base64 image data found for editing")
+                                    
+                                    without_text_bytes = base64.b64decode(base64_data)
+                                    if not without_text_bytes:
+                                        raise ValueError("Decoded image data is empty for editing")
                                     # Get original image without text for editing
 
-                                    new_image = text_editor_form(
+                                    new_image, submitted = text_editor_form(
                                         text_values=current_text_values,
                                         content_bytes=without_text_bytes,
                                         template=template,
@@ -268,7 +284,7 @@ def show_content_results(session_id: str):
                                         form_key=f"edit_form_{session_id}_{selected_slide_idx}_{tab_idx}",
                                     )
 
-                                    if new_image:
+                                    if submitted and new_image:
                                         st.session_state[edit_key] = new_image
                                         st.success("✅ Text edited successfully!")
                                         st.rerun()

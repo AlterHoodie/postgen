@@ -1,5 +1,6 @@
 import streamlit as st
 import os
+import io
 from typing import Dict, Tuple
 from PIL import Image
 from src.workflows.editors import text_editor
@@ -31,24 +32,24 @@ def text_editor_form(
     text_json = template["slides"][slide_name]["text_json"]
     with st.form(key=form_key):
         text_input = {}
-
+        
         # Create inputs based on text_json
         for field_name, config in text_json.get("text_template", {}).items():
             display_name = field_name.replace("_", " ").title()
 
             if config.get("type") == "checkbox":
                 text_input[field_name] = st.checkbox(
-                    display_name, value=True if text_values.get(field_name) else False
+                    display_name, value=True if text_values.get(field_name,"") else False
                 )
             elif config.get("type") == "text_area":
                 text_input[field_name] = st.text_area(
                     f"{display_name}:",
-                    value=extract_text_from_html(text_values.get(field_name)),
+                    value=extract_text_from_html(text_values.get(field_name,"")),
                 )
             elif config.get("type") == "text":
                 text_input[field_name] = st.text_input(
                     f"{display_name}:",
-                    value=extract_text_from_html(text_values.get(field_name)),
+                    value=extract_text_from_html(text_values.get(field_name,"")),
                 )
 
         submitted = st.form_submit_button("Generate New Image", type="primary")
@@ -89,6 +90,29 @@ def show_post_editor_page():
 
     # Show uploaded file
     file_type = get_file_type(uploaded_file.name)
+    
+    # Validate uploaded file
+    try:
+        file_bytes = uploaded_file.getvalue()
+        if not file_bytes:
+            st.error("Uploaded file is empty")
+            return
+        
+        # For images, try to validate with PIL
+        if file_type == "image":
+            from PIL import Image
+            try:
+                # Test if image can be opened
+                test_img = Image.open(io.BytesIO(file_bytes))
+                test_img.verify()  # Verify image integrity
+                uploaded_file.seek(0)  # Reset file pointer
+            except Exception as img_error:
+                st.error(f"Invalid image file: {img_error}")
+                return
+                
+    except Exception as e:
+        st.error(f"Error reading uploaded file: {e}")
+        return
 
     template_options = {
         "Timeline": "timeline",
@@ -154,9 +178,9 @@ def show_post_editor_page():
             ]
 
             if is_video:
-                st.video(content_bytes)
+                st.video(content_bytes, width=500)
             else:
-                st.image(content_bytes, use_column_width=True)
+                st.image(content_bytes, width=500)
 
             # Download button
             file_ext = "mp4" if is_video else "png"
@@ -171,10 +195,10 @@ def show_post_editor_page():
             )
         else:
             if is_video:
-                st.video(media_bytes)
+                st.video(media_bytes, width=500)
                 st.caption("Original video")
             else:
-                st.image(media_bytes, use_column_width=True)
+                st.image(media_bytes, width=500)
                 st.caption("Original image")
 
 

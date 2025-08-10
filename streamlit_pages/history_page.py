@@ -233,7 +233,6 @@ def display_content_workflow(workflow_result):
                         slide_name = selected_slide.get("name", "headline_slide")
 
                         if "slides" in template and slide_name in template["slides"]:
-                            text_json = template["slides"][slide_name]["text_json"]
 
                             # Get original image without text for editing
                             try:

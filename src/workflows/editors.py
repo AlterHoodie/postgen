@@ -20,6 +20,12 @@ logger = logging.getLogger(__name__)
 
 def image_editor(image_bytes: bytes, text_template: dict, html_template: str) -> bytes:
     try:
+        if html_template is None:
+            raise ValueError("HTML template is None")
+        if text_template is None:
+            raise ValueError("Text template is None")
+        
+            
         temp_dir = Path("./data/scoopwhoop/temp")
         temp_dir.mkdir(exist_ok=True)
         temp_files = []
@@ -168,7 +174,7 @@ def _create_final_video(
         video_clip.close()
         final_composite.close()
 
-        return output_path, [overlay_resized_path, gradient_path]
+        return output_path, [overlay_image_path, overlay_resized_path, gradient_path]
 
     except Exception as e:
         print(f"Error during video processing: {e}")
