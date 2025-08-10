@@ -182,6 +182,10 @@ HEADLINE_SLIDE_HTML_TEMPLATE = """<!DOCTYPE html>
         );
       }}
 
+      .yellow {{
+        color: #FBE10A;
+      }}
+
       .sub-heading {{
         background-color: white;
         color: black;
@@ -452,7 +456,9 @@ TIMELINE_START_SLIDE_TEMPLATE = """
         /* line-height: 1.1; */
         transform: scaleY(1.1);
       }}
-
+      .yellow {{
+        color: #FBE10A;
+      }}
       .body-text {{
         font-family: "Golos Text", sans-serif;
         font-weight: 400;
@@ -589,6 +595,9 @@ TIMELINE_START_SLIDE_OVERLAY_TEMPLATE = """
         width: 3px;
         height: 50px; /* Length of the connector line */
         background-color: #fbe10a;
+      }}
+      .yellow {{
+        color: #FBE10A;
       }}
 
       /* --- MODULAR TIMELINE STYLES END --- */
@@ -757,7 +766,9 @@ TIMELINE_MIDDLE_SLIDE_TEMPLATE = """
         /* line-height: 1.1; */
         transform: scaleY(1.1);
       }}
-
+      .yellow {{
+        color: #FBE10A;
+      }}
       .body-text {{
         font-family: "Golos Text", sans-serif;
         font-weight: 400;
@@ -894,6 +905,9 @@ TIMELINE_MIDDLE_SLIDE_OVERLAY_TEMPLATE = """
         width: 3px;
         height: 50px; /* Length of the connector line */
         background-color: #fbe10a;
+      }}
+      .yellow {{
+        color: #FBE10A;
       }}
 
       /* --- MODULAR TIMELINE STYLES END --- */
@@ -1048,6 +1062,10 @@ TIMELINE_END_SLIDE_TEMPLATE = """
         background-color: #fbe10a;
       }}
 
+      .yellow {{
+        color: #FBE10A;
+      }}
+
       /* --- MODULAR TIMELINE STYLES END --- */
 
       .timeline-highlight {{
@@ -1154,6 +1172,10 @@ TIMELINE_END_SLIDE_OVERLAY_TEMPLATE = """
         padding: 70px 80px 20px 80px;
         color: white;
         text-align: center;
+      }}
+
+      .yellow {{
+        color: #FBE10A;
       }}
 
       /* --- MODULAR TIMELINE STYLES START --- */

@@ -113,14 +113,14 @@ HEADLINE_SLIDE_HTML_TEMPLATE = """
         line-height: 1.1;
       }}
       .text-content h1 .yellow {{
-        color: #ffee04;
+        color: #FBE10A;
       }}
       .text-content .subtext {{
         margin: 5px 0 0;
         font-size: 2.5em; /* Increased font size */
       }}
       .text-content .subtext .yellow {{
-        color: #ffee04;
+        color: #FBE10A;
       }}
       
       .text-content .source {{
@@ -236,14 +236,14 @@ HEADLINE_SLIDE_OVERLAY_TEMPLATE = """
         line-height: 1.1;
       }}
       .text-content h1 .yellow {{
-        color: #ffee04;
+        color: #FBE10A;
       }}
       .text-content .subtext {{
         margin: 5px 0 0;
         font-size: 2.5em; /* Increased font size */
       }}
       .text-content .subtext .yellow {{
-        color: #ffee04;
+        color: #FBE10A;
       }}
       
       .text-content .source {{
