@@ -1,6 +1,6 @@
 from typing import List, Tuple
 import base64
-import os 
+import os
 from dotenv import load_dotenv
 import logging
 import io
@@ -28,13 +28,15 @@ async def download_image(image_url: str) -> io.BytesIO:
         async with httpx.AsyncClient() as client:
             response = await client.get(image_url, timeout=10)
             response.raise_for_status()
-            
+
             # Check if content type is an image
-            content_type = response.headers.get('content-type', '').lower()
-            if not content_type.startswith('image/'):
-                logging.warning(f"URL does not return an image content type: {content_type} for {image_url}")
+            content_type = response.headers.get("content-type", "").lower()
+            if not content_type.startswith("image/"):
+                logging.warning(
+                    f"URL does not return an image content type: {content_type} for {image_url}"
+                )
                 return None
-            
+
             # Create BytesIO object with image data
             image_data = io.BytesIO(response.content)
             image_data.name = "image.jpg"  # Default name
@@ -45,7 +47,12 @@ async def download_image(image_url: str) -> io.BytesIO:
 
 
 async def openai_response(
-    prompt, model: str = "gpt-4.1", use_web_search: bool = False, tools: List[str] = [], images: List[str] = [], type:str = "path"
+    prompt,
+    model: str = "gpt-4.1",
+    use_web_search: bool = False,
+    tools: List[str] = [],
+    images: List[str] = [],
+    type: str = "path",
 ) -> Tuple[dict, dict]:
 
     media_type = "image/png"
@@ -64,7 +71,13 @@ async def openai_response(
     else:
         for image in images:
             if image:
-                encoded_image = base64.standard_b64encode(image.getvalue() if isinstance(image, io.BytesIO) else image).decode("utf-8") if image else ""
+                encoded_image = (
+                    base64.standard_b64encode(
+                        image.getvalue() if isinstance(image, io.BytesIO) else image
+                    ).decode("utf-8")
+                    if image
+                    else ""
+                )
                 messages.append(
                     {
                         "type": "input_image",
@@ -75,30 +88,30 @@ async def openai_response(
     messages.append({"type": "input_text", "text": prompt})
     if use_web_search:
         response = await openai_client.responses.create(
-            model=model, input=[{"role": "user", "content": messages}],
-            tools=[{"type": "web_search_preview", "search_context_size": "low"}] + tools
+            model=model,
+            input=[{"role": "user", "content": messages}],
+            tools=[{"type": "web_search_preview", "search_context_size": "low"}]
+            + tools,
         )
         return response.output_text
     else:
         response = await openai_client.responses.create(
-            model=model, input=[{"role": "user", "content": messages}],
-            tools=tools
+            model=model, input=[{"role": "user", "content": messages}], tools=tools
         )
 
     return response.output_text
 
-async def openai_image_response(prompt:str, images:List[str] = [],timeout=200,model="gpt-image-1") -> bytes:
+
+async def openai_image_response(
+    prompt: str, images: List[str] = [], timeout=200, model="gpt-image-1"
+) -> bytes:
 
     if model == "dall-e-3":
         size = "1024x1024"
         quality = "hd"
 
         result = await openai_client.images.generate(
-            model=model,
-            prompt=prompt,
-            size = size,
-            quality=quality,
-            timeout=timeout
+            model=model, prompt=prompt, size=size, quality=quality, timeout=timeout
         )
         url = result.data[0].url
         image_bytes = await download_image(url)
@@ -107,23 +120,19 @@ async def openai_image_response(prompt:str, images:List[str] = [],timeout=200,mo
     else:
         size = "1024x1536"
         quality = "high"
-    
+
         if images:
             result = await openai_client.images.edit(
-            model=model,
-            prompt=prompt,
-            image=[open(image, "rb") for image in images],
-            size = size,
-            quality=quality,
-            timeout=timeout
+                model=model,
+                prompt=prompt,
+                image=[open(image, "rb") for image in images],
+                size=size,
+                quality=quality,
+                timeout=timeout,
             )
         else:
             result = await openai_client.images.generate(
-                model=model,
-                prompt=prompt,
-                size = size,
-                quality=quality,
-                timeout=timeout
+                model=model, prompt=prompt, size=size, quality=quality, timeout=timeout
             )
 
         image_base64 = result.data[0].b64_json
@@ -132,14 +141,19 @@ async def openai_image_response(prompt:str, images:List[str] = [],timeout=200,mo
         return image_bytes
 
 
-async def google_image_response(prompt:str,timeout=100,model="imagen-4.0-ultra-generate-preview-06-06") -> bytes:
-    response = await asyncio.wait_for(google_client.aio.models.generate_images(
-        model=model,
-        prompt=prompt,
-        config=types.GenerateImagesConfig(
-            number_of_images= 1,
-        )
-    ),timeout=timeout)
+async def google_image_response(
+    prompt: str, timeout=100, model="imagen-4.0-ultra-generate-preview-06-06"
+) -> bytes:
+    response = await asyncio.wait_for(
+        google_client.aio.models.generate_images(
+            model=model,
+            prompt=prompt,
+            config=types.GenerateImagesConfig(
+                number_of_images=1,
+            ),
+        ),
+        timeout=timeout,
+    )
     # Get the image (assuming it's a PIL Image object)
     if response.generated_images:
         image = response.generated_images[0].image
@@ -147,54 +161,58 @@ async def google_image_response(prompt:str,timeout=100,model="imagen-4.0-ultra-g
     else:
         return None
 
-async def flux_image_response(prompt:str,timeout=200,model="flux-pro-1.1-ultra") -> bytes:
+
+async def flux_image_response(
+    prompt: str, timeout=200, model="flux-pro-1.1-ultra"
+) -> bytes:
     async with httpx.AsyncClient() as client:
         response = await client.post(
-            f'https://api.bfl.ai/v1/{model}',
+            f"https://api.bfl.ai/v1/{model}",
             headers={
-                'accept': 'application/json',
-                'x-key': os.environ.get("FLUX_API_KEY"),
-                'Content-Type': 'application/json',
+                "accept": "application/json",
+                "x-key": os.environ.get("FLUX_API_KEY"),
+                "Content-Type": "application/json",
             },
-            json={
-                'prompt': prompt,
-                "aspect_ratio": "3:4"
-            },
-            timeout=timeout
+            json={"prompt": prompt, "aspect_ratio": "3:4"},
+            timeout=timeout,
         )
         request = response.json()
 
         request_id = request["id"]
         polling_url = request["polling_url"]
         while True:
-            await asyncio.sleep(1) 
+            await asyncio.sleep(1)
             response = await client.get(
                 polling_url,
                 headers={
-                    'accept': 'application/json',
-                    'x-key': os.getenv("FLUX_API_KEY"),
+                    "accept": "application/json",
+                    "x-key": os.getenv("FLUX_API_KEY"),
                 },
                 params={
-                    'id': request_id,
+                    "id": request_id,
                 },
-                timeout=timeout
+                timeout=timeout,
             )
             result = response.json()
 
             status = result["status"]
 
             if status == "Ready":
-                signed_url =  result['result']['sample']
+                signed_url = result["result"]["sample"]
                 break
             elif status in ["Error", "Failed"]:
                 logging.error(f"Generation failed: {result}")
                 raise Exception(f"Flux Generation failed: {result}")
-    
+
     image_bytes = await download_image(signed_url)
     return image_bytes.getvalue()
 
 
 if __name__ == "__main__":
-    image_bytes = asyncio.run(google_image_response("A cat on its back legs running like a human is holding a big silver fish with its arms. The cat is running away from the shop owner and has a panicked look on his face. The scene is situated in a crowded market."))
+    image_bytes = asyncio.run(
+        google_image_response(
+            "A cat on its back legs running like a human is holding a big silver fish with its arms. The cat is running away from the shop owner and has a panicked look on his face. The scene is situated in a crowded market."
+        )
+    )
     with open("./data_/google_image.png", "wb") as f:
         f.write(image_bytes)

@@ -283,16 +283,21 @@ thumbnail_template = {
     "template_type": "thumbnail",
     "text_template": TEXT_TEMPLATE,
     "slides": {
-        "headline_slide": {"html_template": HEADLINE_SLIDE_HTML_TEMPLATE, 
-                           "overlay_template": HEADLINE_SLIDE_OVERLAY_TEMPLATE,
-                           "text_json":{
-                                "name": "headline_slide",
-                                "image_description": "str",
-                                "text_template":{
-                                "headline": {"type":"text","tag":"h1","class":""},
-                                "subtext": {"type":"text","tag":"p","class":"subtext"},
-                                "is_trigger": {"type":"checkbox","html_snippet":"<p class='trigger-warning'>Trigger Warning</p>"}
-                                }
-                           }},
-    }
+        "headline_slide": {
+            "html_template": HEADLINE_SLIDE_HTML_TEMPLATE,
+            "overlay_template": HEADLINE_SLIDE_OVERLAY_TEMPLATE,
+            "text_json": {
+                "name": "headline_slide",
+                "image_description": "str",
+                "text_template": {
+                    "headline": {"type": "text", "tag": "h1", "class": ""},
+                    "subtext": {"type": "text", "tag": "p", "class": "subtext"},
+                    "is_trigger": {
+                        "type": "checkbox",
+                        "html_snippet": "<p class='trigger-warning'>Trigger Warning</p>",
+                    },
+                },
+            },
+        },
+    },
 }

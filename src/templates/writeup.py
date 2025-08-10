@@ -542,25 +542,32 @@ writeup_template = {
     "template_type": "writeup",
     "text_template": TEXT_TEMPLATE,
     "slides": {
-        "headline_slide": {"html_template": HEADLINE_SLIDE_HTML_TEMPLATE, 
-                           "overlay_template": HEADLINE_SLIDE_OVERLAY_TEMPLATE,
-                           "text_json":{
-                                "name": "headline_slide",
-                                "image_description": "str",
-                                "text_template":{
-                                "headline": {"type":"text","tag":"h1","class":""},
-                                "subtext": {"type":"text","tag":"p","class":"subtext"},
-                                "is_trigger": {"type":"checkbox","html_snippet":"<p class='trigger-warning'>Trigger Warning</p>"}
-                                }
-                           }},
-        "content_slide": {"html_template": CONTENT_SLIDE_HTML_TEMPLATE, 
-                           "overlay_template": CONTENT_SLIDE_OVERLAY_TEMPLATE,
-                           "text_json":{
-                                "name": "content_slide",
-                                "image_description": "str",
-                                "text_template":{
-                                "subtext": {"type":"text_area","tag":"p","class":"subtext"},
-                                }
-                           }},
-    }
+        "headline_slide": {
+            "html_template": HEADLINE_SLIDE_HTML_TEMPLATE,
+            "overlay_template": HEADLINE_SLIDE_OVERLAY_TEMPLATE,
+            "text_json": {
+                "name": "headline_slide",
+                "image_description": "str",
+                "text_template": {
+                    "headline": {"type": "text", "tag": "h1", "class": ""},
+                    "subtext": {"type": "text", "tag": "p", "class": "subtext"},
+                    "is_trigger": {
+                        "type": "checkbox",
+                        "html_snippet": "<p class='trigger-warning'>Trigger Warning</p>",
+                    },
+                },
+            },
+        },
+        "content_slide": {
+            "html_template": CONTENT_SLIDE_HTML_TEMPLATE,
+            "overlay_template": CONTENT_SLIDE_OVERLAY_TEMPLATE,
+            "text_json": {
+                "name": "content_slide",
+                "image_description": "str",
+                "text_template": {
+                    "subtext": {"type": "text_area", "tag": "p", "class": "subtext"},
+                },
+            },
+        },
+    },
 }

@@ -1249,60 +1249,100 @@ timeline_template = {
     "template_type": "timeline",
     "text_template": TEXT_TEMPLATE,
     "slides": {
-        "headline_slide": {"html_template": HEADLINE_SLIDE_OVERLAY_TEMPLATE, 
-                           "overlay_template": HEADLINE_SLIDE_OVERLAY_TEMPLATE,
-                           "text_json":{
-                                "name": "headline_slide",
-                                "image_description": "str",
-                                "text_template":{
-                                "first_line": {"type":"text","tag":"div","class":"first-line"},
-                                "highlight": {"type":"text","tag":"div","class":"highlight"},
-                                "sub_heading": {"type":"text","tag":"div","class":"sub-heading"}
-                                }
-                           }},
-        "timeline_start_slide": {"html_template":TIMELINE_START_SLIDE_TEMPLATE, 
-                                 "overlay_template": TIMELINE_START_SLIDE_OVERLAY_TEMPLATE,
-                                 "text_json":{
-                                    "name": "timeline_start_slide",
-                                    "image_description": "str",
-                                    "text_template":{
-                                        "timeline_highlight": {"type":"text","tag":"div","class":"timeline-highlight"},
-                                        "body_text": {"type":"text_area","tag":"p","class":"body-text"}
-                                    }
-                                }},
-        "timeline_middle_slide": {"html_template": TIMELINE_MIDDLE_SLIDE_OVERLAY_TEMPLATE, 
-                                 "overlay_template": TIMELINE_MIDDLE_SLIDE_OVERLAY_TEMPLATE,
-                                 "text_json":{
-                                    "name": "timeline_middle_slide",
-                                    "image_description": "str",
-                                    "text_template":{
-                                        "timeline_highlight": {"type":"text","tag":"div","class":"timeline-highlight"},
-                                        "body_text": {"type":"text_area","tag":"p","class":"body-text"}
-                                    }
-                                }},
-        "timeline_end_slide": {"html_template": TIMELINE_END_SLIDE_OVERLAY_TEMPLATE, 
-                                 "overlay_template": TIMELINE_END_SLIDE_OVERLAY_TEMPLATE,
-                                 "text_json":{
-                                    "name": "timeline_end_slide",
-                                    "image_description": "str",
-                                    "text_template":{
-                                        "timeline_highlight": {"type":"text","tag":"div","class":"timeline-highlight"},
-                                        "body_text": {"type":"text_area","tag":"p","class":"body-text"}
-                                    }
-                                }},
-        }
+        "headline_slide": {
+            "html_template": HEADLINE_SLIDE_OVERLAY_TEMPLATE,
+            "overlay_template": HEADLINE_SLIDE_OVERLAY_TEMPLATE,
+            "text_json": {
+                "name": "headline_slide",
+                "image_description": "str",
+                "text_template": {
+                    "first_line": {"type": "text", "tag": "div", "class": "first-line"},
+                    "highlight": {"type": "text", "tag": "div", "class": "highlight"},
+                    "sub_heading": {
+                        "type": "text",
+                        "tag": "div",
+                        "class": "sub-heading",
+                    },
+                },
+            },
+        },
+        "timeline_start_slide": {
+            "html_template": TIMELINE_START_SLIDE_TEMPLATE,
+            "overlay_template": TIMELINE_START_SLIDE_OVERLAY_TEMPLATE,
+            "text_json": {
+                "name": "timeline_start_slide",
+                "image_description": "str",
+                "text_template": {
+                    "timeline_highlight": {
+                        "type": "text",
+                        "tag": "div",
+                        "class": "timeline-highlight",
+                    },
+                    "body_text": {
+                        "type": "text_area",
+                        "tag": "p",
+                        "class": "body-text",
+                    },
+                },
+            },
+        },
+        "timeline_middle_slide": {
+            "html_template": TIMELINE_MIDDLE_SLIDE_OVERLAY_TEMPLATE,
+            "overlay_template": TIMELINE_MIDDLE_SLIDE_OVERLAY_TEMPLATE,
+            "text_json": {
+                "name": "timeline_middle_slide",
+                "image_description": "str",
+                "text_template": {
+                    "timeline_highlight": {
+                        "type": "text",
+                        "tag": "div",
+                        "class": "timeline-highlight",
+                    },
+                    "body_text": {
+                        "type": "text_area",
+                        "tag": "p",
+                        "class": "body-text",
+                    },
+                },
+            },
+        },
+        "timeline_end_slide": {
+            "html_template": TIMELINE_END_SLIDE_OVERLAY_TEMPLATE,
+            "overlay_template": TIMELINE_END_SLIDE_OVERLAY_TEMPLATE,
+            "text_json": {
+                "name": "timeline_end_slide",
+                "image_description": "str",
+                "text_template": {
+                    "timeline_highlight": {
+                        "type": "text",
+                        "tag": "div",
+                        "class": "timeline-highlight",
+                    },
+                    "body_text": {
+                        "type": "text_area",
+                        "tag": "p",
+                        "class": "body-text",
+                    },
+                },
+            },
+        },
+    },
 }
 
 if __name__ == "__main__":
     text = {
-            "name": "headline_slide",
-            "image_description": "Wreckage of Air India Flight 171 at crash site",
-            "text_template": {
-                "first_line": "<div class=\"first-line\">Air India Flight 171 Tragedy</div>",
-                "highlight": "<div class=\"highlight\">Catastrophic Crash After Takeoff</div>",
-                "sub_heading": "<div class=\"sub-heading\">A Timeline of the Fateful Events</div>"
-            }
-        }
+        "name": "headline_slide",
+        "image_description": "Wreckage of Air India Flight 171 at crash site",
+        "text_template": {
+            "first_line": '<div class="first-line">Air India Flight 171 Tragedy</div>',
+            "highlight": '<div class="highlight">Catastrophic Crash After Takeoff</div>',
+            "sub_heading": '<div class="sub-heading">A Timeline of the Fateful Events</div>',
+        },
+    }
 
     with open("./data_/bleh_4.html", "w") as f:
-        f.write(HEADLINE_SLIDE_HTML_TEMPLATE.format(file_path="./test.png", **text['text_template']))
+        f.write(
+            HEADLINE_SLIDE_HTML_TEMPLATE.format(
+                file_path="./test.png", **text["text_template"]
+            )
+        )

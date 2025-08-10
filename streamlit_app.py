@@ -11,11 +11,12 @@ st.set_page_config(
     page_title="Scoopwhoop Post Generator",
     page_icon="🎨",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="expanded",
 )
 
 # Custom CSS for loading states
-st.markdown("""
+st.markdown(
+    """
 <style>
 /* Loading overlay styles */
 .loading-overlay {
@@ -55,32 +56,36 @@ st.markdown("""
 /* Style the sidebar */
 .css-1d391kg { background-color: #f8f9fa; }
 </style>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
+
 
 def main():
     # Sidebar navigation
     st.sidebar.title("🎨 Post Generator")
     st.sidebar.markdown("---")
-    
+
     # Navigation
     page = st.sidebar.selectbox(
         "Choose a page:",
         ["Generate Posts", "Post Editor", "History"],
-        key="page_selector"
+        key="page_selector",
     )
-    
+
     st.sidebar.markdown("---")
     st.sidebar.markdown("### About")
     st.sidebar.markdown("Generate social media posts from reference images using AI.")
-    
+
     # Route to appropriate page
     if page == "Generate Posts":
-        
+
         show_generate_page()
     elif page == "Post Editor":
         show_post_editor_page()
     elif page == "History":
         show_history_page()
 
+
 if __name__ == "__main__":
-    main() 
+    main()
