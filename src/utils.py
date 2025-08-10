@@ -5,11 +5,8 @@ import logging
 import os
 from typing import List
 import io
-import uuid
-import shutil
-import base64
 
-from PIL import Image
+from PIL import Image, ImageDraw
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from bs4 import BeautifulSoup
@@ -17,6 +14,8 @@ from bs4 import BeautifulSoup
 
 logger = logging.getLogger(__name__)
 
+
+## General Utils
 def extract_x(response: str, code_type: str) -> str:
     pattern = rf"```{code_type}\s*(.*?)```"
     match = re.search(pattern, response, re.DOTALL)
@@ -35,6 +34,8 @@ def cleanup_files(file_paths: List[str]) -> None:
         except Exception as e:
             logger.warning(f"Failed to delete file {file_path}: {e}")
 
+
+## Image Utils
 def capture_html_screenshot(
     file_path: str,
     element_selector: str,
@@ -155,51 +156,49 @@ def crop_image(
 
     return buffer.getvalue()
 
-def convert_simple_text_to_html(headline_text, subtext_text):
-    """Convert simple text with **text** syntax to styled HTML"""
-    try:
-        # Process headline
-        headline_lines = headline_text.strip().split('\n')
-        headline_html_parts = []
-        
-        for line in headline_lines:
-            line = line.strip()
-            if line:
-                # Replace **text** syntax with yellow spans
-                processed_line = re.sub(
-                    r'\*\*([^*]+?)\*\*', 
-                    r'<span class="yellow">\1</span>', 
-                    line
-                )
-                headline_html_parts.append(processed_line)
-        
-        # Join with <br /> tags
-        headline_html = f"<h1>\n    {('<br />').join(headline_html_parts)}\n</h1>"
-        
-        # Process sub-text
-        subtext_lines = subtext_text.strip().split('\n')
-        subtext_html_parts = []
-        
-        for line in subtext_lines:
-            line = line.strip()
-            if line:
-                # Replace **text** syntax with yellow spans
-                processed_line = re.sub(
-                    r'\*\*([^*]+?)\*\*', 
-                    r'<span class="yellow">\1</span>', 
-                    line
-                )
-                subtext_html_parts.append(processed_line)
-        
-        # Join with <br /> tags
-        subtext_html = f"<p class='subtext'>{('<br />').join(subtext_html_parts)}</p>"
-        
-        return headline_html, subtext_html
-        
-    except Exception as e:
-        logger.error(f"Error converting simple text to HTML: {e}")
-        return f"<h1>{headline_text}</h1>", f"<p>{subtext_text}</p>"
+def create_gradient_overlay(width:int, height:int, gradient_height_ratio:float=0.35) -> Image:
+    """
+    Create a gradient overlay image that's transparent at top and black at bottom
+    """
+    gradient_height = int(height * gradient_height_ratio)
+    img = Image.new('RGBA', (width, height), (0, 0, 0, 0))
+    
+    for y in range(gradient_height):
+        alpha = int(y*1.7)
+        draw = ImageDraw.Draw(img)
+        y_pos = height - gradient_height + y
+        draw.line([(0, y_pos), (width, y_pos)], fill=(0, 0, 0, alpha))
+    
+    return img
 
+def process_overlay_for_transparency(image_path:str, session_id:str, target_width:int=576, target_height:int=720) -> str:
+    """
+    Process overlay image to make black areas transparent
+    """
+    try:
+        img = Image.open(image_path).convert("RGBA")
+        pixels = img.getdata()
+        new_pixels = []
+
+        for pixel in pixels:
+            r, g, b, a = pixel
+            if r == 0 and g == 0 and b == 0:
+                new_pixels.append((255, 255, 255, 0))  # Make black transparent
+            else:
+                new_pixels.append(pixel)
+
+        img.putdata(new_pixels)
+        resized_img = img.resize((target_width, target_height), Image.Resampling.LANCZOS)
+        output_path = f"./data/scoopwhoop/temp/processed_overlay_{session_id}.png"
+        resized_img.save(output_path, format="PNG")
+        return output_path
+    
+    except Exception as e:
+        logger.error(f"Error processing overlay image Error: {e}")
+        return None
+
+
+## Text-Html Utils
 def extract_text_from_html(html_content):
     """Extract clean text from HTML content, converting spans to **text** syntax"""
     try:
@@ -214,11 +213,29 @@ def extract_text_from_html(html_content):
         return text
     except Exception as e:
         logger.error(f"Error extracting text from HTML: {e}")
-        return "", ""
+        return ""
+
+def convert_text_to_html(tag:str, class_name:str, text:str) -> str:
+    """
+    Build HTML for a text element
+    """
+    text_lines = text.strip().split("\n")
+    html_parts = []
+    for line in text_lines:
+        line = line.strip()
+        if line:
+            processed_line = re.sub(
+                r'\*\*([^*]+?)\*\*', 
+                r'<span class="yellow">\1</span>', 
+                line
+            )
+            html_parts.append(processed_line)
+    
+    return f"<{tag} class='{class_name}'>{('<br />').join(html_parts)}</{tag}>"
 
 
 if __name__ == "__main__":
-    print(convert_simple_text_to_html("""POV: When Your **Wallet** has more **Personality** than **Money**""","UPI Id in the description, please **gib money**")[1])
+    pass
     # # with open("./data_/test_cropped.png","wb") as f:
     # #     f.write(crop_image(image_bytes=open("./data_/test.png","rb").read(),bias=0.5))
     # capture_html_screenshot(file_path="./data_/overlay_test.html",element_selector=".container",output="./data_/test_out.png",delay=0.1,headless=True)
