@@ -1,5 +1,5 @@
 TEMPLATE_DESCRIPTION = """
-Write Ups : This ScoopWhoop template uses a bold, eye-catching design to present engaging narratives in a snackable, multi-slide format for social media. It pairs strong imagery with large, highlighted text to quickly tell a story and is aimed at a young audience that consumes content on the go.
+Write Ups : This ScoopWhoop template uses a bold, eye-catching design to present engaging narratives in a snackable, multi-slide format for social media. It pairs strong imagery with large, highlighted text to quickly tell a story and is aimed at a young audience that consumes content on the go. The source should only be used if the post or the news is not from ScoopWhoop.
 NOTE: 3-5 slides is the maximum number of slides you can have.
 """
 
@@ -25,6 +25,9 @@ This template has the following slides/sections:
   - is_trigger: Use when explicit/graphic visuals are required for the post.
     If required, use <p class='trigger-warning'>Trigger Warning</p> else fill "".
 
+  - source: A p tag with classname-"source" for the source of the post.
+    Ex: <p class="source">Source: TOI</p>
+
   ### Text Input:
     {{
       "name": "headline_slide",
@@ -32,7 +35,8 @@ This template has the following slides/sections:
       "text_template":{{
       "headline": "<html_snippet_code>",
       "subtext": "<html_snippet_code>",
-      "is_trigger": "<html_snippet_code>"
+      "is_trigger": "<html_snippet_code>",
+      "source": "<html_snippet_code>"
       }}
     }}
 
@@ -42,6 +46,7 @@ This template has the following slides/sections:
   - Have visuals that directly complement and reinforce the text content
   - Maintain a clear narrative flow from the headline slide
   - Use engaging language while staying informative
+  - The source should only be used if the post or the news is not from ScoopWhoop.
   The goal is to tell a compelling story through a balanced mix of visuals and text, without overwhelming the viewer with too much information at once.
   
   ### Attributes:
@@ -50,6 +55,9 @@ This template has the following slides/sections:
   
   - subtext: Use this tag to write content using p tags. use class yellow to highlight sentences.
     EX: <p class="subtext"><span class="yellow">A 'voter rights yatra' is planned from August17</span>, aiming to rally support and spotlight the claims.</p>
+  
+  - source: A p tag with classname-"source" for the source of the post.
+    Ex: <p class="source">Source: TOI</p>
 
   ### Text Input:
     {{
@@ -57,6 +65,7 @@ This template has the following slides/sections:
       "image_description": "str",
       "text_template":{{
       "subtext": "<html_snippet_code>",
+      "source": "<html_snippet_code>"
       }}
     }}
 
@@ -183,6 +192,7 @@ HEADLINE_SLIDE_HTML_TEMPLATE = """
           {is_trigger}
           {headline}
           {subtext}
+          {source}
         </div>
       </div>
     </div>
@@ -305,6 +315,7 @@ HEADLINE_SLIDE_OVERLAY_TEMPLATE = """
           {is_trigger}
           {headline}
           {subtext}
+          {source}
         </div>
       </div>
     </div>
@@ -426,6 +437,7 @@ CONTENT_SLIDE_HTML_TEMPLATE = """
         <div class="blue-bar"></div>
         <div class="text-content">
           {subtext}
+          {source}
         </div>
       </div>
     </div>
@@ -547,6 +559,7 @@ CONTENT_SLIDE_OVERLAY_TEMPLATE = """
         <div class="blue-bar"></div>
         <div class="text-content">
           {subtext}
+          {source}
         </div>
       </div>
     </div>
@@ -572,6 +585,7 @@ writeup_template = {
                         "type": "checkbox",
                         "html_snippet": "<p class='trigger-warning'>Trigger Warning</p>",
                     },
+                    "source": {"type": "text", "tag": "p", "class": "source"},
                 },
             },
         },
@@ -583,6 +597,7 @@ writeup_template = {
                 "image_description": "str",
                 "text_template": {
                     "subtext": {"type": "text_area", "tag": "p", "class": "subtext"},
+                    "source": {"type": "text", "tag": "p", "class": "source"},
                 },
             },
         },

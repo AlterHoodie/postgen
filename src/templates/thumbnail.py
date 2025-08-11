@@ -1,5 +1,6 @@
 TEMPLATE_DESCRIPTION = """
 Thumbnail: This ScoopWhoop template creates eye-catching thumbnail images for social media posts. It combines a striking background image with bold, highlighted text overlays to grab attention and drive engagement. The thumbnail should capture the essence of the story while remaining visually appealing and readable at smaller sizes.
+The source should only be used if the post or the news is not from ScoopWhoop.
 NOTE: Only one slide is required for this template.
 """
 
@@ -22,6 +23,9 @@ Thumbnail Slide:
   
   - is_trigger: Use when explicit/graphic visuals are required for the post.
     If required, use <p class='trigger-warning'>Trigger Warning</p> else fill "".
+  
+  - source: A p tag with classname-"source" for the source of the post.
+    Ex: <p class="source">Source: TOI</p>
 
   ### Text Input:
     {{
@@ -30,7 +34,8 @@ Thumbnail Slide:
       "text_template":{{
       "headline": "<html_snippet_code>",
       "subtext": "<html_snippet_code>",
-      "is_trigger": "<html_snippet_code>"
+      "is_trigger": "<html_snippet_code>",
+      "source": "<html_snippet_code>"
       }}
     }}
 
@@ -157,6 +162,7 @@ HEADLINE_SLIDE_HTML_TEMPLATE = """
           {is_trigger}
           {headline}
           {subtext}
+          {source}
         </div>
       </div>
     </div>
@@ -279,6 +285,7 @@ HEADLINE_SLIDE_OVERLAY_TEMPLATE = """
           {is_trigger}
           {headline}
           {subtext}
+          {source}
         </div>
       </div>
     </div>
@@ -304,6 +311,7 @@ thumbnail_template = {
                         "type": "checkbox",
                         "html_snippet": "<p class='trigger-warning'>Trigger Warning</p>",
                     },
+                    "source": {"type": "text", "tag": "p", "class": "source"},
                 },
             },
         },
