@@ -159,6 +159,7 @@ HEADLINE_SLIDE_HTML_TEMPLATE = """
       }}
       .text-content .subtext {{
         margin: 5px 0 0;
+        font-weight: 500;
         font-size: 2.5em; /* Increased font size */
       }}
       .text-content .subtext .yellow {{
@@ -283,6 +284,7 @@ HEADLINE_SLIDE_OVERLAY_TEMPLATE = """
       }}
       .text-content .subtext {{
         margin: 5px 0 0;
+        font-weight: 500;
         font-size: 2.5em; /* Increased font size */
       }}
       .text-content .subtext .yellow {{
@@ -406,6 +408,7 @@ CONTENT_SLIDE_HTML_TEMPLATE = """
       }}
       .text-content .subtext {{
         margin: 5px 0 0;
+        font-weight: 500;
         font-size: 2.5em; /* Increased font size */
       }}
       .text-content .subtext .yellow {{
@@ -529,6 +532,7 @@ CONTENT_SLIDE_OVERLAY_TEMPLATE = """
       }}
       .text-content .subtext {{
         margin: 5px 0 0;
+        font-weight: 500;
         font-size: 2.5em; /* Increased font size */
       }}
       .text-content .subtext .yellow {{

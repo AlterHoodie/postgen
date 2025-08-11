@@ -128,6 +128,7 @@ HEADLINE_SLIDE_HTML_TEMPLATE = """
         color: #FBE10A;
       }}
       .text-content .subtext {{
+        font-weight: 500;
         margin: 5px 0 0;
         font-size: 2.5em; /* Increased font size */
       }}
@@ -252,6 +253,7 @@ HEADLINE_SLIDE_OVERLAY_TEMPLATE = """
         color: #FBE10A;
       }}
       .text-content .subtext {{
+        font-weight: 500;
         margin: 5px 0 0;
         font-size: 2.5em; /* Increased font size */
       }}
