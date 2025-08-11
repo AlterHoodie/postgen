@@ -170,7 +170,7 @@ async def workflow(headline: str, template: dict, save: bool = True) -> str:
             
             # Run each slide in its own thread
             loop = asyncio.get_event_loop()
-            with ThreadPoolExecutor(max_workers=5) as executor:
+            with ThreadPoolExecutor(max_workers=3) as executor:
                 tasks = [loop.run_in_executor(executor, create_slide, slide) for slide in slides]
                 try:
                     results = await asyncio.wait_for(asyncio.gather(*tasks, return_exceptions=True), timeout=300) # 5 min timeout
