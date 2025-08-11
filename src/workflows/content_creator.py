@@ -172,7 +172,11 @@ async def workflow(headline: str, template: dict, save: bool = True) -> str:
             loop = asyncio.get_event_loop()
             with ThreadPoolExecutor(max_workers=5) as executor:
                 tasks = [loop.run_in_executor(executor, create_slide, slide) for slide in slides]
-                results = await asyncio.gather(*tasks, return_exceptions=True)
+                try:
+                    results = await asyncio.wait_for(asyncio.gather(*tasks, return_exceptions=True), timeout=300) # 5 min timeout
+                except asyncio.TimeoutError:
+                    logger.error("Slide generation timed out after 5 minutes")
+                    results = [TimeoutError(f"Slide {i} timed out") for i in range(len(slides))]
                 
                 # Handle failures
                 slide_results = []

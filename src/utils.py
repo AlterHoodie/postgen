@@ -184,7 +184,7 @@ def create_gradient_overlay(
     img = Image.new("RGBA", (width, height), (0, 0, 0, 0))
 
     for y in range(gradient_height):
-        alpha = int(y * 1.7)
+        alpha = int(y * 1.2)
         draw = ImageDraw.Draw(img)
         y_pos = height - gradient_height + y
         draw.line([(0, y_pos), (width, y_pos)], fill=(0, 0, 0, alpha))

@@ -90,8 +90,8 @@ def _create_final_video(
     video_path: str,
     overlay_image_path: str,
     session_id: str,
-    target_width: int = 576,
-    target_height: int = 720,
+    target_width: int = 1080,
+    target_height: int = 1350,
     add_gradient: bool = True,
 ) -> Tuple[bytes, str]:
     """
@@ -218,8 +218,8 @@ def video_editor(video_bytes: bytes, text_template: dict, html_template: str) ->
         processed_overlay_path = process_overlay_for_transparency(
             image_path=overlay_image_path,
             session_id=session_id,
-            target_width=576,
-            target_height=720,
+            target_width=1080,
+            target_height=1350,
         )
 
         # Step 4: Create the final video (576x720)
@@ -228,8 +228,8 @@ def video_editor(video_bytes: bytes, text_template: dict, html_template: str) ->
             overlay_image_path=processed_overlay_path,
             session_id=session_id,
             add_gradient=True,
-            target_width=576,
-            target_height=720,
+            target_width=1080,
+            target_height=1350,
         )
         temp_files.extend(video_temp_files)
 

@@ -103,7 +103,8 @@ JSON_DESCRIPTION = """
     }
 """
 
-HEADLINE_SLIDE_TEMPLATE = """<!DOCTYPE html>
+HEADLINE_SLIDE_TEMPLATE = """
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -166,7 +167,7 @@ HEADLINE_SLIDE_TEMPLATE = """<!DOCTYPE html>
         font-size: 110px;
         font-weight: 590;
         line-height: 1.2;
-        display: inline-block;
+        display: block; /* Changed from inline-block */
         transform: scaleY(1.1);
       }}
 
@@ -175,11 +176,15 @@ HEADLINE_SLIDE_TEMPLATE = """<!DOCTYPE html>
         color: black;
         padding: 5px 20px 0px 20px;
         font-size: 110px;
-        display: inline-block;
-        /* margin-top: 2px; Closer to the first line */
+        display: block; /* Changed from inline-block */
         font-weight: 590;
         line-height: 1.2;
         transform: scaleY(1.1);
+        /* The following properties help to center the block and fit the background to the text */
+        margin-left: auto;
+        margin-right: auto;
+        width: -moz-fit-content;
+        width: fit-content;
       }}
 
       .dashed-line {{
@@ -204,9 +209,14 @@ HEADLINE_SLIDE_TEMPLATE = """<!DOCTYPE html>
         font-weight: 700;
         font-size: 32px;
         padding: 8px 40px;
-        display: inline-block;
+        display: block; /* Changed from inline-block */
         border-radius: 3px;
         letter-spacing: 0px;
+        /* The following properties help to center the block and fit the background to the text */
+        margin-left: auto;
+        margin-right: auto;
+        width: -moz-fit-content;
+        width: fit-content;
       }}
     </style>
   </head>
@@ -290,7 +300,7 @@ HEADLINE_SLIDE_OVERLAY_TEMPLATE = """
         font-size: 110px;
         font-weight: 590;
         line-height: 1.2;
-        display: inline-block;
+        display: block; /* Changed from inline-block */
         transform: scaleY(1.1);
       }}
 
@@ -299,11 +309,15 @@ HEADLINE_SLIDE_OVERLAY_TEMPLATE = """
         color: black;
         padding: 5px 20px 0px 20px;
         font-size: 110px;
-        display: inline-block;
-        /* margin-top: 2px; Closer to the first line */
+        display: block; /* Changed from inline-block */
         font-weight: 590;
         line-height: 1.2;
         transform: scaleY(1.1);
+        /* The following properties help to center the block and fit the background to the text */
+        margin-left: auto;
+        margin-right: auto;
+        width: -moz-fit-content;
+        width: fit-content;
       }}
 
       .dashed-line {{
@@ -317,6 +331,10 @@ HEADLINE_SLIDE_OVERLAY_TEMPLATE = """
         );
       }}
 
+      .yellow {{
+        color: #FBE10A;
+      }}
+
       .sub-heading {{
         background-color: white;
         color: black;
@@ -324,9 +342,14 @@ HEADLINE_SLIDE_OVERLAY_TEMPLATE = """
         font-weight: 700;
         font-size: 32px;
         padding: 8px 40px;
-        display: inline-block;
+        display: block; /* Changed from inline-block */
         border-radius: 3px;
         letter-spacing: 0px;
+        /* The following properties help to center the block and fit the background to the text */
+        margin-left: auto;
+        margin-right: auto;
+        width: -moz-fit-content;
+        width: fit-content;
       }}
     </style>
   </head>
@@ -1383,17 +1406,18 @@ timeline_template = {
 
 if __name__ == "__main__":
     text = {
-        "name": "timeline_middle_slide",
+        "name": "timeline_headline_slide",
         "image_description": "Wreckage of Air India Flight 171 at crash site",
         "text_template": {
-            "timeline_highlight": '<div class="timeline-highlight">10:30 PM, 9TH JUNE</div>',
-            "body_text": '<div class="body-text">A Timeline of the Fateful Events Lorem ipsum dolor sit amet consectetur adipisicing elit. Perferendis, reiciendis. loremLorem ipsum dolor sit amet consectetur adipisicing elit. Perferendis, reiciendis. loremLorem ipsum dolor sit amet consectetur adipisicing elit. Perferendis, reiciendis. loremLorem ipsum dolor sit amet consectetur adipisicing elit. Perferendis, reiciendis. loremLorem ipsum dolor sit amet consectetur adipisicing elit. Perferendis, reiciendis. lorem</div>',
+            "first_line": "<div class='first-line'>Test</div>",
+            "highlight": "<div class='highlight'>Test</div>",
+            "sub_heading": "<div class='sub-heading'>Test Sub Heading</div>",
         },
     }
 
-    with open("./data_/bleh_6.html", "w") as f:
+    with open("./data_/bleh_7.html", "w") as f:
         f.write(
-            TIMELINE_END_SLIDE_TEMPLATE.format(
+            HEADLINE_SLIDE_TEMPLATE.format(
                 file_path="./test.png", **text["text_template"]
             )
         )

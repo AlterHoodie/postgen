@@ -214,7 +214,7 @@ async def image_search_agent(query: str, reference_image: bytes = None) -> List[
 
         # Step 4: Filter out low-quality images (score < 6)
         filtered_images = [
-            img for img in downloaded_images if img.get("score", 0) >= 0.6
+            img for img in downloaded_images if img.get("score", 0) >= 0.4
         ]
         logger.info(f"Filtered images: {len(filtered_images)}")
         if not filtered_images:

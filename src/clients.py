@@ -15,7 +15,7 @@ from google.genai import types
 load_dotenv(override=True)
 logging.basicConfig(level=logging.INFO)
 
-openai_client = openai.AsyncClient(api_key=os.getenv("OPENAI_API_KEY"))
+openai_client = openai.AsyncClient(api_key=os.getenv("OPENAI_API_KEY"), timeout=150)
 google_client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY"))
 
 
@@ -92,6 +92,7 @@ async def openai_response(
             input=[{"role": "user", "content": messages}],
             tools=[{"type": "web_search_preview", "search_context_size": "low"}]
             + tools,
+            timeout=150,
         )
         return response.output_text
     else:
@@ -103,7 +104,7 @@ async def openai_response(
 
 
 async def openai_image_response(
-    prompt: str, images: List[str] = [], timeout=200, model="gpt-image-1"
+    prompt: str, images: List[str] = [], timeout=150, model="gpt-image-1"
 ) -> bytes:
 
     if model == "dall-e-3":
