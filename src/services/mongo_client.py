@@ -128,7 +128,7 @@ class SimpleMongoClient:
     def get_recent_workflows(self, limit: int = 10) -> List[Dict]:
         """Get recent workflow results"""
         pipeline = [
-            # {"$sort": {"created_at": -1}},
+            {"$sort": {"created_at": -1}},
             {"$limit": limit}
         ]
 
