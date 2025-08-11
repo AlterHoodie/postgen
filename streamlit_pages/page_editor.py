@@ -76,7 +76,19 @@ def show_post_editor_page():
     """Simple post editor with image/video upload, template selection, and slide editing"""
     st.title("✏️ Post Editor")
     st.markdown("Create posts with your own images/videos")
+    
+    # Add tabs for different editor types
+    tab1, tab2 = st.tabs(["📷 Image/Video Editor", "📝 Text-Only Editor"])
+    
+    with tab1:
+        show_media_editor()
+    
+    with tab2:
+        show_text_only_editor()
 
+
+def show_media_editor():
+    """Media editor for image/video uploads"""
     # Step 1: Upload Media
     uploaded_file = st.file_uploader(
         "Choose an image or video file",
@@ -129,6 +141,7 @@ def show_post_editor_page():
 
     template_key = template_options[selected_template]
     template_config = get_template_config(template_key)
+
 
     slides = list(template_config["slides"].keys())
     selected_slide = st.selectbox(
@@ -240,3 +253,98 @@ def initialize_slide_fields(slide_config: Dict) -> Dict:
                 fields[field_name] = ""
 
     return fields
+
+
+def show_text_only_editor():
+    """Simple text-only editor for templates that don't need uploaded images"""
+    
+    # Template selection - only text_based for now
+    text_only_template_config = get_template_config("text_based")
+    
+    # Get the slide (text_based only has one slide)
+    slide_name = "text_based_slide"
+    
+    # Initialize session state for text-only editor
+    if "text_only_data" not in st.session_state:
+        st.session_state.text_only_data = initialize_slide_fields(
+            text_only_template_config["slides"][slide_name]
+        )
+    
+    # Create the form
+    col1, col2 = st.columns([1, 1])
+    
+    with col1:
+        st.markdown("**Create Text-Based Post:**")
+        
+        # Create a simple form for text-based template
+        with st.form(key="text_only_form"):
+            text_input = {}
+            st.info("Use \*\*<text>\*\* for highlighting text in Yellow.")
+            
+            # Get text template config
+            text_json = text_only_template_config["slides"][slide_name]["text_json"]
+            
+            for field_name, config in text_json.get("text_template", {}).items():
+                display_name = field_name.replace("_", " ").title()
+                
+                if config.get("type") == "dropdown":
+                    text_input[field_name] = st.selectbox(
+                        f"{display_name}:",
+                        options=config.get("values", []),
+                        index=0 if config.get("values") else 0
+                    )
+                elif config.get("type") == "text_area":
+                    text_input[field_name] = st.text_area(
+                        f"{display_name}:",
+                        value=st.session_state.text_only_data.get(field_name, ""),
+                        help="Use <span class=\"yellow\">text</span> for highlighting"
+                    )
+                elif config.get("type") == "text":
+                    text_input[field_name] = st.text_input(
+                        f"{display_name}:",
+                        value=st.session_state.text_only_data.get(field_name, ""),
+                        help="Use <span class=\"yellow\">text</span> for highlighting"
+                    )
+                elif config.get("type") == "dropdown":
+                    text_input[field_name] = st.selectbox(
+                        f"{display_name}:",
+                        options=config.get("values", []),
+                        index=0 if config.get("values") else 0
+                    )
+            
+            submitted = st.form_submit_button("Generate Image", type="primary")
+            
+            if submitted:
+                try:
+                    # Generate the image using text_editor
+                    new_image_bytes = text_editor(
+                        text_only_template_config, slide_name, text_input
+                    )
+                    
+                    if new_image_bytes:
+                        st.session_state.text_only_data.update(text_input)
+                        st.session_state.text_only_data["generated_image"] = new_image_bytes
+                        st.success("✅ Image generated!")
+                    else:
+                        st.error("Failed to generate image")
+                        
+                except Exception as e:
+                    st.error(f"Error: {e}")
+    
+    with col2:
+        st.markdown("**Preview:**")
+        
+        if "generated_image" in st.session_state.text_only_data:
+            image_bytes = st.session_state.text_only_data["generated_image"]
+            st.image(image_bytes, width=500)
+            
+            # Download button
+            st.download_button(
+                label="📥 Download Image",
+                data=image_bytes,
+                file_name="text_based_post.png",
+                mime="image/png",
+                use_container_width=True,
+            )
+        else:
+            st.info("👆 Fill out the form and click 'Generate Image' to see preview")

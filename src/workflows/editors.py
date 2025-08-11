@@ -31,15 +31,22 @@ def image_editor(image_bytes: bytes, text_template: dict, html_template: str) ->
         temp_files = []
         session_id = str(uuid.uuid4())[:8]
 
-        input_image_name = f"input_image_{session_id}.png"
-        input_image_path = f"./data/scoopwhoop/temp/{input_image_name}"
-        with open(input_image_path, "wb") as f:
-            f.write(image_bytes)
-
-        temp_files.append(input_image_path)
+        # Check if this is a text-based template (no file_path in template)
+        is_text_based = "{file_path}" not in html_template
+        
+        if not is_text_based:
+            # Regular image template - save uploaded image
+            input_image_name = f"input_image_{session_id}.png"
+            input_image_path = f"./data/scoopwhoop/temp/{input_image_name}"
+            with open(input_image_path, "wb") as f:
+                f.write(image_bytes)
+            temp_files.append(input_image_path)
+            html_content = html_template.format(file_path=input_image_name, **text_template)
+        else:
+            # Text-based template - no uploaded image needed
+            html_content = html_template.format(**text_template)
 
         html_path = f"./data/scoopwhoop/temp/temp_overlay_{session_id}.html"
-        html_content = html_template.format(file_path=input_image_name, **text_template)
         with open(html_path, "w", encoding="utf-8") as f:
             f.write(html_content)
 
@@ -256,7 +263,7 @@ def text_editor(
     template: dict,
     slide_name: str,
     text_input: dict,
-    content_bytes: bytes,
+    content_bytes: bytes = None,
     is_video: bool = False,
 ) -> bytes:
     """
@@ -280,6 +287,9 @@ def text_editor(
             )
         elif template_config["type"] == "checkbox":
             text_template[key] = template_config["html_snippet"] if value else ""
+        elif template_config["type"] == "dropdown":
+            # For dropdown fields, use the value directly (e.g., logo file paths)
+            text_template[key] = value
 
     if is_video:
         new_content_bytes = video_editor(
@@ -298,19 +308,22 @@ def text_editor(
 
 # Test function for development
 if __name__ == "__main__":
-    from src.templates.writeup import writeup_template
+    from src.templates.text_based import text_based_template
 
     ## Test Image Workflow
-    with open("./data_/2.mp4", "rb") as f:
-        video_bytes = f.read()
+    # with open("./data_/2.mp4", "rb") as f:
+    #     video_bytes = f.read()
     result = text_editor(
-        writeup_template,
-        "content_slide",
+        text_based_template,
+        "text_based_slide",
         {
-            "subtext": "No more **snail mail**—India Post goes digital. A **smarter era begins**."
+            "logo_image": "logo_1.png",
+            "background_image": "black_background.png",
+            "headline": "<h1>IPL just doesn't seem that <span class=\"yellow\">exciting</span> anymore.</h1>",
+            "subtext": "<p class=\"subtext\">And then I realized mummy <br/> hamesha last mai kyun khaati thi.</p>"
         },
-        video_bytes,
-        is_video=True,
+        content_bytes=None,
+        is_video=False,
     )
-    with open("./data_/test_out.mp4", "wb") as f:
+    with open("./data_/test_out.png", "wb") as f:
         f.write(result)
