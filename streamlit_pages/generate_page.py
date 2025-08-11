@@ -197,7 +197,7 @@ def show_content_results(session_id: str):
                                     key=f"download_without_{session_id}_{selected_slide_idx}_{tab_idx}",
                                 )
                             except Exception as e:
-                                st.error(f"Failed to load image without text: {e}")
+                                st.error(f"Failed to load image without text")
 
                         with col2:
                             st.markdown("**With Text Overlay**")
@@ -246,7 +246,7 @@ def show_content_results(session_id: str):
                                         key=f"download_with_{session_id}_{selected_slide_idx}_{tab_idx}",
                                     )
                                 except Exception as e:
-                                    st.error(f"Failed to load image with text: {e}")
+                                    st.error(f"Failed to load image with text")
 
                             # Text editor section
                             st.markdown("---")
@@ -290,7 +290,7 @@ def show_content_results(session_id: str):
                                         st.rerun()
 
                                 except Exception as e:
-                                    st.error(f"Text editor error: {e}")
+                                    st.error(f"No image to edit")
                             else:
                                 st.info(
                                     "Text editing not available for this slide type"

@@ -139,6 +139,7 @@ Image Resolution: {}
 - Primary Criteria: 
   - How relevant the image is to the Query and the reference image.
   - Images must be **free of any text**, watermarks etc. 
+  - STRICTLY NO AI GENERATED IMAGES.
   NOTE: This rule can be broken if the image is an official poster or teaser of the movie.
   - Images must be **Instagram-worthy** (aesthetic appeal, good lighting, visually engaging)
 - Secondary Criteria: 

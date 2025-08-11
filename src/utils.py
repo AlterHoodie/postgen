@@ -42,7 +42,7 @@ def capture_html_screenshot(
     element_selector: str,
     output: str = "./data/scoopwhoop/element_screenshot.png",
     zoom: float = 1.0,
-    delay: float = 0.2,
+    delay: float = 0.6,
     headless: bool = True,
 ):
     file_url = Path(file_path).resolve().as_uri()

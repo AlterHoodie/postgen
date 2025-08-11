@@ -8,6 +8,7 @@ TEMPLATE_DESCRIPTION = """
 *   Pay close attention to the word and line count limits for each field.
 *   Image descriptions should be concise yet evocative, suitable for an AI image generator.
 *   Ensure all text is proofread and fits the narrative context of a timeline.
+*   body_text should not be more than 2-3 lines of content [This is so that the text does not overflow the timeline slide]
 NOTE:
 * Use Date and Time in the format of "Time, Date" (e.g., `10:30 PM, 9TH JUNE`), To explain each event in the timeline.
 - 3-6 slides is the maximum number of slides you can have.
@@ -20,7 +21,8 @@ JSON_DESCRIPTION = """
 *   **Purpose:** The opening slide of the storyboard. It must be eye-catching and create a strong first impression of the story.
 
 ### Attributes:
-*   **`image_description`:** A clear, one-line description of the desired background image. Focus on the mood, subject, and style. (e.g., "A dramatic, wide-angle shot of a crowded city street at night").
+*   **`image_description`:** A clear, one-line description of the desired background image that captures the mood, subject and style - for example, a movie headline could reference the official poster, key actors or set photos, while news stories should focus on actual event stills and photos.
+(e.g., "Special Ops 2025 India Poster", "Rahul Gandhi's Speech Portrait Shot").
 *   **`first_line`:** The main headline of the story. Must be a powerful statement of **no more than 3-4 words**.
     *   **Format:** `<div class="first-line">YOUR HEADLINE HERE</div>`
 *   **`highlight`:** The highlighted keyword or phrase of the headline. Must be **no more than 3-4 words**.
@@ -43,10 +45,11 @@ JSON_DESCRIPTION = """
 *   **Purpose:** This slide marks the first event or the beginning of the chronological sequence.
 
 ### Attributes:
-*   **`image_description`:** A one-line description of an image relevant to this specific event in the timeline.
+*   **`image_description`:** A clear, one-line description of the desired background image that captures the mood, subject and style - for example, a movie headline could reference the official poster, key actors or set photos, while news stories should focus on actual event stills and photos.
+(e.g., "Special Ops 2025 India Poster", "Rahul Gandhi's Speech Portrait Shot").
 *   **`timeline_highlight`:** The timestamp for the event. **Must be in a "Time, Date" format** (e.g., `10:30 PM, 9TH JUNE`). This field should only contain the time and date.
     *   **Format:** `<div class="timeline-highlight">10:30 PM, 9TH JUNE</div>`
-*   **`body_text`:** The main descriptive text for this event. Expand on the story in **4-5 lines**, explaining what happened at this point in time.
+*   **`body_text`:** The main descriptive text for this event. Expand on the story in **2-3 lines** not more than that, explaining what happened at this point in time.
     *   **Format:** `<p class="body-text">Your full body text goes here...</p>`
 
 ### Text Input Structure:
@@ -66,7 +69,7 @@ JSON_DESCRIPTION = """
 *   **`image_description`:** A one-line description of an image relevant to this specific event in the timeline.
 *   **`timeline_highlight`:** The timestamp for the event. **Must be in a "Time, Date" format** (e.g., `11:00 PM, 9TH JUNE`). This field should only contain the time and date.
     *   **Format:** `<div class="timeline-highlight">11:00 PM, 9TH JUNE</div>`
-*   **`body_text`:** The main descriptive text for this event. Expand on the story in **4-5 lines**, explaining what happened at this point in time.
+*   **`body_text`:** The main descriptive text for this event. Expand on the story in **2-3 lines** not more than that, explaining what happened at this point in time.
     *   **Format:** `<p class="body-text">Your full body text goes here...</p>`
 
 ### Text Input Structure:
@@ -86,7 +89,7 @@ JSON_DESCRIPTION = """
 *   **`image_description`:** A one-line description of an image relevant to this final event in the timeline.
 *   **`timeline_highlight`:** The timestamp for the final event. **Must be in a "Time, Date" format** (e.g., `1:30 AM, 10TH JUNE`). This field should only contain the time and date.
     *   **Format:** `<div class="timeline-highlight">1:30 AM, 10TH JUNE</div>`
-*   **`body_text`:** The main descriptive text for this final event. Expand on the story's conclusion in **4-5 lines**.
+*   **`body_text`:** The main descriptive text for this final event. Expand on the story's conclusion in **2-3 lines** not more than that.
     *   **Format:** `<p class="body-text">Your full body text goes here...</p>`
 
 ### Text Input Structure:
