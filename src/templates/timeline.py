@@ -400,9 +400,13 @@ TIMELINE_START_SLIDE_TEMPLATE = """
           rgba(0, 0, 0, 0.5) 70%,
           rgba(0, 0, 0, 0) 100%
         );
-        padding: 70px 80px 20px 80px;
+        padding: 40px 80px 20px 80px;
         color: white;
         text-align: center;
+         /* --- FIX STARTS HERE --- */
+        height: 550px; /* This gives the overlay a fixed height. */
+        box-sizing: border-box; /* This ensures padding is included in the height calculation, not added to it. */
+        /* --- FIX ENDS HERE --- */
       }}
 
       /* --- MODULAR TIMELINE STYLES START --- */
@@ -470,7 +474,7 @@ TIMELINE_START_SLIDE_TEMPLATE = """
       .body-text {{
         font-family: "Golos Text", sans-serif;
         font-weight: 400;
-        font-size: 38px;
+        font-size: 34px;
         line-height: 1.4;
         text-align: center;
         margin-top: 40px;
@@ -513,7 +517,7 @@ TIMELINE_START_SLIDE_OVERLAY_TEMPLATE = """
         padding: 0;
         height: 100%;
         font-family: "Bebas Neue", sans-serif;
-        background-color: #000000;
+        background-color: #f0f0f0;
       }}
 
       .container {{
@@ -555,9 +559,13 @@ TIMELINE_START_SLIDE_OVERLAY_TEMPLATE = """
           rgba(0, 0, 0, 0.5) 70%,
           rgba(0, 0, 0, 0) 100%
         );
-        padding: 70px 80px 20px 80px;
+        padding: 40px 80px 20px 80px;
         color: white;
         text-align: center;
+         /* --- FIX STARTS HERE --- */
+        height: 550px; /* This gives the overlay a fixed height. */
+        box-sizing: border-box; /* This ensures padding is included in the height calculation, not added to it. */
+        /* --- FIX ENDS HERE --- */
       }}
 
       /* --- MODULAR TIMELINE STYLES START --- */
@@ -604,9 +612,6 @@ TIMELINE_START_SLIDE_OVERLAY_TEMPLATE = """
         height: 50px; /* Length of the connector line */
         background-color: #fbe10a;
       }}
-      .yellow {{
-        color: #FBE10A;
-      }}
 
       /* --- MODULAR TIMELINE STYLES END --- */
 
@@ -622,11 +627,13 @@ TIMELINE_START_SLIDE_OVERLAY_TEMPLATE = """
         /* line-height: 1.1; */
         transform: scaleY(1.1);
       }}
-
+      .yellow {{
+        color: #FBE10A;
+      }}
       .body-text {{
         font-family: "Golos Text", sans-serif;
         font-weight: 400;
-        font-size: 38px;
+        font-size: 34px;
         line-height: 1.4;
         text-align: center;
         margin-top: 40px;
@@ -710,9 +717,13 @@ TIMELINE_MIDDLE_SLIDE_TEMPLATE = """
           rgba(0, 0, 0, 0.5) 70%,
           rgba(0, 0, 0, 0) 100%
         );
-        padding: 70px 80px 20px 80px;
+        padding: 40px 80px 20px 80px;
         color: white;
         text-align: center;
+         /* --- FIX STARTS HERE --- */
+        height: 550px; /* This gives the overlay a fixed height. */
+        box-sizing: border-box; /* This ensures padding is included in the height calculation, not added to it. */
+        /* --- FIX ENDS HERE --- */
       }}
 
       /* --- MODULAR TIMELINE STYLES START --- */
@@ -780,7 +791,7 @@ TIMELINE_MIDDLE_SLIDE_TEMPLATE = """
       .body-text {{
         font-family: "Golos Text", sans-serif;
         font-weight: 400;
-        font-size: 38px;
+        font-size: 34px;
         line-height: 1.4;
         text-align: center;
         margin-top: 40px;
@@ -823,7 +834,7 @@ TIMELINE_MIDDLE_SLIDE_OVERLAY_TEMPLATE = """
         padding: 0;
         height: 100%;
         font-family: "Bebas Neue", sans-serif;
-        background-color: #000000;
+        background-color: #f0f0f0;
       }}
 
       .container {{
@@ -865,9 +876,13 @@ TIMELINE_MIDDLE_SLIDE_OVERLAY_TEMPLATE = """
           rgba(0, 0, 0, 0.5) 70%,
           rgba(0, 0, 0, 0) 100%
         );
-        padding: 70px 80px 20px 80px;
+        padding: 40px 80px 20px 80px;
         color: white;
         text-align: center;
+         /* --- FIX STARTS HERE --- */
+        height: 550px; /* This gives the overlay a fixed height. */
+        box-sizing: border-box; /* This ensures padding is included in the height calculation, not added to it. */
+        /* --- FIX ENDS HERE --- */
       }}
 
       /* --- MODULAR TIMELINE STYLES START --- */
@@ -914,9 +929,6 @@ TIMELINE_MIDDLE_SLIDE_OVERLAY_TEMPLATE = """
         height: 50px; /* Length of the connector line */
         background-color: #fbe10a;
       }}
-      .yellow {{
-        color: #FBE10A;
-      }}
 
       /* --- MODULAR TIMELINE STYLES END --- */
 
@@ -932,11 +944,13 @@ TIMELINE_MIDDLE_SLIDE_OVERLAY_TEMPLATE = """
         /* line-height: 1.1; */
         transform: scaleY(1.1);
       }}
-
+      .yellow {{
+        color: #FBE10A;
+      }}
       .body-text {{
         font-family: "Golos Text", sans-serif;
         font-weight: 400;
-        font-size: 38px;
+        font-size: 34px;
         line-height: 1.4;
         text-align: center;
         margin-top: 40px;
@@ -1020,9 +1034,13 @@ TIMELINE_END_SLIDE_TEMPLATE = """
           rgba(0, 0, 0, 0.5) 70%,
           rgba(0, 0, 0, 0) 100%
         );
-        padding: 70px 80px 20px 80px;
+        padding: 40px 80px 20px 80px;
         color: white;
         text-align: center;
+         /* --- FIX STARTS HERE --- */
+        height: 550px; /* This gives the overlay a fixed height. */
+        box-sizing: border-box; /* This ensures padding is included in the height calculation, not added to it. */
+        /* --- FIX ENDS HERE --- */
       }}
 
       /* --- MODULAR TIMELINE STYLES START --- */
@@ -1070,10 +1088,6 @@ TIMELINE_END_SLIDE_TEMPLATE = """
         background-color: #fbe10a;
       }}
 
-      .yellow {{
-        color: #FBE10A;
-      }}
-
       /* --- MODULAR TIMELINE STYLES END --- */
 
       .timeline-highlight {{
@@ -1088,11 +1102,13 @@ TIMELINE_END_SLIDE_TEMPLATE = """
         /* line-height: 1.1; */
         transform: scaleY(1.1);
       }}
-
+      .yellow {{
+        color: #FBE10A;
+      }}
       .body-text {{
         font-family: "Golos Text", sans-serif;
         font-weight: 400;
-        font-size: 38px;
+        font-size: 34px;
         line-height: 1.4;
         text-align: center;
         margin-top: 40px;
@@ -1135,7 +1151,7 @@ TIMELINE_END_SLIDE_OVERLAY_TEMPLATE = """
         padding: 0;
         height: 100%;
         font-family: "Bebas Neue", sans-serif;
-        background-color: #000000;
+        background-color: #f0f0f0;
       }}
 
       .container {{
@@ -1177,13 +1193,13 @@ TIMELINE_END_SLIDE_OVERLAY_TEMPLATE = """
           rgba(0, 0, 0, 0.5) 70%,
           rgba(0, 0, 0, 0) 100%
         );
-        padding: 70px 80px 20px 80px;
+        padding: 40px 80px 20px 80px;
         color: white;
         text-align: center;
-      }}
-
-      .yellow {{
-        color: #FBE10A;
+         /* --- FIX STARTS HERE --- */
+        height: 550px; /* This gives the overlay a fixed height. */
+        box-sizing: border-box; /* This ensures padding is included in the height calculation, not added to it. */
+        /* --- FIX ENDS HERE --- */
       }}
 
       /* --- MODULAR TIMELINE STYLES START --- */
@@ -1245,11 +1261,13 @@ TIMELINE_END_SLIDE_OVERLAY_TEMPLATE = """
         /* line-height: 1.1; */
         transform: scaleY(1.1);
       }}
-
+      .yellow {{
+        color: #FBE10A;
+      }}
       .body-text {{
         font-family: "Golos Text", sans-serif;
         font-weight: 400;
-        font-size: 38px;
+        font-size: 34px;
         line-height: 1.4;
         text-align: center;
         margin-top: 40px;
@@ -1263,9 +1281,9 @@ TIMELINE_END_SLIDE_OVERLAY_TEMPLATE = """
       <div class="text-overlay">
         <!-- MODIFIED TIMELINE STRUCTURE -->
         <div class="timeline-track">
-          <div class="line"></div>
-          <div class="circle"></div>
           <div class="no_line"></div>
+          <div class="circle"></div>
+          <div class="line"></div>
         </div>
         {timeline_highlight}
         {body_text}
@@ -1362,18 +1380,17 @@ timeline_template = {
 
 if __name__ == "__main__":
     text = {
-        "name": "headline_slide",
+        "name": "timeline_middle_slide",
         "image_description": "Wreckage of Air India Flight 171 at crash site",
         "text_template": {
-            "first_line": '<div class="first-line">Air India Flight 171 Tragedy</div>',
-            "highlight": '<div class="highlight">Catastrophic Crash After Takeoff</div>',
-            "sub_heading": '<div class="sub-heading">A Timeline of the Fateful Events</div>',
+            "timeline_highlight": '<div class="timeline-highlight">10:30 PM, 9TH JUNE</div>',
+            "body_text": '<div class="body-text">A Timeline of the Fateful Events Lorem ipsum dolor sit amet consectetur adipisicing elit. Perferendis, reiciendis. loremLorem ipsum dolor sit amet consectetur adipisicing elit. Perferendis, reiciendis. loremLorem ipsum dolor sit amet consectetur adipisicing elit. Perferendis, reiciendis. loremLorem ipsum dolor sit amet consectetur adipisicing elit. Perferendis, reiciendis. loremLorem ipsum dolor sit amet consectetur adipisicing elit. Perferendis, reiciendis. lorem</div>',
         },
     }
 
-    with open("./data_/bleh_4.html", "w") as f:
+    with open("./data_/bleh_6.html", "w") as f:
         f.write(
-            HEADLINE_SLIDE_TEMPLATE.format(
+            TIMELINE_END_SLIDE_TEMPLATE.format(
                 file_path="./test.png", **text["text_template"]
             )
         )

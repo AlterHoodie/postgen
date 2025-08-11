@@ -226,7 +226,7 @@ async def image_search_agent(query: str, reference_image: bytes = None) -> List[
         # Step 5: Select top 5 images based on score
         top_image = sorted(
             filtered_images, key=lambda x: x.get("score", 0), reverse=True
-        )[:1]
+        )[:3]
 
         if not top_image:
             logger.error("No images could be processed")
