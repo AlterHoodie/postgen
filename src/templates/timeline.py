@@ -1334,7 +1334,7 @@ timeline_template = {
                     "first_line": {"type": "text", "tag": "div", "class": "first-line"},
                     "highlight": {"type": "text", "tag": "div", "class": "highlight"},
                     "sub_heading": {
-                        "type": "text",
+                        "type": "text_area",
                         "tag": "div",
                         "class": "sub-heading",
                     },
