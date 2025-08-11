@@ -52,6 +52,9 @@ def capture_html_screenshot(
         options.add_argument("--headless=new")
     options.add_argument("--hide-scrollbars")
     options.add_argument("--window-size=1920,2000")
+    options.add_argument("--disable-gpu")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
 
     driver = webdriver.Chrome(options=options)
     try:

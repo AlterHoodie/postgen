@@ -32,7 +32,7 @@ def text_editor_form(
     text_json = template["slides"][slide_name]["text_json"]
     with st.form(key=form_key):
         text_input = {}
-        st.info("Use \*\*<text>\*\* for highlighting text in Yellow.")
+        st.info("Use ****<text>**** for highlighting text in Yellow.")
         # Create inputs based on text_json
         for field_name, config in text_json.get("text_template", {}).items():
             display_name = field_name.replace("_", " ").title()
