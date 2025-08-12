@@ -1,10 +1,13 @@
-import streamlit as st
-import asyncio
+import logging
 from pathlib import Path
+
+import streamlit as st
 
 from streamlit_pages.generate_page import show_generate_page
 from streamlit_pages.page_editor import show_post_editor_page
 from streamlit_pages.history_page import show_history_page
+from streamlit_pages.sources_page import show_sources_page
+from src.workflows.sources import start_background_daemon, get_daemon_status
 
 # Configure page
 st.set_page_config(
@@ -13,6 +16,8 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded",
 )
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Custom CSS for loading states
 st.markdown(
@@ -61,7 +66,17 @@ st.markdown(
 )
 
 
+@st.cache_resource
+def start_daemon_on_server_startup():
+    """Start the background daemon when server starts - runs only once."""
+    daemon = start_background_daemon()
+    logger.info("Background sources daemon started! 🚀")
+    return daemon
+
 def main():
+    # ⚡ Start daemon when server starts (runs only once)
+    start_daemon_on_server_startup()
+    
     # Sidebar navigation
     st.sidebar.title("🎨 Post Generator")
     st.sidebar.markdown("---")
@@ -69,7 +84,7 @@ def main():
     # Navigation
     page = st.sidebar.selectbox(
         "Choose a page:",
-        ["Generate Posts", "Post Editor", "History"],
+        ["Generate Posts", "Post Editor", "History", "Sources"],
         key="page_selector",
     )
 
@@ -79,12 +94,13 @@ def main():
 
     # Route to appropriate page
     if page == "Generate Posts":
-
         show_generate_page()
     elif page == "Post Editor":
         show_post_editor_page()
     elif page == "History":
         show_history_page()
+    elif page == "Sources":
+        show_sources_page()
 
 
 if __name__ == "__main__":

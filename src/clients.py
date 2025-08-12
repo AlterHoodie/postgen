@@ -4,7 +4,6 @@ import os
 from dotenv import load_dotenv
 import logging
 import io
-import time
 import asyncio
 
 import httpx
@@ -17,6 +16,33 @@ logging.basicConfig(level=logging.INFO)
 
 openai_client = openai.AsyncClient(api_key=os.getenv("OPENAI_API_KEY"), timeout=150)
 google_client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY"))
+
+
+def sync_download_image(image_url: str) -> io.BytesIO:
+    """
+    Download image from URL and return as BytesIO object
+    Returns the image data as BytesIO object if it's a valid image
+    """
+    try:
+        with httpx.Client() as client:
+            response = client.get(image_url, timeout=10)
+            response.raise_for_status()
+
+            # Check if content type is an image
+            content_type = response.headers.get("content-type", "").lower()
+            if not content_type.startswith("image/"):
+                logging.warning(
+                    f"URL does not return an image content type: {content_type} for {image_url}"
+                )
+                return None
+
+            # Create BytesIO object with image data
+            image_data = io.BytesIO(response.content)
+            image_data.name = "image.jpg"  # Default name
+            return image_data
+    except Exception as e:
+        logging.error(f"Failed to download image {image_url}: {e}")
+        return None
 
 
 async def download_image(image_url: str) -> io.BytesIO:

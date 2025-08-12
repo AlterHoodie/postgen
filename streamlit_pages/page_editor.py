@@ -47,7 +47,7 @@ def text_editor_form(
                     value=extract_text_from_html(text_values.get(field_name,"")),
                 )
             elif config.get("type") == "text":
-                text_input[field_name] = st.text_input(
+                text_input[field_name] = st.text_area(
                     f"{display_name}:",
                     value=extract_text_from_html(text_values.get(field_name,"")),
                 )

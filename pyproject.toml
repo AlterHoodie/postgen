@@ -19,5 +19,6 @@ dependencies = [
     "playwright>=1.54.0",
     "pymongo>=4.6.1",
     "selenium>=4.34.2",
+    "serpapi>=0.1.5",
     "streamlit>=1.28.0",
 ]

@@ -23,6 +23,7 @@ class SimpleMongoClient:
         self.client = MongoClient(mongo_uri)
         self.db = self.client[database_name]
         self.collection = self.db.ig_posts
+        self.sources_collection = self.db.sources
 
     def _encode_image_to_base64(self, image_bytes: bytes) -> str:
         """Convert image file to base64 string"""
@@ -243,6 +244,89 @@ class SimpleMongoClient:
         )
 
         return results
+
+    # Sources collection methods
+    def get_latest_sources(self, limit: int = 10) -> List[Dict]:
+        """Get latest sources from sources collection"""
+        try:
+            pipeline = [
+                {"$sort": {"taken_at": -1}},
+                {"$limit": limit}
+            ]
+            
+            documents = list(self.sources_collection.aggregate(pipeline, allowDiskUse=True))
+            
+            # Convert ObjectIds to strings
+            for doc in documents:
+                doc["_id"] = str(doc["_id"])
+            
+            logger.info(f"Retrieved {len(documents)} latest sources")
+            return documents
+        except Exception as e:
+            logger.error(f"Error retrieving latest sources: {e}")
+            return []
+
+    def get_latest_source_timestamp(self) -> Optional[int]:
+        """Get the latest timestamp from sources collection"""
+        try:
+            latest_doc = self.sources_collection.find_one(
+                {}, 
+                sort=[("taken_at", -1)]
+            )
+            if latest_doc:
+                timestamp = latest_doc.get("taken_at")
+                logger.info(f"Latest source timestamp: {timestamp}")
+                return timestamp
+            else:
+                logger.info("No sources found in collection")
+                return None
+        except Exception as e:
+            logger.error(f"Error getting latest timestamp: {e}")
+            return None
+
+    def add_sources(self, posts: List[Dict]) -> List[str]:
+        """Add multiple Instagram posts to sources collection"""
+        if not posts:
+            logger.info("No posts to add")
+            return []
+        
+        try:
+            # Add metadata to each post
+            for post in posts:
+                post["added_at"] = datetime.now()
+                post["source"] = "instagram"
+            
+            # Insert posts, handling duplicates
+            inserted_ids = []
+            for post in posts:
+                try:
+                    # Use code as unique identifier to avoid duplicates
+                    existing = self.sources_collection.find_one({"code": post["code"]})
+                    if not existing:
+                        result = self.sources_collection.insert_one(post)
+                        inserted_ids.append(str(result.inserted_id))
+                        logger.info(f"Added post with code: {post['code']}")
+                    else:
+                        logger.info(f"Post with code {post['code']} already exists, skipping")
+                except Exception as e:
+                    logger.error(f"Error inserting post {post.get('code', 'unknown')}: {e}")
+                    continue
+            
+            logger.info(f"Successfully added {len(inserted_ids)} new posts to sources")
+            return inserted_ids
+        except Exception as e:
+            logger.error(f"Error adding sources: {e}")
+            return []
+
+    def get_sources_count(self) -> int:
+        """Get total count of sources in collection"""
+        try:
+            count = self.sources_collection.count_documents({})
+            logger.info(f"Total sources count: {count}")
+            return count
+        except Exception as e:
+            logger.error(f"Error getting sources count: {e}")
+            return 0
 
     def close(self):
         """Close MongoDB connection"""
