@@ -101,7 +101,7 @@ def display_history():
         total_slides = workflow_result.get("total_slides", 0)
 
         with st.expander(
-            f"🎬 {headline} - {template_type.title()} ({total_slides} slides) - "
+            f"🎬 {headline[:500]} - {template_type.title()} ({total_slides} slides) - "
             f"{format_date(workflow_result.get('created_at'))}",
             expanded=(i == 0),
         ):

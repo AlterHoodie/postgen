@@ -16,10 +16,7 @@ from streamlit_pages.page_editor import text_editor_form
 
 def show_sources_page():
     """Display sources management page with original images and generation form."""
-    st.title("📊 Instagram Sources Management")
-    
-    # Sources Collection Summary
-    st.subheader("📚 Sources Collection")
+    st.title("📊 Instagram Sources")
     
     summary = get_sources_summary(limit=10)
     
