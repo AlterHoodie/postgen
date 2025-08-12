@@ -282,6 +282,7 @@ def show_content_results(session_id: str):
                                         template=template,
                                         slide_name=slide_name,
                                         form_key=f"edit_form_{session_id}_{selected_slide_idx}_{tab_idx}",
+                                        show_image_upload=True
                                     )
 
                                     if submitted and new_image:

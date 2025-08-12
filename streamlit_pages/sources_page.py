@@ -6,6 +6,7 @@ import time
 
 import streamlit as st
 import pandas as pd
+import pytz
 
 from src.workflows.sources import get_sources_summary
 from src.services.mongo_client import get_mongo_client
@@ -32,7 +33,7 @@ def show_sources_page():
     
     with col2:
         if summary["latest_timestamp"]:
-            latest_dt = datetime.fromtimestamp(summary["latest_timestamp"])
+            latest_dt = datetime.fromtimestamp(summary["latest_timestamp"],tz=pytz.timezone("Asia/Kolkata"))
             st.metric("Latest Post", latest_dt.strftime("%Y-%m-%d %H:%M"))
         else:
             st.metric("Latest Post", "None")
@@ -352,6 +353,7 @@ def show_generation_results(session_key: str, container_key: str):
                                             template=template,
                                             slide_name=slide_name,
                                             form_key=f"edit_form_{container_key}_{selected_slide_idx}_{tab_idx}",
+                                            show_image_upload=True
                                         )
                                         
                                         if submitted and new_image:

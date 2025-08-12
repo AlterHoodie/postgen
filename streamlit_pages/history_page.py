@@ -251,6 +251,7 @@ def display_content_workflow(workflow_result):
                                     template=template,
                                     slide_name=slide_name,
                                     form_key=f"history_edit_form_{session_id}_{selected_slide_idx}_{tab_idx}",
+                                    show_image_upload=True
                                 )
 
                                 if new_image[0]:  # new_image is a tuple (bytes, bool)

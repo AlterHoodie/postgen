@@ -15,6 +15,7 @@ def text_editor_form(
     slide_name: str,
     form_key: str,
     is_video: bool = False,
+    show_image_upload: bool = False,
 ) -> Tuple[bytes, bool]:
     """
     Simple Streamlit form for text editing using text_editor from editors.py
@@ -32,7 +33,31 @@ def text_editor_form(
     text_json = template["slides"][slide_name]["text_json"]
     with st.form(key=form_key):
         text_input = {}
+        custom_content_bytes = content_bytes
         st.info("Use \*\*<text>\*\* for highlighting text in Yellow.")
+        if show_image_upload:
+            uploaded_image = st.file_uploader(
+                "Upload your own background image",
+                type=["png", "jpg", "jpeg"],
+                help="If you upload an image, it will be used instead of the generated background",
+                key=f"{form_key}_image_upload"
+            )
+            
+            # Choose which image to use
+            use_uploaded = uploaded_image is not None
+            if use_uploaded:
+                try:
+                    custom_content_bytes = uploaded_image.getvalue()
+                    st.success("✅ Custom image uploaded! It will be used as background.")
+                except Exception as e:
+                    st.error(f"Error reading uploaded image: {e}")
+                    use_uploaded = False
+                    custom_content_bytes = content_bytes
+            else:
+                custom_content_bytes = content_bytes
+            
+            st.markdown("---")
+        
         # Create inputs based on text_json
         for field_name, config in text_json.get("text_template", {}).items():
             display_name = field_name.replace("_", " ").title()
@@ -58,11 +83,11 @@ def text_editor_form(
             try:
                 if is_video:
                     new_image_bytes = text_editor(
-                        template, slide_name, text_input, content_bytes, is_video=True
+                        template, slide_name, text_input, custom_content_bytes, is_video=True
                     )
                 else:
                     new_image_bytes = text_editor(
-                        template, slide_name, text_input, content_bytes
+                        template, slide_name, text_input, custom_content_bytes
                     )
                 return new_image_bytes, True
             except Exception as e:
