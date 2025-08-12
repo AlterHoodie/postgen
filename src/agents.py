@@ -39,10 +39,15 @@ async def content_research_agent(headline: str, template: str) -> dict:
     return response
 
 
-async def story_board_generator(headline: str, research_result: str, template: str) -> dict:
+async def story_board_generator(headline: str, research_result: str, template: str,image_bytes: bytes) -> dict:
     prompt = STORY_BOARD_PROMPT.format(headline, research_result, template)
-    response = await openai_response(
-        prompt=prompt, model="gpt-4.1"
+    if image_bytes:
+        response = await openai_response(
+            prompt=prompt, model="gpt-4.1",images=[image_bytes],type="bytes"
+        )
+    else:
+        response = await openai_response(
+            prompt=prompt, model="gpt-4.1"
     )
     return json.loads(extract_x(response, "json"))
 

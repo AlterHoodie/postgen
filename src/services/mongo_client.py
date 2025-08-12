@@ -295,6 +295,7 @@ class SimpleMongoClient:
             for post in posts:
                 post["added_at"] = datetime.now()
                 post["source"] = "instagram"
+                post['media_bytes']['image_bytes'] = self._encode_image_to_base64(post['media_bytes']['image_bytes'])
             
             # Insert posts, handling duplicates
             inserted_ids = []

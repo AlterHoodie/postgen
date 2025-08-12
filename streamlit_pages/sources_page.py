@@ -63,22 +63,18 @@ def show_sources_page():
                     st.caption(f"❤️ {post.get('like_count', 0)} likes | 💬 {post.get('comment_count', 0)} comments")
                     
                     # Display original Instagram media (first item only)
-                    media_list = post.get("media_list", [])
-                    if media_list:
-                        # Show only the first media item
-                        first_media = media_list[0]
-                        media_url = first_media.get("url")
-                        media_type = first_media.get("type")
+                    media = post.get("media_bytes", "")
+                    if media:
+                        image_bytes = base64.b64decode(media.get("image_bytes"))
+                        media_type = media.get("type")
                         
-                        if media_url:
-                            # Show media info
-                            st.caption(f"📷 {media_type.title()}")
+                        if image_bytes:
                             if media_type == "image" or media_type == "thumbnail":
-                                st.image(media_url, width=400)
+                                st.image(image_bytes, width=400)
                             elif media_type == "video":
-                                st.video(media_url)
+                                st.video(image_bytes)
                         else:
-                            st.warning("No media URL available")
+                            st.warning("No media available")
                     else:
                         # Show post info without media
                         st.info("No media available for this post")

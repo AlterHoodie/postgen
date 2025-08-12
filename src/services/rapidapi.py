@@ -159,9 +159,9 @@ def extract_instagram_post_data(posts_data: List[dict]) -> List[dict]:
             image_data = sync_download_image(img_data["url"])
             if image_data:
                 post_info["media_bytes"] = {
-                    "type": post_info["type"],
+                    "type": img_data["type"],
                     "url": img_data["url"],
-                    "image_bytes": image_data
+                    "image_bytes": image_data.read()
                 }
                 break
         
@@ -239,7 +239,7 @@ if __name__ == "__main__":
     # Test case 2: Get posts after a specific timestamp (e.g., 7 days ago)
     print("\n=== Test 2: Posts after timestamp ===")
     seven_days_ago = int(time.time()) - (2*60 * 60) # 7 days ago
-    recent_posts = get_latest_instagram_post(page_name, last_created_at=seven_days_ago, n_posts=20)
+    recent_posts = get_latest_instagram_post(page_name, last_created_at=seven_days_ago, n_posts=10)
     print(f"Found {len(recent_posts)}")
     
     if recent_posts:

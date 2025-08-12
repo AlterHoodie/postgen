@@ -12,7 +12,7 @@ from src.workflows.image_gen import fetch_multiple_images, generate_single_image
 logger = logging.getLogger(__name__)
 
 
-async def story_board_creator(headline: str, text_template: str) -> Dict:
+async def story_board_creator(headline: str, text_template: str,image_bytes: bytes) -> Dict:
     """Generate story board from headline and template"""
     try:
         # Research the headline
@@ -26,7 +26,8 @@ async def story_board_creator(headline: str, text_template: str) -> Dict:
         story_board = await story_board_generator(
             headline=headline,
             research_result=research_result, 
-            template=template_context
+            template=template_context,
+            image_bytes=image_bytes
         )
 
         slide_count = len(story_board.get('storyboard', []))
@@ -149,14 +150,14 @@ async def save_to_mongo(session_id: str, headline: str, template_type: str,
         raise
 
 
-async def workflow(headline: str, template: dict, save: bool = True) -> str:
+async def workflow(headline: str, template: dict,image_bytes: bytes = None, save: bool = True) -> str:
     """Main workflow function that creates content and optionally saves to MongoDB"""
     session_id = str(uuid.uuid4())[:8]
 
     try:
         # Generate story board
         story_board = await story_board_creator(
-            headline=headline, text_template=template["text_template"]
+            headline=headline, text_template=template["text_template"],image_bytes=image_bytes
         )
 
         # Generate all slides in parallel using threads
