@@ -75,7 +75,7 @@ def start_daemon_on_server_startup():
 
 def main():
     # ⚡ Start daemon when server starts (runs only once)
-    start_daemon_on_server_startup()
+    # start_daemon_on_server_startup()
     
     # Sidebar navigation
     st.sidebar.title("🎨 Post Generator")

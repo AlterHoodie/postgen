@@ -27,6 +27,8 @@ def cleanup_files(file_paths: List[str]) -> None:
     # print(file_paths)
     for file_path in file_paths:
         try:
+            if not file_path:
+                continue
             if os.path.exists(file_path):
                 if "logo.png" in file_path:
                     continue

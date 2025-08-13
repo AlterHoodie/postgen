@@ -99,7 +99,9 @@ def _create_final_video(
     session_id: str,
     target_width: int = 1080,
     target_height: int = 1350,
+    offset: int = 0,
     add_gradient: bool = True,
+    crop_type: str = "fill",
 ) -> Tuple[bytes, str]:
     """
     Create final video with fixed size scaling to 576x720
@@ -122,17 +124,29 @@ def _create_final_video(
             crop_height = int(crop_width / target_ratio)
 
         # Crop to 4:5 ratio first
-        cropped_clip = video_clip.cropped(
-            width=crop_width,
-            height=crop_height,
-            x_center=original_width / 2,
-            y_center=original_height / 2,
-        )
-
-        # STEP 2: Scale to exact target dimensions (576x720)
-        final_clip = cropped_clip.resized((target_width, target_height))
-
-        # Create list of clips to composite
+        if crop_type == "fill":
+            cropped_clip = video_clip.cropped(
+                width=crop_width,
+                height=crop_height,
+                x_center=original_width / 2,
+                y_center=original_height / 2,
+            )
+            final_clip = cropped_clip.resized((target_width, target_height))
+        else:   
+            # Use padding to preserve aspect ratio
+            scale_w = target_width / original_width
+            scale_h = target_height / original_height
+            scale = min(scale_w, scale_h)  # Use smaller scale to fit within bounds
+            
+            # Resize video maintaining aspect ratio
+            resized_clip = video_clip.resized(scale)
+            
+                        # Create final video with black padding (slightly below center)
+            # Calculate position to be slightly down from center
+            x_pos = (target_width - resized_clip.w) // 2  # Center horizontally
+            y_pos = (target_height - resized_clip.h) // 2 + offset  # 30 pixels down from center
+            
+            final_clip = CompositeVideoClip([resized_clip.with_position((x_pos, y_pos))], size=(target_width, target_height),bg_color=(0, 0, 0))  
         clips_to_composite = [final_clip]
 
         # Add gradient overlay if requested
@@ -170,9 +184,9 @@ def _create_final_video(
             codec="libx264",
             audio_codec="aac",
             threads=4,
-            fps=15,
-            preset="ultrafast",
-            bitrate="1500k",
+            fps=20,
+            preset="medium",
+            bitrate="2500k",
             audio_bitrate="128k",
             logger=None,
         )
@@ -188,7 +202,7 @@ def _create_final_video(
         return None
 
 
-def video_editor(video_bytes: bytes, text_template: dict, html_template: str) -> bytes:
+def video_editor(video_bytes: bytes, text_template: dict, html_template: str, crop_type: str = "fill",add_gradient: bool = True, offset: int = 0) -> bytes:
     """
     Complete workflow to create edited video with text overlay
 
@@ -234,9 +248,11 @@ def video_editor(video_bytes: bytes, text_template: dict, html_template: str) ->
             video_path=input_video_path,
             overlay_image_path=processed_overlay_path,
             session_id=session_id,
-            add_gradient=True,
+            add_gradient=add_gradient,
             target_width=1080,
             target_height=1350,
+            crop_type=crop_type,
+            offset=offset,
         )
         temp_files.extend(video_temp_files)
 
@@ -265,6 +281,9 @@ def text_editor(
     text_input: dict,
     content_bytes: bytes = None,
     is_video: bool = False,
+    crop_type: str = "fill",
+    add_gradient: bool = True,
+    offset: int = 0,
 ) -> bytes:
     """
     Editor for text-based templates
@@ -296,6 +315,9 @@ def text_editor(
             video_bytes=content_bytes,
             text_template=text_template,
             html_template=overlay_template,
+            crop_type=crop_type,
+            add_gradient=add_gradient,
+            offset=offset,
         )
     else:
         new_content_bytes = image_editor(
@@ -308,22 +330,18 @@ def text_editor(
 
 # Test function for development
 if __name__ == "__main__":
-    from src.templates.text_based import text_based_template
+    from src.templates.meme import meme_template
 
     ## Test Image Workflow
-    # with open("./data_/2.mp4", "rb") as f:
-    #     video_bytes = f.read()
-    result = text_editor(
-        text_based_template,
-        "text_based_slide",
-        {
-            "logo_image": "logo_1.png",
-            "background_image": "black_background.png",
-            "headline": "<h1>IPL just doesn't seem that <span class=\"yellow\">exciting</span> anymore.</h1>",
-            "subtext": "<p class=\"subtext\">And then I realized mummy <br/> hamesha last mai kyun khaati thi.</p>"
-        },
-        content_bytes=None,
-        is_video=False,
+    with open("./data_/2.mp4", "rb") as f:
+        video_bytes = f.read()
+    final_video = video_editor(
+        video_bytes=video_bytes,
+        text_template={"headline": "<h1>IPL just doesn't seem that <span class=\"yellow\">exciting</span> anymore.</h1>",
+                       "crop_type": "fill"},
+        html_template=meme_template["slides"]["meme_up_slide"]["overlay_template"],
+        crop_type="crop",
+        add_gradient=False,
     )
-    with open("./data_/test_out.png", "wb") as f:
-        f.write(result)
+    with open("./data_/test_out.mp4", "wb") as f:
+        f.write(final_video)

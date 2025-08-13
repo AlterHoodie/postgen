@@ -25,7 +25,7 @@ This template has the following slides/sections:
   - is_trigger: Use when explicit/graphic visuals are required for the post.
     If required, use <p class='trigger-warning'>Trigger Warning</p> else fill "".
 
-  - source: A p tag with classname-"source" for the source of the post.
+  - source: Use source only to cite facts from other news sources and not to cite ScoopWhoop. A p tag with classname-"source" for the source of the post.
     Ex: <p class="source">Source: TOI</p>
 
   ### Text Input:
@@ -42,7 +42,7 @@ This template has the following slides/sections:
 
 2. Content Slide:
   These are content slides that provide additional context and details about the main headline. Each slide should:
-  - Contain 3-4 concise lines of text that expand on a key aspect of the story
+  - Contain a **paragraph** of 3-4 concise lines of text that expand on a key aspect of the story
   - Have visuals that directly complement and reinforce the text content
   - Maintain a clear narrative flow from the headline slide
   - Use engaging language while staying informative
@@ -56,7 +56,7 @@ This template has the following slides/sections:
   - subtext: Use this tag to write content using p tags. use class yellow to highlight sentences.
     EX: <p class="subtext"><span class="yellow">A 'voter rights yatra' is planned from August17</span>, aiming to rally support and spotlight the claims.</p>
   
-  - source: A p tag with classname-"source" for the source of the post.
+  - source: Use source only to cite facts from other news sources and not to cite ScoopWhoop. A p tag with classname-"source" for the source of the post.
     Ex: <p class="source">Source: TOI</p>
 
   ### Text Input:
