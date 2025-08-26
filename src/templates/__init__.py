@@ -1,8 +1,8 @@
-from src.templates.timeline import timeline_template
-from src.templates.thumbnail import thumbnail_template
-from src.templates.writeup import writeup_template
-from src.templates.text_based import text_based_template
-from src.templates.meme import meme_template
+from src.templates.scoopwhoop.timeline import timeline_template
+from src.templates.scoopwhoop.thumbnail import thumbnail_template
+from src.templates.scoopwhoop.writeup import writeup_template
+from src.templates.scoopwhoop.text_based import text_based_template
+from src.templates.scoopwhoop.meme import meme_template
 
 def get_template_config(template_type: str) -> dict:
     """Get template configuration based on type"""
