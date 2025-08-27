@@ -117,7 +117,7 @@ THUMBNAIL_SLIDE_HTML_TEMPLATE = """<!DOCTYPE html>
   </head>
   <body>
     <div class="container">
-      <img src="{logo_path}" alt="Social Village Logo" class="logo" />
+      <img src="{logo_image}" alt="Social Village Logo" class="logo" />
       <img src="{background_image}" class="background-image" />
       <div class="text-overlay">
         <div class="text-content">
@@ -215,7 +215,7 @@ THUMBNAIL_SLIDE_OVERLAY_TEMPLATE = """<!DOCTYPE html>
   </head>
   <body>
     <div class="container">
-      <img src="{logo_path}" alt="Social Village Logo" class="logo" />
+      <img src="{logo_image}" alt="Social Village Logo" class="logo" />
       <div class="text-overlay">
         <div class="text-content">
           <h1>

@@ -101,8 +101,92 @@ CONTENT_SLIDE_HTML_TEMPLATE = """
   </head>
   <body>
     <div class="container">
-      <img src="{logo_path}" alt="Social Village Logo" class="logo" />
+      <img src="{logo_image}" alt="Social Village Logo" class="logo" />
       <img src="{background_image}" class="background-image" />
+      <div class="text-overlay">
+        <div class="text-content">
+          <h1>
+            {headline}
+          </h1>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+"""
+
+CONTENT_SLIDE_OVERLAY_TEMPLATE = """
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title></title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap");
+      body,
+      html {{
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        font-family: "Poppins", sans-serif;
+        background-color: #f0f0f0;
+      }}
+      .container {{
+        position: relative;
+        width: 1080px;
+        height: 1350px;
+        margin: auto;
+        overflow: hidden;
+      }}
+      .background-image {{
+        width: 100%;
+        height: 100%;
+        display: block;
+        /* 'cover' scales the image to fill the container, cropping sides or top/bottom as needed */
+        object-fit: cover;
+        /* Aligns the image. 'center' horizontally, and 25% from the top vertically to shift it up. */
+        object-position: center 25%;
+      }}
+      .logo {{
+        position: absolute;
+        top: -50px;
+        right: -50px;
+        width: 250px;
+        height: 250px;
+      }}
+      .text-overlay {{
+        position: absolute;
+        top: 60%;
+        left: 0;
+        right: 0;
+        color: white;
+        display: flex;
+        flex-direction: column;
+      }}
+
+      .text-content {{
+        width: 80%;
+        align-self: center;
+      }}
+      .text-content h1 {{
+        margin: 0 0 0 0;
+        font-size: 60px;
+        font-weight: 700;
+        line-height: 1;
+        text-align: center;
+        -webkit-text-stroke: 1px black;
+        text-shadow: 4px 4px 8px rgba(0, 0, 0, 1);
+      }}
+      .text-content h1 .yellow {{
+        color: #f0c713;
+      }}
+
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <img src="{logo_image}" alt="Social Village Logo" class="logo" />
       <div class="text-overlay">
         <div class="text-content">
           <h1>
@@ -125,7 +209,7 @@ content_template = {
     "slides": {
         "content_slide": {
             "html_template": CONTENT_SLIDE_HTML_TEMPLATE,
-            "overlay_template": "",
+            "overlay_template": CONTENT_SLIDE_OVERLAY_TEMPLATE,
             "text": {
                     "headline": {"type": "text", "tag": "h1", "class": ""}
                 },
