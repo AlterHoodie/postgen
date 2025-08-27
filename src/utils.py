@@ -21,21 +21,19 @@ def extract_x(response: str, code_type: str) -> str:
     match = re.search(pattern, response, re.DOTALL)
     return match.group(1).strip() if match else None
 
-
-def cleanup_files(file_paths: List[str]) -> None:
-    """Delete all temporary files generated during the workflow"""
-    # print(file_paths)
-    for file_path in file_paths:
+def cleanup_files(dir_path: str, session_id: str) -> None:
+    """Delete all temporary files generated during the workflow that contain the session_id"""
+    for file_path in os.listdir(dir_path):
         try:
             if not file_path:
                 continue
-            if os.path.exists(file_path):
-                if "logo.png" in file_path:
-                    continue
-                os.remove(file_path)
-                logger.info(f"Deleted temporary file: {file_path}")
+            full_path = os.path.join(dir_path, file_path)
+            if os.path.exists(full_path):
+                if session_id in file_path:
+                    os.remove(full_path)
+                    logger.info(f"Deleted temporary file: {full_path}")
         except Exception as e:
-            logger.warning(f"Failed to delete file {file_path}: {e}")
+            logger.warning(f"Failed to delete file {full_path}: {e}")
 
 
 ## Image Utils
