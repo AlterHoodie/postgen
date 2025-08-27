@@ -13,28 +13,20 @@ Thumbnail Slide:
   
   - image_description: A one line description of the image you would like to use for the slide.
   - headline: The main headline of the story must be given as an html H1 tag 
-    EX: <h1>
-          Meanwhile Sharvi, Kavita, Dinaz and Jasmine after pulling off
-          Netflix<br />
-          level scam
-        </h1>
-  - crop_type: ["fill","crop"] for images that have aspect ratio close to 4:5 use fill and for images that have aspect ratio close to 16:9 use crop.
+    EX: Meanwhile Sharvi, Kavita, Dinaz and Jasmine after pulling off Netflix level scam
 
   ### Text Input:
     {{
       "name": "headline_slide",
       "image_description": "str",
-      "text_template":{{
-      "headline": "<html_snippet_code>",
-      "crop_type": ["fill","crop"] select one
+      "text":{{
+      "headline": "str",
       }}
     }}
 
 NOTE: 
-- YOU CAN USE class name "yellow" to highlight words and to make the headline more engaging. Use br tags to break the text into multiple lines.
+- YOU CAN USE "**str**" to highlight words and to make the headline more engaging. Use \\n tags to break the text into multiple lines.
 - DO NOT COMPLICATE THE IMAGE DESCRIPTIONS, KEEP IT SIMPLE AND DIRECT.
-- DO NOT CITE SOURCES USING <a> tags. 
-- Use Source tag to only cite external sources NOT SCOOPWHOOP
 """
 MEME_UP_HTML_TEMPLATE = """
 <!DOCTYPE html>
@@ -61,7 +53,7 @@ MEME_UP_HTML_TEMPLATE = """
         overflow: hidden;
         background-color: #000;
       }}
-      .crop {{
+      .contain {{
         width: 100%;
         height: 100%;
         /* display: block; */
@@ -70,7 +62,7 @@ MEME_UP_HTML_TEMPLATE = """
         /* Move image down using transform instead of object-position */
         transform: translateY(80px);
       }}
-      .fill {{
+      .cover {{
         width: 100%;
         height: 100%;
         display: block;
@@ -106,8 +98,8 @@ MEME_UP_HTML_TEMPLATE = """
   </head>
   <body>
     <div class="container">
-      <img src="{file_path}" class="{crop_type}" alt="test" />
-      <img src="./logo.png" alt="SW Logo" class="logo" />
+      <img src="{background_image}" class="{crop_type}" alt="test" />
+      <img src="{logo_image}" alt="SW Logo" class="logo" />
       <div class="text-overlay">{headline}</div>
     </div>
   </body>
@@ -184,7 +176,7 @@ MEME_UP_OVERLAY_TEMPLATE = """
   </head>
   <body>
     <div class="container">
-      <img src="./logo.png" alt="SW Logo" class="logo" />
+      <img src="{logo_image}" alt="SW Logo" class="logo" />
       <div class="text-overlay">{headline}</div>
     </div>
   </body>
@@ -216,7 +208,7 @@ MEME_DOWN_HTML_TEMPLATE = """
         overflow: hidden;
         background-color: #000;
       }}
-      .crop {{
+      .contain {{
         width: 100%;
         height: 100%;
         /* display: block; */
@@ -225,7 +217,7 @@ MEME_DOWN_HTML_TEMPLATE = """
         /* Move image down using transform instead of object-position */
         /* transform: translateY(-80px); */
       }}
-      .fill {{
+      .cover {{
         width: 100%;
         height: 100%;
         display: block;
@@ -261,8 +253,8 @@ MEME_DOWN_HTML_TEMPLATE = """
   </head>
   <body>
     <div class="container">
-      <img src="{file_path}" class="{crop_type}" alt="test" />
-      <img src="./logo.png" alt="SW Logo" class="logo" />
+      <img src="{background_image}" class="{crop_type}" alt="test" />
+      <img src="{logo_image}" alt="SW Logo" class="logo" />
       <div class="text-overlay">{headline}</div>
     </div>
   </body>
@@ -339,7 +331,7 @@ MEME_DOWN_OVERLAY_TEMPLATE = """
   </head>
   <body>
     <div class="container">
-      <img src="./logo.png" alt="SW Logo" class="logo" />
+      <img src="{logo_image}" alt="SW Logo" class="logo" />
       <div class="text-overlay">{headline}</div>
     </div>
   </body>
@@ -349,40 +341,57 @@ MEME_DOWN_OVERLAY_TEMPLATE = """
 
 
 meme_template = {
-    "template_type": "thumbnail",
+    "page_name": "scoopwhoop",
+    "template_type": "meme",
     "text_template": {"template_description":TEMPLATE_DESCRIPTION,
             "json_description":JSON_DESCRIPTION},
     "slides": {
         "meme_up_slide": {
             "html_template": MEME_UP_HTML_TEMPLATE,
             "overlay_template": MEME_UP_OVERLAY_TEMPLATE,
-            "text_json": {
+            "text": {
                 "name": "meme_up_slide",
-                "image_description": "str",
                 "text_template": {
                     "headline": {"type": "text", "tag": "h1", "class": ""},
-                    "crop_type": {"type": "dropdown", "values": ["fill", "crop"]},
                 },
             },
-            "video_editing_json":{
-                "offset": 75,
-                "add_gradient": False
+            "assets":{
+                "background_video": {"type":"bytes", "file_type":"mp4"},
+                "background_image": {"type":"bytes", "file_type":"png"},
+                "logo_image": {"type": "dropdown", "values": ["logo_original.png", "logo_hottake.png"], "default": "logo.png"},
+            },
+            "image_edits": {
+                "crop_type": {"type": "dropdown", "values": ["cover", "contain"]},
+            },
+            "video_edits":{
+                "type": {"type":"default", "values": "image_overlay"},
+                "crop_type": {"type": "dropdown", "values": ["cover", "contain"]},
+                "offset": {"type":"default", "values": 75},
+                "add_gradient": {"type":"default", "values": False}
             }
         },
         "meme_down_slide": {
             "html_template": MEME_DOWN_HTML_TEMPLATE,
             "overlay_template": MEME_DOWN_OVERLAY_TEMPLATE,
-            "text_json": {
+            "text": {
                 "name": "meme_down_slide",
-                "image_description": "str",
                 "text_template": {
                     "headline": {"type": "text", "tag": "h1", "class": ""},
-                    "crop_type": {"type": "dropdown", "values": ["fill", "crop"]},
                 },
             },
-            "video_editing_json":{
-                "offset": -50,
-                "add_gradient": False
+            "assets":{
+                "background_video": {"type":"bytes", "file_type":"mp4"},
+                "background_image": {"type":"bytes", "file_type":"png"},
+                "logo_image": {"type": "dropdown", "values": ["logo_original.png", "logo_hottake.png"], "default": "logo.png"},
+            },
+            "image_edits": {
+                "crop_type": {"type": "dropdown", "values": ["cover", "contain"]},
+            },
+            "video_edits":{
+                "type": {"type":"default", "values": "image_overlay"},
+                "crop_type": {"type": "dropdown", "values": ["cover", "contain"]},
+                "offset": {"type":"default", "values": -50},
+                "add_gradient": {"type":"default", "values": False}
             }
         },
     },

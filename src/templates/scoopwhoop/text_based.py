@@ -13,22 +13,20 @@ Text Based Slide:
   - background_image: The background image to be used for the slide. For normal posts, use blue_background.png. For "hottakes", use black_background.png
     EX: blue_background.png or black_background.png
   - headline: The main headline of the story must be given as an html H1 tag 
-    EX: <h1>
-            IPL just doesn't seem that
-            <span class="yellow">exciting</span> anymore.
-        </h1>
-  - subtext: A short p tag with classname-"subtext" for the post, one sentence max.
-    Ex: <p class="subtext">And then I realized mummy <br/> hamesha last mai kyun khaati thi.</p>
+    EX: IPL just doesn't seem that **exciting** anymore.
+  - subtext: A short subtext for the post, one sentence max.
+    Ex: And then I realized mummy hamesha last mai kyun khaati thi.
   ### Text Input:
     {{
       "name": "text_based_slide",
-      "text_template":{{
-      "logo_image": ["logo_1.png", "logo_hottake.png"] select one,
-      "background_image": ["blue_background.png", "black_background.png"] select one,
-      "headline": "<html_snippet_code>",
-      "subtext": "<html_snippet_code>"
+      "text":{{
+      "headline": "str",
+      "subtext": "str"
       }}
     }}
+
+NOTE: 
+- Use **str** to highlight parts of the text and \\n for new line.
 
 """
 
@@ -118,23 +116,30 @@ TEXT_BASED_HTML_TEMPLATE = """
 """
 
 text_based_template = {
-    "template_type": "thumbnail",
+    "page_name": "scoopwhoop",
+    "template_type": "text_based",
     "text_template": {"template_description":TEXT_DESCRIPTION,
             "json_description":JSON_DESCRIPTION},
     "slides": {
         "text_based_slide": {
             "html_template": TEXT_BASED_HTML_TEMPLATE,
             "overlay_template": "",
-            "text_json": {
+            "text": {
                 "name": "text_based_slide",
-                "image_description": "str",
                 "text_template": {
-                    "logo_image": {"type": "dropdown", "values": ["logo_original.png", "logo_hottake.png"]},
-                    "background_image": {"type": "dropdown", "values": ["blue_background.png", "black_background.png"]},
                     "headline": {"type": "text", "tag": "h1", "class": ""},
                     "subtext": {"type": "text", "tag": "p", "class": "subtext"},
                 },
             },
+            "assets":{
+                "logo_image": {"type": "dropdown", "values": ["logo_original.png", "logo_hottake.png"], "default": "logo_original.png"},
+                "background_image": {"type": "dropdown", "values": ["blue_background.png", "black_background.png"], "default": "blue_background.png"},
+            },
+            ## No edits because background image not there
+            "image_edits": {},
+            "video_edits":{
+                "type": {"type":"default", "values": "image_overlay"},
+            }
         },
     },
 }

@@ -18,33 +18,19 @@ from src.utils import (
 logger = logging.getLogger(__name__)
 
 
-def image_editor(image_bytes: bytes, text_template: dict, html_template: str) -> bytes:
+def image_editor(text: dict, assets: dict, image_edits: dict, html_template: str, session_id: str) -> bytes:
     try:
         if html_template is None:
             raise ValueError("HTML template is None")
-        if text_template is None:
+        if text is None:
             raise ValueError("Text template is None")
         
-            
         temp_dir = Path("./data/scoopwhoop/temp")
         temp_dir.mkdir(exist_ok=True)
         temp_files = []
-        session_id = str(uuid.uuid4())[:8]
 
-        # Check if this is a text-based template (no file_path in template)
-        is_text_based = "{file_path}" not in html_template
-        
-        if not is_text_based:
-            # Regular image template - save uploaded image
-            input_image_name = f"input_image_{session_id}.png"
-            input_image_path = f"./data/scoopwhoop/temp/{input_image_name}"
-            with open(input_image_path, "wb") as f:
-                f.write(image_bytes)
-            temp_files.append(input_image_path)
-            html_content = html_template.format(file_path=input_image_name, **text_template)
-        else:
-            # Text-based template - no uploaded image needed
-            html_content = html_template.format(**text_template)
+        # Check if this is a text-based template 
+        html_content = html_template.format(**assets, **image_edits, **text)
 
         html_path = f"./data/scoopwhoop/temp/temp_overlay_{session_id}.html"
         with open(html_path, "w", encoding="utf-8") as f:
@@ -71,13 +57,13 @@ def image_editor(image_bytes: bytes, text_template: dict, html_template: str) ->
 
 
 def _create_overlay_image(
-    text_template: dict, html_template: str, session_id: str
+    text: dict, assets: dict, html_template: str, session_id: str
 ) -> Tuple[str, str]:
     """
     Create the overlay image with text using HTML template
     """
     # Save HTML template
-    html_content = html_template.format(**text_template)
+    html_content = html_template.format(**text, **assets)
     html_path = f"./data/scoopwhoop/temp/temp_overlay_{session_id}.html"
     with open(html_path, "w", encoding="utf-8") as f:
         f.write(html_content)
@@ -93,7 +79,7 @@ def _create_overlay_image(
     return overlay_image_path, html_path
 
 
-def _create_final_video(
+def _create_image_over_video(
     video_path: str,
     overlay_image_path: str,
     session_id: str,
@@ -101,9 +87,9 @@ def _create_final_video(
     target_height: int = 1350,
     offset: int = 0,
     add_gradient: bool = True,
-    crop_type: str = "fill",
+    crop_type: str = "cover",
 ) -> Tuple[bytes, str]:
-    """
+    """ 
     Create final video with fixed size scaling to 576x720
     """
     try:
@@ -124,7 +110,7 @@ def _create_final_video(
             crop_height = int(crop_width / target_ratio)
 
         # Crop to 4:5 ratio first
-        if crop_type == "fill":
+        if crop_type == "cover":
             cropped_clip = video_clip.cropped(
                 width=crop_width,
                 height=crop_height,
@@ -202,7 +188,63 @@ def _create_final_video(
         return None
 
 
-def video_editor(video_bytes: bytes, text_template: dict, html_template: str, crop_type: str = "fill",add_gradient: bool = True, offset: int = 0) -> bytes:
+def _create_video_over_image(image_path:str, video_path:str, session_id:str, max_scale:float = 0.8, duration:float = None) -> Tuple[str, str]:
+    """
+    Create a video with a background image and a video overlay
+    """
+    # Load the background image
+    background = ImageClip(image_path)
+    bg_width, bg_height = background.size
+    
+    # Load the video to overlay
+    video_clip = VideoFileClip(video_path)
+    video_width, video_height = video_clip.size
+    
+    # Calculate appropriate size while maintaining aspect ratio
+    # Scale video to fit within the background with some padding
+    scale_x = (bg_width * max_scale) / video_width
+    scale_y = (bg_height * max_scale) / video_height
+    
+    # Use the smaller scale to ensure video fits completely
+    scale_factor = min(scale_x, scale_y)
+    
+    new_width = int(video_width * scale_factor)
+    new_height = int(video_height * scale_factor)
+    
+    # Resize the video while maintaining aspect ratio
+    video_clip = video_clip.resized((new_width, new_height))
+    
+    # Set duration (use video duration if not specified)
+    if duration is None:
+        duration = video_clip.duration
+    
+    # Set background duration to match
+    background = background.with_duration(duration)
+    
+    # Center the video on the background
+    video_clip = video_clip.with_position('center')
+    
+    # Create composite video
+    final_video = CompositeVideoClip([background, video_clip])
+    
+    # Write the result
+    output_path = f"./data/scoopwhoop/temp/final_video_{session_id}.mp4"
+    final_video.write_videofile(output_path, 
+                               codec='libx264', 
+                               audio_codec='aac',
+                               fps=video_clip.fps,
+                               preset="medium",
+                               bitrate="2500k",
+                               audio_bitrate="128k",
+                               logger=None)
+    
+    # Clean up
+    background.close()
+    video_clip.close()
+    final_video.close()
+
+
+def video_editor(text: dict,assets:dict ,video_edits: dict, html_template: str, session_id: str) -> bytes:
     """
     Complete workflow to create edited video with text overlay
 
@@ -214,46 +256,50 @@ def video_editor(video_bytes: bytes, text_template: dict, html_template: str, cr
     Returns:
         str: Path to the final video file, or None if failed
     """
-    session_id = str(uuid.uuid4())[:8]
     temp_files = []
 
     try:
         # Create temp directory
         temp_dir = Path("./data/scoopwhoop")
         temp_dir.mkdir(exist_ok=True)
-
-        # Step 1: Save input video
-        input_video_path = f"./data/scoopwhoop/temp/input_video_{session_id}.mp4"
-        with open(input_video_path, "wb") as f:
-            f.write(video_bytes)
-        temp_files.append(input_video_path)
+        temp_files.extend([value for key, value in assets.items()])
+        video_src = assets.get("background_video")
+        del assets['background_video']
 
         # Step 2: Create the overlay image with text
         overlay_image_path, html_path = _create_overlay_image(
-            text_template=text_template,
+            text=text,
+            assets=assets,
             html_template=html_template,
             session_id=session_id,
         )
         temp_files.extend([overlay_image_path, html_path])
+        if video_edits.get("type") == "image_overlay":
+            processed_overlay_path = process_overlay_for_transparency(
+                image_path=overlay_image_path,
+                session_id=session_id,
+                target_width=1080,
+                target_height=1350,
+            )
+            # Step 4: Create the final video (576x720)
+            final_video_path, video_temp_files = _create_image_over_video(
+                video_path=video_src,
+                overlay_image_path=processed_overlay_path,
+                session_id=session_id,
+                add_gradient=video_edits.get("add_gradient", True),
+                target_width=1080,
+                target_height=1350,
+                crop_type=video_edits.get("crop_type", "cover"),
+                offset=video_edits.get("offset", 0),
+            )
+            temp_files.append(processed_overlay_path)
+        else:
+            final_video_path, video_temp_files = _create_video_over_image(
+                image_path=overlay_image_path,
+                video_path=video_src,
+                session_id=session_id,
+            )
 
-        processed_overlay_path = process_overlay_for_transparency(
-            image_path=overlay_image_path,
-            session_id=session_id,
-            target_width=1080,
-            target_height=1350,
-        )
-
-        # Step 4: Create the final video (576x720)
-        final_video_path, video_temp_files = _create_final_video(
-            video_path=input_video_path,
-            overlay_image_path=processed_overlay_path,
-            session_id=session_id,
-            add_gradient=add_gradient,
-            target_width=1080,
-            target_height=1350,
-            crop_type=crop_type,
-            offset=offset,
-        )
         temp_files.extend(video_temp_files)
 
         if not final_video_path:
@@ -277,71 +323,106 @@ def video_editor(video_bytes: bytes, text_template: dict, html_template: str, cr
 
 def text_editor(
     template: dict,
-    slide_name: str,
-    text_input: dict,
-    content_bytes: bytes = None,
+    image_edits: dict,
+    video_edits: dict,
+    text: dict,
+    assets: dict,
+    session_id: str,
     is_video: bool = False,
-    crop_type: str = "fill",
-    add_gradient: bool = True,
-    offset: int = 0,
 ) -> bytes:
     """
     Editor for text-based templates
     """
-    text_json = template["slides"][slide_name]["text_json"]
-    html_template = template["slides"][slide_name]["html_template"]
-    overlay_template = template["slides"][slide_name]["overlay_template"]
+    html_template = template["overlay_template"] if is_video else template["html_template"]
 
-    text_template = {}
-    for key, value in text_input.items():
-        if key not in text_json["text_template"]:
+    # Process text inputs
+    text_input = {}
+    text_template = template["text"]
+    
+    # Add defaults for missing keys
+    for key, value in text_template.items():
+        if key not in text and "default" in value:
+            text_input[key] = value["default"]
+    
+    # Process provided text values
+    for key, value in text.items():
+        if key not in text_template:
             continue
-
-        template_config = text_json["text_template"][key]
+        
+        template_config = text_template[key]
         if template_config["type"] in ["text", "text_area"]:
-            text_template[key] = convert_text_to_html(
+            text_input[key] = convert_text_to_html(
                 tag=template_config["tag"],
                 class_name=template_config["class"],
                 text=value,
             )
         elif template_config["type"] == "checkbox":
-            text_template[key] = template_config["html_snippet"] if value else ""
+            text_input[key] = template_config["html_snippet"] if value else ""
         elif template_config["type"] == "dropdown":
-            # For dropdown fields, use the value directly (e.g., logo file paths)
-            text_template[key] = value
+            text_input[key] = value
 
+    # Process assets
+    assets_input = assets
+    assets_template = template["assets"]
+    
+    # Add defaults for missing assets
+    for key, value in assets_template.items():
+        if key not in assets and "default" in value:
+            assets_input[key] = value["default"]
+
+    # Process edits based on video/image mode
     if is_video:
-        new_content_bytes = video_editor(
-            video_bytes=content_bytes,
-            text_template=text_template,
-            html_template=overlay_template,
-            crop_type=crop_type,
-            add_gradient=add_gradient,
-            offset=offset,
+        edits_template = template["video_edits"]
+        edits_input = video_edits
+    else:
+        edits_template = template["image_edits"]
+        edits_input = image_edits
+
+    # Process edits
+    processed_edits = {}
+    for key, value in edits_template.items():
+        if key not in edits_input and "default" in value:
+            processed_edits[key] = value["default"]
+    
+    for key, value in edits_input.items():
+        if key in edits_template and edits_template[key]["type"] in ["default", "dropdown"]:
+            processed_edits[key] = value
+
+    # Call appropriate editor
+    if is_video:
+        return video_editor(
+            text=text_input,
+            assets=assets_input,
+            video_edits=processed_edits,
+            html_template=html_template,
+            session_id=session_id,
         )
     else:
-        new_content_bytes = image_editor(
-            image_bytes=content_bytes,
-            text_template=text_template,
+        return image_editor(
+            text=text_input,
+            assets=assets_input,
+            image_edits=processed_edits,
             html_template=html_template,
+            session_id=session_id,
         )
-    return new_content_bytes
 
 
 # Test function for development
 if __name__ == "__main__":
-    from src.templates.meme import meme_template
-
+    from src.templates.scoopwhoop.thumbnail import thumbnail_template
     ## Test Image Workflow
-    with open("./data_/2.mp4", "rb") as f:
-        video_bytes = f.read()
-    final_video = video_editor(
-        video_bytes=video_bytes,
-        text_template={"headline": "<h1>IPL just doesn't seem that <span class=\"yellow\">exciting</span> anymore.</h1>",
-                       "crop_type": "fill"},
-        html_template=meme_template["slides"]["meme_up_slide"]["overlay_template"],
-        crop_type="crop",
-        add_gradient=False,
+    final_image = text_editor(
+        template=thumbnail_template['slides']['headline_slide'],
+        image_edits={"crop_type": "cover"},
+        video_edits={},
+        text={"headline": "**IPL just doesn't** seem that exciting anymore.",
+              "subtext": "The IPL is a cricket tournament that is played in India. It is a very popular tournament and is watched by millions of people all over the world.",
+              "is_trigger": True,
+              "source":"Source: IPL"},
+        assets={"background_image": "test.png"},
+        is_video=False,
+        session_id="test",
     )
-    with open("./data_/test_out.mp4", "wb") as f:
-        f.write(final_video)
+
+    with open("./data_/test_out.png", "wb") as f:
+        f.write(final_image)

@@ -12,38 +12,30 @@ Thumbnail Slide:
     EX: A photo of a temple and a gurdwara created inside a game.
   
   - image_description: A one line description of the image you would like to use for the slide.
-  - headline: The main headline of the story must be given as an html H1 tag 
-    EX: <h1>
-            Temples and <span class="yellow">Gurdwaras</span><br />Created
-            Inside A Game!
-        </h1>
+  - headline: The main headline of the story with no new lines.
   
-  - subtext: A short p tag with classname-"subtext" for the post, one sentence max.
-    Ex: <p class="subtext">Gamers have made fully-functional religious<br />places INSIDE AGAME! 😲</p>
+  - subtext: A short subtext for the post, one sentence max.
   
   - is_trigger: Use when explicit/graphic visuals are required for the post.
-    If required, use <p class='trigger-warning'>Trigger Warning</p> else fill "".
   
-  - source: A p tag with classname-"source" for the source of the post.
-    Ex: <p class="source">Source: TOI</p>
+  - source: A source for the post, single. Ex: Source: TOI
 
   ### Text Input:
     {{
       "name": "headline_slide",
       "image_description": "str",
-      "text_template":{{
-      "headline": "<html_snippet_code>",
-      "subtext": "<html_snippet_code>",
-      "is_trigger": "<html_snippet_code>",
-      "source": "<html_snippet_code>"
+      "text":{{
+      "headline": "str",
+      "subtext": "str",
+      "is_trigger": True/False,
+      "source": "str"
       }}
     }}
 
 NOTE: 
-- YOU CAN USE class name "yellow" to highlight words and to make the headline more engaging. Use br tags to break the text into multiple lines.
+- Use **str** to highlight parts of the text and \\n for new line.
 - DO NOT COMPLICATE THE IMAGE DESCRIPTIONS, KEEP IT SIMPLE AND DIRECT.
-- DO NOT CITE SOURCES USING <a> tags. 
-- Use Source tag to only cite external sources NOT SCOOPWHOOP
+- Use Source tag to only cite external sources NOT SCOOPWHOOP.
 """
 
 HEADLINE_SLIDE_HTML_TEMPLATE = """
@@ -75,7 +67,7 @@ HEADLINE_SLIDE_HTML_TEMPLATE = """
         height: 100%;
         display: block;
         /* 'cover' scales the image to fill the container, cropping sides or top/bottom as needed */
-        object-fit: cover;
+        object-fit: {crop_type};
         /* Aligns the image. 'center' horizontally, and 25% from the top vertically to shift it up. */
         object-position: center 25%;
       }}
@@ -155,8 +147,8 @@ HEADLINE_SLIDE_HTML_TEMPLATE = """
   </head>
   <body>
     <div class="container">
-      <img src="./logo.png" alt="SW Logo" class="logo" />
-      <img src="{file_path}" class="background-image" />
+      <img src="{logo_image}" alt="SW Logo" class="logo" />
+      <img src="{background_image}" class="background-image" />
       <div class="text-overlay">
         <div class="blue-bar"></div>
         <div class="text-content">
@@ -280,7 +272,7 @@ HEADLINE_SLIDE_OVERLAY_TEMPLATE = """
   </head>
   <body>
     <div class="container">
-      <img src="./logo.png" alt="SW Logo" class="logo" />
+      <img src="{logo_image}" alt="SW Logo" class="logo" />
       <div class="text-overlay">
         <div class="blue-bar"></div>
         <div class="text-content">
@@ -296,6 +288,7 @@ HEADLINE_SLIDE_OVERLAY_TEMPLATE = """
 """
 
 thumbnail_template = {
+    "page_name": "scoopwhoop",
     "template_type": "thumbnail",
     "text_template": {"template_description":TEMPLATE_DESCRIPTION,
             "json_description":JSON_DESCRIPTION},
@@ -303,10 +296,7 @@ thumbnail_template = {
         "headline_slide": {
             "html_template": HEADLINE_SLIDE_HTML_TEMPLATE,
             "overlay_template": HEADLINE_SLIDE_OVERLAY_TEMPLATE,
-            "text_json": {
-                "name": "headline_slide",
-                "image_description": "str",
-                "text_template": {
+            "text": {
                     "headline": {"type": "text", "tag": "h1", "class": ""},
                     "subtext": {"type": "text", "tag": "p", "class": "subtext"},
                     "is_trigger": {
@@ -314,8 +304,19 @@ thumbnail_template = {
                         "html_snippet": "<p class='trigger-warning'>Trigger Warning</p>",
                     },
                     "source": {"type": "text", "tag": "p", "class": "source"},
-                },
             },
+            "assets":{
+                "background_video": {"type":"bytes", "file_type":"mp4"},
+                "background_image": {"type":"bytes", "file_type":"png"},
+                "logo_image": {"type": "dropdown", "values": ["logo_original.png", "logo_hottake.png"], "default": "logo.png"},
+            },
+            "image_edits": {
+                "crop_type": {"type": "dropdown", "values": ["cover", "contain"]},
+            },
+            "video_edits":{
+                "type": {"type":"default", "values": "image_overlay"},
+                "crop_type": {"type": "dropdown", "values": ["cover", "contain"]},
+            }
         },
     },
 }

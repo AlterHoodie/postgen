@@ -11,23 +11,22 @@ Content Slide:
     EX: A photo of a celebrity or relevant scene from entertainment/lifestyle content.
   
   - image_description: A one line description of the image you would like to use for the slide.
-  - headline: The main headline content without H1 tags (tags are added automatically)
-    EX: <span class="yellow">Badass Ravi Kumar</span> is my spirit animal
-    Note: Do not include <h1> tags, only the inner content with spans for highlighting.
+  - headline: The main headline content. Use **str** for highlighting important words and \n for line breaks.
+    EX: **Badass Ravi Kumar** is my spirit animal
+    Note: Use plain text with **str** for highlighting.
 
   ### Text Input:
     {{
       "name": "content_slide",
       "image_description": "str",
-      "text_template":{{
-      "headline": "<html_content_without_h1_tags>"
+      "text": {{
+      "headline": "str"
       }}
     }}
 
 NOTE: 
-- YOU CAN USE class name "yellow" to highlight words and make the headline more engaging. Use <br /> tags to break the text into multiple lines.
+- Use **str** to highlight words and make the headline more engaging. Use \n for line breaks.
 - DO NOT COMPLICATE THE IMAGE DESCRIPTIONS, KEEP IT SIMPLE AND DIRECT.
-- The headline should NOT include <h1> tags as they are automatically added in the template.
 - Focus on creating engaging, shareable content that works well with Social Village branding.
 """
 
@@ -117,6 +116,7 @@ CONTENT_SLIDE_HTML_TEMPLATE = """
 """
 
 content_template = {
+    "page_name": "social_village",
     "template_type": "content",
     "text_template": {
         "template_description": TEMPLATE_DESCRIPTION,
@@ -125,12 +125,21 @@ content_template = {
     "slides": {
         "content_slide": {
             "html_template": CONTENT_SLIDE_HTML_TEMPLATE,
-            "text_json": {
-                "name": "content_slide",
-                "image_description": "str",
-                "text_template": {
+            "overlay_template": "",
+            "text": {
                     "headline": {"type": "text", "tag": "h1", "class": ""}
-                }
+                },
+            "assets":{
+                "background_image": {"type":"bytes", "file_type":"png"},
+                "background_video": {"type":"bytes", "file_type":"mp4"},
+                "logo_image": {"type": "dropdown", "values": ["logo.png"], "default": "logo.png"},
+            },
+            "image_edits": {
+                "crop_type": {"type": "dropdown", "values": ["cover", "contain"] , "default": "cover"},
+            },
+            "video_edits":{
+                "type": {"type":"default", "values": "image_overlay"},
+                "crop_type": {"type": "dropdown", "values": ["cover", "contain"] , "default": "cover"},
             }
         }
     }

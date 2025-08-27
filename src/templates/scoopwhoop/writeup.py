@@ -13,30 +13,26 @@ This template has the following slides/sections:
   - image_description: A one line description of the image you would like to use for the slide.
     EX: A photo of a temple and a gurdwara created inside a game.
   
-  - headline: The main headline of the story must be given as an html H1 tag 
-    EX: <h1>
-            Temples and <span class="yellow">Gurdwaras</span><br />Created
-            Inside A Game!
-        </h1>
+  - headline: The main headline of the story. Use plain text with **str** for highlighting important words.
+    EX: Temples and **Gurdwaras** Created Inside A Game!
   
-  - subtext: A short p tag with classname-"subtext" for the post, one sentence max.
-    Ex: <p class="subtext">Gamers have made fully-functional religious<br />places INSIDE AGAME! 😲</p>
+  - subtext: A short description for the post, one sentence max. Use plain text only.
+    Ex: Gamers have made fully-functional religious places INSIDE A GAME! 😲
   
-  - is_trigger: Use when explicit/graphic visuals are required for the post.
-    If required, use <p class='trigger-warning'>Trigger Warning</p> else fill "".
+  - is_trigger: True/False.
 
-  - source: Use source only to cite facts from other news sources and not to cite ScoopWhoop. A p tag with classname-"source" for the source of the post.
-    Ex: <p class="source">Source: TOI</p>
+  - source: Use source only to cite facts from other news sources and not to cite ScoopWhoop. Plain text only.
+    Ex: Source: TOI
 
   ### Text Input:
     {{
       "name": "headline_slide",
       "image_description": "str",
-      "text_template":{{
-      "headline": "<html_snippet_code>",
-      "subtext": "<html_snippet_code>",
-      "is_trigger": "<html_snippet_code>",
-      "source": "<html_snippet_code>"
+      "text": {{
+      "headline": "str",
+      "subtext": "str",
+      "is_trigger": "True/False",
+      "source": "str"
       }}
     }}
 
@@ -53,26 +49,26 @@ This template has the following slides/sections:
   - image_description: A one line description of the image you would like to use for the slide.
     EX: A photo of a temple and a gurdwara created inside a game.
   
-  - subtext: Use this tag to write content using p tags. use class yellow to highlight sentences.
-    EX: <p class="subtext"><span class="yellow">A 'voter rights yatra' is planned from August17</span>, aiming to rally support and spotlight the claims.</p>
+  - subtext: Use this to write content. Use **str** to highlight important sentences.
+    EX: **A 'voter rights yatra' is planned from August17**, aiming to rally support and spotlight the claims.
   
-  - source: Use source only to cite facts from other news sources and not to cite ScoopWhoop. A p tag with classname-"source" for the source of the post.
-    Ex: <p class="source">Source: TOI</p>
+  - source: Use source only to cite facts from other news sources and not to cite ScoopWhoop. Plain text only.
+    Ex: Source: TOI
 
   ### Text Input:
     {{
       "name": "content_slide",
       "image_description": "str",
-      "text_template":{{
-      "subtext": "<html_snippet_code>",
-      "source": "<html_snippet_code>"
+      "text": {{
+      "subtext": "str",
+      "source": "str"
       }}
     }}
 
 NOTE: 
-- YOU CAN USE class name "yellow" to highlight words and to make the headline more engaging. Use br tags to break the text into multiple lines.
+- Use **str** to highlight parts of the text and \\n for new line.
 - DO NOT COMPLICATE THE IMAGE DESCRIPTIONS, KEEP IT SIMPLE AND DIRECT.
-- DO NOT CITE SOURCES USING <a> tags. 
+- Use Source tag to only cite external sources NOT SCOOPWHOOP.
 """
 
 
@@ -105,7 +101,7 @@ HEADLINE_SLIDE_HTML_TEMPLATE = """
         height: 100%;
         display: block;
         /* 'cover' scales the image to fill the container, cropping sides or top/bottom as needed */
-        object-fit: cover;
+        object-fit: {crop_type};
         /* Aligns the image. 'center' horizontally, and 25% from the top vertically to shift it up. */
         object-position: center 25%;
       }}
@@ -185,8 +181,8 @@ HEADLINE_SLIDE_HTML_TEMPLATE = """
   </head>
   <body>
     <div class="container">
-      <img src="./logo.png" alt="SW Logo" class="logo" />
-      <img src="{file_path}" class="background-image" />
+      <img src="{logo_image}" alt="SW Logo" class="logo" />
+      <img src="{background_image}" class="background-image" />
       <div class="text-overlay">
         <div class="blue-bar"></div>
         <div class="text-content">
@@ -310,7 +306,7 @@ HEADLINE_SLIDE_OVERLAY_TEMPLATE = """
   </head>
   <body>
     <div class="container">
-      <img src="./logo.png" alt="SW Logo" class="logo" />
+      <img src="{logo_image}" alt="SW Logo" class="logo" />
       <div class="text-overlay">
         <div class="blue-bar"></div>
         <div class="text-content">
@@ -354,7 +350,7 @@ CONTENT_SLIDE_HTML_TEMPLATE = """
         height: 100%;
         display: block;
         /* 'cover' scales the image to fill the container, cropping sides or top/bottom as needed */
-        object-fit: cover;
+        object-fit: {crop_type};
         /* Aligns the image. 'center' horizontally, and 25% from the top vertically to shift it up. */
         object-position: center 25%;
       }}
@@ -434,8 +430,8 @@ CONTENT_SLIDE_HTML_TEMPLATE = """
   </head>
   <body>
     <div class="container">
-      <img src="./logo.png" alt="SW Logo" class="logo" />
-      <img src="{file_path}" class="background-image" />
+      <img src="{logo_image}" alt="SW Logo" class="logo" />
+      <img src="{background_image}" class="background-image" />
       <div class="text-overlay">
         <div class="blue-bar"></div>
         <div class="text-content">
@@ -472,15 +468,6 @@ CONTENT_SLIDE_OVERLAY_TEMPLATE = """
         height: 1350px;
         margin: auto;
         overflow: hidden;
-      }}
-      .background-image {{
-        width: 100%;
-        height: 100%;
-        display: block;
-        /* 'cover' scales the image to fill the container, cropping sides or top/bottom as needed */
-        object-fit: cover;
-        /* Aligns the image. 'center' horizontally, and 25% from the top vertically to shift it up. */
-        object-position: center 25%;
       }}
       .logo {{
         position: absolute;
@@ -558,7 +545,7 @@ CONTENT_SLIDE_OVERLAY_TEMPLATE = """
   </head>
   <body>
     <div class="container">
-      <img src="./logo.png" alt="SW Logo" class="logo" />
+      <img src="{logo_image}" alt="SW Logo" class="logo" />
       <div class="text-overlay">
         <div class="blue-bar"></div>
         <div class="text-content">
@@ -572,6 +559,7 @@ CONTENT_SLIDE_OVERLAY_TEMPLATE = """
 """
 
 writeup_template = {
+    "page_name": "scoopwhoop",
     "template_type": "writeup",
     "text_template": {"template_description":TEMPLATE_DESCRIPTION,
             "json_description":JSON_DESCRIPTION},
@@ -579,10 +567,7 @@ writeup_template = {
         "headline_slide": {
             "html_template": HEADLINE_SLIDE_HTML_TEMPLATE,
             "overlay_template": HEADLINE_SLIDE_OVERLAY_TEMPLATE,
-            "text_json": {
-                "name": "headline_slide",
-                "image_description": "str",
-                "text_template": {
+            "text": {
                     "headline": {"type": "text", "tag": "h1", "class": ""},
                     "subtext": {"type": "text", "tag": "p", "class": "subtext"},
                     "is_trigger": {
@@ -590,20 +575,39 @@ writeup_template = {
                         "html_snippet": "<p class='trigger-warning'>Trigger Warning</p>",
                     },
                     "source": {"type": "text", "tag": "p", "class": "source"},
-                },
             },
+            "assets":{
+                "background_video": {"type":"bytes", "file_type":"mp4"},
+                "background_image": {"type":"bytes", "file_type":"png"},
+                "logo_image": {"type": "dropdown", "values": ["logo_original.png", "logo_hottake.png"], "default": "logo.png"},
+            },
+            "image_edits": {
+                "crop_type": {"type": "dropdown", "values": ["cover", "contain"] , "default": "cover"},
+            },
+            "video_edits":{
+                "crop_type": {"type": "dropdown", "values": ["cover", "contain"] , "default": "cover"},
+                "type": {"type":"default", "values": "image_overlay"},
+            }
         },
         "content_slide": {
             "html_template": CONTENT_SLIDE_HTML_TEMPLATE,
             "overlay_template": CONTENT_SLIDE_OVERLAY_TEMPLATE,
-            "text_json": {
-                "name": "content_slide",
-                "image_description": "str",
-                "text_template": {
+            "text": {
                     "subtext": {"type": "text_area", "tag": "p", "class": "subtext"},
                     "source": {"type": "text", "tag": "p", "class": "source"},
-                },
             },
+            "assets":{
+                "background_video": {"type":"bytes", "file_type":"mp4"},
+                "background_image": {"type":"bytes", "file_type":"png"},
+                "logo_image": {"type": "dropdown", "values": ["logo_original.png", "logo_hottake.png"], "default": "logo.png"},
+            },
+            "image_edits": {
+                "crop_type": {"type": "dropdown", "values": ["cover", "contain"] , "default": "cover"},
+            },
+            "video_edits":{
+                "type": {"type":"default", "values": "image_overlay"},
+                "crop_type": {"type": "dropdown", "values": ["cover", "contain"] , "default": "cover"},
+            }
         },
     },
 }

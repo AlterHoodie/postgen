@@ -23,23 +23,20 @@ JSON_DESCRIPTION = """
 ### Attributes:
 *   **`image_description`:** A clear, one-line description of the desired background image that captures the mood, subject and style - for example, a movie headline could reference the official poster, key actors or set photos, while news stories should focus on actual event stills and photos.
 (e.g., "Special Ops 2025 India Poster", "Rahul Gandhi's Speech Portrait Shot").
-*   **`first_line`:** The main headline of the story. Must be a powerful statement of **no more than 3-4 words**.
-    *   **Format:** `<div class="first-line">YOUR HEADLINE HERE</div>`
+*   **`first_line`:** The main headline of the story. Must be a powerful statement of **no more than 3-4 words**. Use plain text only.
 *   **`highlight`:** The highlighted keyword or phrase of the headline. Must be **no more than 3-4 words**.
-    *   **Format:** `<div class="highlight">HIGHLIGHTED TEXT HERE</div>`
-*   **`sub_heading`:** A concise subheading that provides additional context to the headline. **Must not exceed one line or 8-10 words.**
-    *   **Format:** `<div class="sub-heading">Your sub-heading here</div>`
+*   **`sub_heading`:** A concise subheading that provides additional context to the headline. **Must not exceed one line or 8-10 words.** Use plain text only.
 
 ### Text Input Structure:
-    {
+    {{
       "name": "headline_slide",
       "image_description": "str",
-      "text_template": {
-        "first_line": "<html_snippet_code>",
-        "highlight": "<html_snippet_code>",
-        "sub_heading": "<html_snippet_code>"
-      }
-    }
+      "text": {{
+        "first_line": "str",
+        "highlight": "str",
+        "sub_heading": "str"
+      }}
+    }}
 
 **2. Timeline Start Slide**
 *   **Purpose:** This slide marks the first event or the beginning of the chronological sequence.
@@ -47,40 +44,36 @@ JSON_DESCRIPTION = """
 ### Attributes:
 *   **`image_description`:** A clear, one-line description of the desired background image that captures the mood, subject and style - for example, a movie headline could reference the official poster, key actors or set photos, while news stories should focus on actual event stills and photos.
 (e.g., "Special Ops 2025 India Poster", "Rahul Gandhi's Speech Portrait Shot").
-*   **`timeline_highlight`:** The timestamp for the event. **Must be in a "Time, Date" format** (e.g., `10:30 PM, 9TH JUNE`). This field should only contain the time and date.
-    *   **Format:** `<div class="timeline-highlight">10:30 PM, 9TH JUNE</div>`
-*   **`body_text`:** The main descriptive text for this event. Expand on the story in **2-3 lines** not more than that, explaining what happened at this point in time.
-    *   **Format:** `<p class="body-text">Your full body text goes here...</p>`
+*   **`timeline_highlight`:** The timestamp for the event. **Must be in a "Time, Date" format** (e.g., `10:30 PM, 9TH JUNE`). This field should only contain the time and date. 
+*   **`body_text`:** The main descriptive text for this event. Expand on the story in **2-3 lines** not more than that, explaining what happened at this point in time. Use plain text only.
 
 ### Text Input Structure:
-    {
+    {{
       "name": "timeline_start_slide",
       "image_description": "str",
-      "text_template": {
-        "timeline_highlight": "<html_snippet_code>",
-        "body_text": "<html_snippet_code>"
-      }
-    }
+      "text": {{
+        "timeline_highlight": "str",
+        "body_text": "str"
+      }}
+    }}
 
 **3. Timeline Middle Slide**
 *   **Purpose:** This slide is for any subsequent event between the start and the end of the timeline. Use it for all intermediate milestones.
 
 ### Attributes:
 *   **`image_description`:** A one-line description of an image relevant to this specific event in the timeline.
-*   **`timeline_highlight`:** The timestamp for the event. **Must be in a "Time, Date" format** (e.g., `11:00 PM, 9TH JUNE`). This field should only contain the time and date.
-    *   **Format:** `<div class="timeline-highlight">11:00 PM, 9TH JUNE</div>`
-*   **`body_text`:** The main descriptive text for this event. Expand on the story in **2-3 lines** not more than that, explaining what happened at this point in time.
-    *   **Format:** `<p class="body-text">Your full body text goes here...</p>`
+*   **`timeline_highlight`:** The timestamp for the event. **Must be in a "Time, Date" format** (e.g., `11:00 PM, 9TH JUNE`). This field should only contain the time and date. 
+*   **`body_text`:** The main descriptive text for this event. Expand on the story in **2-3 lines** not more than that, explaining what happened at this point in time. Use plain text only.
 
 ### Text Input Structure:
-    {
+    {{
       "name": "timeline_middle_slide",
       "image_description": "str",
-      "text_template": {
-        "timeline_highlight": "<html_snippet_code>",
-        "body_text": "<html_snippet_code>"
-      }
-    }
+      "text": {{
+        "timeline_highlight": "str",
+        "body_text": "str"
+      }}
+    }}
 
 **4. Timeline End Slide**
 *   **Purpose:** This is the concluding event of the timeline, used to wrap up the story or present the final milestone.
@@ -88,19 +81,17 @@ JSON_DESCRIPTION = """
 ### Attributes:
 *   **`image_description`:** A one-line description of an image relevant to this final event in the timeline.
 *   **`timeline_highlight`:** The timestamp for the final event. **Must be in a "Time, Date" format** (e.g., `1:30 AM, 10TH JUNE`). This field should only contain the time and date.
-    *   **Format:** `<div class="timeline-highlight">1:30 AM, 10TH JUNE</div>`
-*   **`body_text`:** The main descriptive text for this final event. Expand on the story's conclusion in **2-3 lines** not more than that.
-    *   **Format:** `<p class="body-text">Your full body text goes here...</p>`
+*   **`body_text`:** The main descriptive text for this final event. Expand on the story's conclusion in **2-3 lines** not more than that. Use plain text only.
 
 ### Text Input Structure:
-    {
+    {{
       "name": "timeline_end_slide",
       "image_description": "str",
-      "text_template": {
-        "timeline_highlight": "<html_snippet_code>",
-        "body_text": "<html_snippet_code>"
-      }
-    }
+      "text": {{
+        "timeline_highlight": "str",
+        "body_text": "str"
+      }}
+    }}
 """
 
 HEADLINE_SLIDE_TEMPLATE = """
@@ -135,7 +126,7 @@ HEADLINE_SLIDE_TEMPLATE = """
         height: 100%;
         display: block;
         /* 'cover' scales the image to fill the container, cropping sides or top/bottom as needed */
-        object-fit: cover;
+        object-fit: {crop_type};
         /* Aligns the image. 'center' horizontally, and 25% from the top vertically to shift it up. */
         object-position: center 25%;
       }}
@@ -222,8 +213,8 @@ HEADLINE_SLIDE_TEMPLATE = """
   </head>
   <body>
     <div class="container">
-      <img src="./logo.png" alt="SW Logo" class="logo" />
-      <img src="{file_path}" class="background-image" />
+      <img src="{logo_image}" alt="SW Logo" class="logo" />
+      <img src="{background_image}" class="background-image" />
       <div class="text-overlay">
         {first_line}
         {highlight}
@@ -263,16 +254,6 @@ HEADLINE_SLIDE_OVERLAY_TEMPLATE = """
         overflow: hidden;
       }}
 
-      .background-image {{
-        width: 100%;
-        height: 100%;
-        display: block;
-        /* 'cover' scales the image to fill the container, cropping sides or top/bottom as needed */
-        object-fit: cover;
-        /* Aligns the image. 'center' horizontally, and 25% from the top vertically to shift it up. */
-        object-position: center 25%;
-      }}
-
       .logo {{
         position: absolute;
         top: 40px;
@@ -355,7 +336,7 @@ HEADLINE_SLIDE_OVERLAY_TEMPLATE = """
   </head>
   <body>
     <div class="container">
-      <img src="./logo.png" alt="SW Logo" class="logo" />
+      <img src="{logo_image}" alt="SW Logo" class="logo" />
       <div class="text-overlay">
         {first_line}
         {highlight}
@@ -400,7 +381,7 @@ TIMELINE_START_SLIDE_TEMPLATE = """
         height: 100%;
         display: block;
         /* 'cover' scales the image to fill the container, cropping sides or top/bottom as needed */
-        object-fit: cover;
+        object-fit: {crop_type};
         /* Aligns the image. 'center' horizontally, and 25% from the top vertically to shift it up. */
         object-position: center 25%;
       }}
@@ -510,8 +491,8 @@ TIMELINE_START_SLIDE_TEMPLATE = """
   </head>
   <body>
     <div class="container">
-      <img src="./logo.png" alt="SW Logo" class="logo" />
-      <img src="{file_path}" class="background-image" />
+      <img src="{logo_image}" alt="SW Logo" class="logo" />
+      <img src="{background_image}" class="background-image" />
       <div class="text-overlay">
         <!-- MODIFIED TIMELINE STRUCTURE -->
         <div class="timeline-track">
@@ -554,16 +535,6 @@ TIMELINE_START_SLIDE_OVERLAY_TEMPLATE = """
         overflow: hidden;
       }}
 
-      .background-image {{
-        width: 100%;
-        height: 100%;
-        display: block;
-        /* 'cover' scales the image to fill the container, cropping sides or top/bottom as needed */
-        object-fit: cover;
-        /* Aligns the image. 'center' horizontally, and 25% from the top vertically to shift it up. */
-        object-position: center 25%;
-      }}
-
       .logo {{
         position: absolute;
         top: 40px;
@@ -669,7 +640,7 @@ TIMELINE_START_SLIDE_OVERLAY_TEMPLATE = """
   </head>
   <body>
     <div class="container">
-      <img src="./logo.png" alt="SW Logo" class="logo" />
+      <img src="{logo_image}" alt="SW Logo" class="logo" />
       <div class="text-overlay">
         <!-- MODIFIED TIMELINE STRUCTURE -->
         <div class="timeline-track">
@@ -717,7 +688,7 @@ TIMELINE_MIDDLE_SLIDE_TEMPLATE = """
         height: 100%;
         display: block;
         /* 'cover' scales the image to fill the container, cropping sides or top/bottom as needed */
-        object-fit: cover;
+        object-fit: {crop_type};
         /* Aligns the image. 'center' horizontally, and 25% from the top vertically to shift it up. */
         object-position: center 25%;
       }}
@@ -827,8 +798,8 @@ TIMELINE_MIDDLE_SLIDE_TEMPLATE = """
   </head>
   <body>
     <div class="container">
-      <img src="./logo.png" alt="SW Logo" class="logo" />
-      <img src="{file_path}" class="background-image" />
+      <img src="{logo_image}" alt="SW Logo" class="logo" />
+      <img src="{background_image}" class="background-image" />
       <div class="text-overlay">
         <!-- MODIFIED TIMELINE STRUCTURE -->
         <div class="timeline-track">
@@ -871,16 +842,6 @@ TIMELINE_MIDDLE_SLIDE_OVERLAY_TEMPLATE = """
         overflow: hidden;
       }}
 
-      .background-image {{
-        width: 100%;
-        height: 100%;
-        display: block;
-        /* 'cover' scales the image to fill the container, cropping sides or top/bottom as needed */
-        object-fit: cover;
-        /* Aligns the image. 'center' horizontally, and 25% from the top vertically to shift it up. */
-        object-position: center 25%;
-      }}
-
       .logo {{
         position: absolute;
         top: 40px;
@@ -986,7 +947,7 @@ TIMELINE_MIDDLE_SLIDE_OVERLAY_TEMPLATE = """
   </head>
   <body>
     <div class="container">
-      <img src="./logo.png" alt="SW Logo" class="logo" />
+      <img src="{logo_image}" alt="SW Logo" class="logo" />
       <div class="text-overlay">
         <!-- MODIFIED TIMELINE STRUCTURE -->
         <div class="timeline-track">
@@ -1034,7 +995,7 @@ TIMELINE_END_SLIDE_TEMPLATE = """
         height: 100%;
         display: block;
         /* 'cover' scales the image to fill the container, cropping sides or top/bottom as needed */
-        object-fit: cover;
+        object-fit: {crop_type};
         /* Aligns the image. 'center' horizontally, and 25% from the top vertically to shift it up. */
         object-position: center 25%;
       }}
@@ -1144,8 +1105,8 @@ TIMELINE_END_SLIDE_TEMPLATE = """
   </head>
   <body>
     <div class="container">
-      <img src="./logo.png" alt="SW Logo" class="logo" />
-      <img src="{file_path}" class="background-image" />
+      <img src="{logo_image}" alt="SW Logo" class="logo" />
+      <img src="{background_image}" class="background-image" />
       <div class="text-overlay">
         <!-- MODIFIED TIMELINE STRUCTURE -->
         <div class="timeline-track">
@@ -1188,16 +1149,6 @@ TIMELINE_END_SLIDE_OVERLAY_TEMPLATE = """
         overflow: hidden;
       }}
 
-      .background-image {{
-        width: 100%;
-        height: 100%;
-        display: block;
-        /* 'cover' scales the image to fill the container, cropping sides or top/bottom as needed */
-        object-fit: cover;
-        /* Aligns the image. 'center' horizontally, and 25% from the top vertically to shift it up. */
-        object-position: center 25%;
-      }}
-
       .logo {{
         position: absolute;
         top: 40px;
@@ -1303,7 +1254,7 @@ TIMELINE_END_SLIDE_OVERLAY_TEMPLATE = """
   </head>
   <body>
     <div class="container">
-      <img src="./logo.png" alt="SW Logo" class="logo" />
+      <img src="{logo_image}" alt="SW Logo" class="logo" />
       <div class="text-overlay">
         <!-- MODIFIED TIMELINE STRUCTURE -->
         <div class="timeline-track">
@@ -1320,6 +1271,7 @@ TIMELINE_END_SLIDE_OVERLAY_TEMPLATE = """
 """
 
 timeline_template = {
+    "page_name": "scoopwhoop",
     "template_type": "timeline",
     "text_template": {"template_description":TEMPLATE_DESCRIPTION,
             "json_description":JSON_DESCRIPTION},
@@ -1327,10 +1279,7 @@ timeline_template = {
         "headline_slide": {
             "html_template": HEADLINE_SLIDE_TEMPLATE,
             "overlay_template": HEADLINE_SLIDE_OVERLAY_TEMPLATE,
-            "text_json": {
-                "name": "headline_slide",
-                "image_description": "str",
-                "text_template": {
+            "text": {
                     "first_line": {"type": "text", "tag": "div", "class": "first-line"},
                     "highlight": {"type": "text", "tag": "div", "class": "highlight"},
                     "sub_heading": {
@@ -1338,16 +1287,24 @@ timeline_template = {
                         "tag": "div",
                         "class": "sub-heading",
                     },
-                },
             },
+            "assets":{
+                "background_video": {"type":"bytes", "file_type":"mp4"},
+                "background_image": {"type":"bytes", "file_type":"png"},
+                "logo_image": {"type": "dropdown", "values": ["logo_original.png", "logo_hottake.png"], "default": "logo.png"},
+            },
+            "image_edits": {
+                "crop_type": {"type": "dropdown", "values": ["cover", "contain"] , "default": "cover"},
+            },
+            "video_edits":{
+                "type": {"type":"default", "values": "image_overlay"},
+                "crop_type": {"type": "dropdown", "values": ["cover", "contain"] , "default": "cover"},
+            }
         },
         "timeline_start_slide": {
             "html_template": TIMELINE_START_SLIDE_TEMPLATE,
             "overlay_template": TIMELINE_START_SLIDE_OVERLAY_TEMPLATE,
-            "text_json": {
-                "name": "timeline_start_slide",
-                "image_description": "str",
-                "text_template": {
+            "text": {
                     "timeline_highlight": {
                         "type": "text",
                         "tag": "div",
@@ -1358,16 +1315,24 @@ timeline_template = {
                         "tag": "p",
                         "class": "body-text",
                     },
-                },
             },
+            "assets":{
+                "background_video": {"type":"bytes", "file_type":"mp4"},
+                "background_image": {"type":"bytes", "file_type":"png"},
+                "logo_image": {"type": "dropdown", "values": ["logo_original.png", "logo_hottake.png"], "default": "logo.png"},
+            },
+            "image_edits": {
+                "crop_type": {"type": "dropdown", "values": ["cover", "contain"] , "default": "cover"},
+            },
+            "video_edits":{
+                "type": {"type":"default", "values": "image_overlay"},
+                "crop_type": {"type": "dropdown", "values": ["cover", "contain"] , "default": "cover"},
+            }
         },
         "timeline_middle_slide": {
             "html_template": TIMELINE_MIDDLE_SLIDE_TEMPLATE,
             "overlay_template": TIMELINE_MIDDLE_SLIDE_OVERLAY_TEMPLATE,
-            "text_json": {
-                "name": "timeline_middle_slide",
-                "image_description": "str",
-                "text_template": {
+            "text": {
                     "timeline_highlight": {
                         "type": "text",
                         "tag": "div",
@@ -1378,16 +1343,24 @@ timeline_template = {
                         "tag": "p",
                         "class": "body-text",
                     },
-                },
             },
+            "assets":{
+                "background_video": {"type":"bytes", "file_type":"mp4"},
+                "background_image": {"type":"bytes", "file_type":"png"},
+                "logo_image": {"type": "dropdown", "values": ["logo_original.png", "logo_hottake.png"], "default": "logo.png"},
+            },
+            "image_edits": {
+                "crop_type": {"type": "dropdown", "values": ["cover", "contain"] , "default": "cover"},
+            },
+            "video_edits":{
+                "type": {"type":"default", "values": "image_overlay"},
+                "crop_type": {"type": "dropdown", "values": ["cover", "contain"] , "default": "cover"},
+            }
         },
         "timeline_end_slide": {
             "html_template": TIMELINE_END_SLIDE_TEMPLATE,
             "overlay_template": TIMELINE_END_SLIDE_OVERLAY_TEMPLATE,
-            "text_json": {
-                "name": "timeline_end_slide",
-                "image_description": "str",
-                "text_template": {
+            "text": {
                     "timeline_highlight": {
                         "type": "text",
                         "tag": "div",
@@ -1398,8 +1371,19 @@ timeline_template = {
                         "tag": "p",
                         "class": "body-text",
                     },
-                },
             },
+            "assets":{
+                "background_video": {"type":"bytes", "file_type":"mp4"},
+                "background_image": {"type":"bytes", "file_type":"png"},
+                "logo_image": {"type": "dropdown", "values": ["logo_original.png", "logo_hottake.png"], "default": "logo.png"},
+            },
+            "image_edits": {
+                "crop_type": {"type": "dropdown", "values": ["cover", "contain"] , "default": "cover"},
+            },
+            "video_edits":{
+                "type": {"type":"default", "values": "image_overlay"},
+                "crop_type": {"type": "dropdown", "values": ["cover", "contain"] , "default": "cover"},
+            }
         },
     },
 }

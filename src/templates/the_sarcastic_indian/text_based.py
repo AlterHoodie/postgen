@@ -7,23 +7,16 @@ Text Based Slide:
   - Note: Only one slide is required for this template.
 
   ### Attributes:
-  
-  - logo_image: The logo image to be used for the slide. For normal posts, use logo_1.png. For "hottakes", use logo_hottake.png
-    EX: logo_1.png or logo_hottake.png
-  - background_image: The background image to be used for the slide. For normal posts, use blue_background.png. For "hottakes", use black_background.png
-    EX: blue_background.png or black_background.png
-  - headline: The main headline of the story must be given as an html H1 tag 
-    EX: <h1>
-            IPL just doesn't seem that
-            <span class="yellow">exciting</span> anymore.
-        </h1>
-  - subtext: A short p tag with classname-"subtext" for the post, one sentence max.
-    Ex: <p class="subtext">And then I realized mummy <br/> hamesha last mai kyun khaati thi.</p>
+  - headline: The main headline of the story. Use **str** for highlighting important words and \n for line breaks.
+    EX: IPL just doesn't seem that **exciting** anymore.
+  - subtext: A short description for the post, one sentence max. Use plain text only.
+    Ex: And then I realized mummy hamesha last mai kyun khaati thi.
   ### Text Input:
     {{
       "name": "text_based_slide",
-      "text_template":{{
-      "headline": "<html_snippet_code>",
+      "text": {{
+      "headline": "str",
+      "subtext": "str"
       }}
     }}
 
@@ -113,5 +106,33 @@ TEXT_BASED_HTML_TEMPLATE = """
     </div>
   </body>
 </html>
-
 """
+
+text_based_template = {
+    "page_name": "the_sarcastic_indian",
+    "template_type": "text_based",
+    "text_template": {"template_description":TEXT_DESCRIPTION,
+            "json_description":JSON_DESCRIPTION},
+    "slides": {
+        "text_based_slide": {
+            "html_template": TEXT_BASED_HTML_TEMPLATE,
+            "overlay_template": "",
+            "text": {
+                "name": "text_based_slide",
+                "text_template": {
+                    "headline": {"type": "text", "tag": "h1", "class": ""},
+                    "subtext": {"type": "text", "tag": "p", "class": "subtext"},
+                },
+            },
+            "assets":{
+                "logo_image": {"type": "dropdown", "values": ["logo.png"], "default": "logo.png"},
+                "background_image": {"type": "dropdown", "values": ["background.jpg"], "default": "background.jpg"},
+            },
+            ## No edits because background image not there
+            "image_edits": {},
+            "video_edits":{
+                "type": {"type":"default", "values": "image_overlay"},
+            }
+        },
+    },
+}
