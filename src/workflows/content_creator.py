@@ -116,8 +116,7 @@ async def slide_creator(slide_template: dict, html_template: dict, page_name:str
                     session_id,
                     False,
                 )
-                with open("./data_/test_out.png", "wb") as f:
-                    f.write(with_text_bytes)
+                
                 return {
                     "images": {
                         "without_text": img_data["image_bytes"],
@@ -143,7 +142,7 @@ async def slide_creator(slide_template: dict, html_template: dict, page_name:str
 
 
 async def save_to_mongo(session_id: str, headline: str, template_type: str, 
-                      story_board: dict, slide_images: list, error: str = None) -> str:
+                      story_board: dict, slide_images: list, page_name: str = "scoopwhoop", error: str = None) -> str:
     """Save workflow results to MongoDB"""
     try:
         mongo_client = get_mongo_client()
@@ -153,6 +152,7 @@ async def save_to_mongo(session_id: str, headline: str, template_type: str,
             template_type=template_type,
             story_board=story_board,
             slide_images=slide_images,
+            page_name=page_name,
             error=error,
         )
         mongo_client.close()
@@ -208,6 +208,7 @@ async def workflow(headline: str, template: dict,image_bytes: bytes = None, save
                 template_type=template["template_type"],
                 story_board=story_board,
                 slide_images=slide_results,
+                page_name=template["page_name"],
                 error=None,
             )
 
@@ -226,6 +227,7 @@ async def workflow(headline: str, template: dict,image_bytes: bytes = None, save
                     template_type=template.get("template_type", "unknown"),
                     story_board={"storyboard": []},
                     slide_images=[],
+                    page_name=template.get("page_name", "scoopwhoop"),
                     error=str(e),
                 )
             except Exception as mongo_error:

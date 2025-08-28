@@ -30,7 +30,6 @@ def image_editor(text: dict,page_name:str, assets: dict, image_edits: dict, html
 
         for key, value in assets.items():
             assets[key] = value.split("/")[-1]
-
         # Check if this is a text-based template 
         html_content = html_template.format(**assets, **image_edits, **text)
 
@@ -345,7 +344,6 @@ def text_editor(
     for key, value in text_template.items():
         if key not in text and "default" in value:
             text_input[key] = value["default"]
-    
     # Process provided text values
     for key, value in text.items():
         if key not in text_template:
