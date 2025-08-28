@@ -71,6 +71,31 @@ async def download_image(image_url: str) -> io.BytesIO:
         logging.error(f"Failed to download image {image_url}: {e}")
         return None
 
+async def download_video(video_url: str) -> io.BytesIO:
+    """
+    Download video from URL and return as BytesIO object
+    Returns the video data as BytesIO object if it's a valid video
+    """
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(video_url, timeout=10)  
+            response.raise_for_status()
+            
+            # Check if content type is a video
+            content_type = response.headers.get("content-type", "").lower()
+            if not content_type.startswith("video/"):
+                logging.warning(
+                    f"URL does not return a video content type: {content_type} for {video_url}"
+                )
+                return None
+            
+            # Create BytesIO object with video data
+            video_data = io.BytesIO(response.content)
+            video_data.name = "video.mp4"  # Default name
+            return video_data
+    except Exception as e:
+        logging.error(f"Failed to download video {video_url}: {e}")
+        return None
 
 async def openai_response(
     prompt,
