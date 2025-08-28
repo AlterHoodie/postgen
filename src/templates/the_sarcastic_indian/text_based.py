@@ -36,7 +36,7 @@ TEXT_BASED_HTML_TEMPLATE = """
     />
     <style>
       body,
-      html {
+      html {{
         margin: 0;
         padding: 0;
         font-family: "Inter", sans-serif;
@@ -44,9 +44,9 @@ TEXT_BASED_HTML_TEMPLATE = """
         justify-content: center;
         align-items: center;
         background-color: #f0f0f0;
-      }
+      }}
 
-      .post-container {
+      .container {{
         width: 1080px;
         height: 1350px;
         background-image: url("{background_image}");
@@ -59,33 +59,33 @@ TEXT_BASED_HTML_TEMPLATE = """
         color: white;
         box-sizing: border-box;
         padding: 85px;
-      }
+      }}
 
-      .logo {
+      .logo {{
         position: absolute;
         top: -40px;
         left: 10px;
         width: 270px;
-      }
+      }}
 
-      .headline {
+      .headline {{
         font-size: 90px;
         font-weight: 700;
         line-height: 1.3;
         text-align: left;
         width: 100%;
-      }
+      }}
 
-      .swipe {
+      .swipe {{
         position: absolute;
         bottom: 0px;
         right: 55px;
         font-size: 40px;
         font-weight: 700;
         margin-bottom: 20px;
-      }
+      }}
 
-      .source {
+      .source {{
         position: absolute;
         bottom: 0px;
         left: 20px;
@@ -93,15 +93,13 @@ TEXT_BASED_HTML_TEMPLATE = """
         font-style: italic;
         font-weight: 500; /* Regular weight */
         margin-bottom: 20px;
-      }
+      }}
     </style>
   </head>
   <body>
-    <div class="post-container">
-      <h1 class="headline">
+    <div class="container">
         {headline}
-      </h1>
-      <p class="source">{news_source}</p>
+        {news_source}
       <p class="swipe">Swipe>>></p>
     </div>
   </body>
@@ -118,11 +116,8 @@ text_based_template = {
             "html_template": TEXT_BASED_HTML_TEMPLATE,
             "overlay_template": "",
             "text": {
-                "name": "text_based_slide",
-                "text_template": {
-                    "headline": {"type": "text", "tag": "h1", "class": ""},
-                    "subtext": {"type": "text", "tag": "p", "class": "subtext"},
-                },
+                "headline": {"type": "text", "tag": "h1", "class": "headline"},
+                "news_source": {"type": "text", "tag": "p", "class": "source"},
             },
             "assets":{
                 "logo_image": {"type": "dropdown", "values": ["logo.png"], "default": "logo.png"},

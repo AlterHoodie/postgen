@@ -44,6 +44,7 @@ class SimpleMongoClient:
         template_type: str,
         story_board: Dict,
         slide_images: List[List[Dict]],
+        page_name: str = "scoopwhoop",
         error: Optional[str] = None,
     ) -> str:
         """Store content creator workflow result in MongoDB"""
@@ -84,7 +85,7 @@ class SimpleMongoClient:
             slide_data = {
                 "slide_index": idx,
                 "name": slide_info.get("name", f"slide_{idx}"),
-                "text_template": slide_info.get("text_template", ""),
+                "text_template": slide_info.get("text",{}),
                 "image_description": slide_info.get("image_description", ""),
                 "images": images_with_type,
                 "total_images": len(images_with_type),
@@ -95,6 +96,7 @@ class SimpleMongoClient:
         document = {
             "session_id": session_id,
             "template_type": template_type,
+            "page_name": page_name,
             "created_at": datetime.now(),
             "workflow_type": "content_creator",
             "headline": headline,

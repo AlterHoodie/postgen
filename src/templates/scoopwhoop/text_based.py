@@ -125,11 +125,8 @@ text_based_template = {
             "html_template": TEXT_BASED_HTML_TEMPLATE,
             "overlay_template": "",
             "text": {
-                "name": "text_based_slide",
-                "text_template": {
-                    "headline": {"type": "text", "tag": "h1", "class": ""},
-                    "subtext": {"type": "text", "tag": "p", "class": "subtext"},
-                },
+                "headline": {"type": "text", "tag": "h1", "class": ""},
+                "subtext": {"type": "text", "tag": "p", "class": "subtext"},
             },
             "assets":{
                 "logo_image": {"type": "dropdown", "values": ["logo_original.png", "logo_hottake.png"], "default": "logo_original.png"},

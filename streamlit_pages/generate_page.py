@@ -14,19 +14,45 @@ def show_generate_page():
     st.title("🎨 Generate Content Slides")
     st.markdown("Enter a headline to generate content slides with images")
 
+    # Page selection
+    page_name = st.selectbox(
+        "Select Page/Brand:",
+        ["scoopwhoop", "twitter", "social_village", "the_sarcastic_indian"],
+        help="Choose which page/brand to create content for"
+    )
+    
+    # Template options based on page
+    if page_name == "scoopwhoop":
+        template_options = {
+            "Timeline": "timeline",
+            "Thumbnail": "thumbnail",
+            "Writeup": "writeup",
+            "Meme": "meme",
+            "Text Based": "text_based"
+        }
+    elif page_name == "twitter":
+        template_options = {
+            "Tweet Image": "tweet_image",
+            "Tweet Text": "tweet_text"
+        }
+    elif page_name == "social_village":
+        template_options = {
+            "Content": "content",
+            "Thumbnail": "thumbnail"
+        }
+    elif page_name == "the_sarcastic_indian":
+        template_options = {
+            "Text Based": "text_based"
+        }
+    else:
+        template_options = {}
+
     # Input for headline
     headline = st.text_input(
         "Enter Headline",
         placeholder="e.g., UttarKashi Cloud Burst India",
         help="Enter the headline for your content",
     )
-
-    # Template selection
-    template_options = {
-        "Timeline": "timeline",
-        "Thumbnail": "thumbnail",
-        "Writeup": "writeup",
-    }
 
     selected_template = st.selectbox(
         "Select Template",
@@ -42,7 +68,7 @@ def show_generate_page():
             if st.button(
                 "🚀 Generate Content", type="primary", use_container_width=True
             ):
-                generate_content(headline, template_options[selected_template])
+                generate_content(headline, template_options[selected_template], page_name)
 
         with col2:
             # Show latest results link
@@ -57,7 +83,7 @@ def show_generate_page():
         show_content_results(st.session_state["latest_session_id"])
 
 
-def generate_content(headline: str, template_type: str):
+def generate_content(headline: str, template_type: str, page_name: str):
     """Generate content slides with loading progress"""
 
     # Create progress tracking
@@ -70,7 +96,7 @@ def generate_content(headline: str, template_type: str):
 
     try:
         # Get template configuration
-        template = get_template_config(template_type)
+        template = get_template_config(template_type, page_name)
 
         # Step 1: Initialize
         progress_bar.progress(20)
@@ -100,8 +126,9 @@ def generate_content(headline: str, template_type: str):
         progress_bar.progress(100)
         status_text.text("✅ Content generated successfully!")
 
-        # Store session_id in session state
+        # Store session_id and page_name in session state
         st.session_state["latest_session_id"] = session_id
+        st.session_state["latest_page_name"] = page_name
         st.session_state["show_results"] = True
 
         time.sleep(1)
@@ -254,9 +281,9 @@ def show_content_results(session_id: str):
 
                             # Get template and slide info for text editor
                             template_type = result.get("template_type", "timeline")
-                            template = get_template_config(template_type)
+                            result_page_name = result.get("page_name", st.session_state.get("latest_page_name", "scoopwhoop"))
+                            template = get_template_config(template_type, result_page_name)
                             slide_name = selected_slide.get("name", "headline_slide")
-
                             if (
                                 "slides" in template
                                 and slide_name in template["slides"]
@@ -276,13 +303,17 @@ def show_content_results(session_id: str):
                                         raise ValueError("Decoded image data is empty for editing")
                                     # Get original image without text for editing
 
+                                    # Get the specific slide configuration
+                                    slide_config = template["slides"][slide_name]
                                     new_image, submitted = text_editor_form(
                                         text_values=current_text_values,
                                         content_bytes=without_text_bytes,
-                                        template=template,
+                                        template={"slides": {slide_name: slide_config}},
                                         slide_name=slide_name,
                                         form_key=f"edit_form_{session_id}_{selected_slide_idx}_{tab_idx}",
-                                        show_image_upload=True
+                                        page_name=result_page_name,
+                                        show_image_upload=True,
+                                        session_id=session_id
                                     )
 
                                     if submitted and new_image:
@@ -292,6 +323,7 @@ def show_content_results(session_id: str):
 
                                 except Exception as e:
                                     st.error(f"No image to edit")
+                                    print(e)
                             else:
                                 st.info(
                                     "Text editing not available for this slide type"
@@ -311,6 +343,8 @@ def show_content_results(session_id: str):
                         del st.session_state[key]
                     if "latest_session_id" in st.session_state:
                         del st.session_state["latest_session_id"]
+                    if "latest_page_name" in st.session_state:
+                        del st.session_state["latest_page_name"]
                     if "show_results" in st.session_state:
                         del st.session_state["show_results"]
                         st.rerun()
