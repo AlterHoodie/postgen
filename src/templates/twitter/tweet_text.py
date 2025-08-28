@@ -129,7 +129,7 @@ HEADLINE_SLIDE_HTML_TEMPLATE = """
         align-items: center;
       }}
 
-      .tweet-container {{
+      .container {{
         width: 1080px;
         height: 1350px;
         background-color: #ffffff;
@@ -246,7 +246,7 @@ HEADLINE_SLIDE_HTML_TEMPLATE = """
     </style>
   </head>
   <body>
-    <div class="tweet-container">
+    <div class="container">
       <div class="tweet-header">
         <div class="header-left">
           <img src="{profile_pic}" alt="Profile Picture" class="profile-pic" />
@@ -271,3 +271,27 @@ HEADLINE_SLIDE_HTML_TEMPLATE = """
   </body>
 </html>
 """
+
+tweet_text_template = {
+    "page_name": "twitter",
+    "template_type": "tweet_text",
+    "text_template": {"template_description":TEMPLATE_DESCRIPTION,
+            "json_description":JSON_DESCRIPTION},
+    "slides": {
+        "twitter_post": {
+            "html_template": HEADLINE_SLIDE_HTML_TEMPLATE,
+            "overlay_template": "",
+            "text": {
+                    "user_name": {"type": "text", "tag": "span", "class": "user-name"},
+                    "user_handle": {"type": "text", "tag": "span", "class": "user-handle"},
+                    "tweet_text": {"type": "text", "tag": "p", "class": "tweet-text"},
+                    "add_verified_badge": {"type": "checkbox", "html_snippet": VERIFIED_BADGE},
+            },
+            "assets":{
+                "profile_pic": {"type":"bytes", "file_type":"png", "default": "profile_pic.png"},
+            },
+            "image_edits": {},
+            "video_edits":{}
+        },
+    },
+}

@@ -16,9 +16,6 @@ Twitter Post Slide:
   - user_handle: The Twitter handle/username starting with @
     EX: "@apsarawrites", "@heyyasaiyaara"
   
-  - profile_pic: Path to the profile picture image file
-    EX: "./test.png", "./logo_1.png"
-  
   - tweet_text: The main tweet content/message
     EX: "when you choose the guy who makes you laugh", "me and who"
   - verified_badge: Whether to show the blue verified checkmark (use the VERIFIED_BADGE constant or empty string)
@@ -27,12 +24,11 @@ Twitter Post Slide:
     {{
       "name": "twitter_post",
       "image_description": "str",
-      "text_template":{{
+      "text":{{
       "user_name": "str",
       "user_handle": "str", 
-      "profile_pic": "str",
       "tweet_text": "str",
-      "add_verified_badge": "bool"
+      "add_verified_badge": "True/False"
       }}
     }}
 
@@ -125,7 +121,7 @@ HEADLINE_SLIDE_HTML_TEMPLATE = """
         align-items: center;
       }}
 
-      .tweet-container {{
+      .container {{
         width: 1080px;
         height: 1350px;
         background-color: #ffffff;
@@ -242,14 +238,14 @@ HEADLINE_SLIDE_HTML_TEMPLATE = """
     </style>
   </head>
   <body>
-    <div class="tweet-container">
+    <div class="container">
       <div class="tweet-header">
         <div class="header-left">
           <img src="{profile_pic}" alt="Profile Picture" class="profile-pic" />
           <div class="user-info">
             <span class="user-name">
               {user_name}
-              {verified_badge}
+              {add_verified_badge}
             </span>
             <span class="user-handle">{user_handle}</span>
           </div>
@@ -263,10 +259,209 @@ HEADLINE_SLIDE_HTML_TEMPLATE = """
       <div class="tweet-content">
         <p class="tweet-text">{tweet_text}</p>
         <div class="tweet-media">
-          <img src="{file_path}" alt="Tweet Media" class="tweet-image" />
+          <img src="{background_image}" alt="Tweet Media" class="tweet-image" />
         </div>
       </div>
     </div>
   </body>
 </html>
 """
+
+HEADLINE_SLIDE_OVERLAY_TEMPLATE = """
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Twitter Post Template</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body,
+      html {{
+        margin: 0;
+        padding: 0;
+        font-family: "Inter", sans-serif;
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }}
+
+      .container {{
+        width: 1080px;
+        height: 1350px;
+        background-color: #ffffff;
+        padding: 85px;
+        box-sizing: border-box;
+
+        display: flex;
+        flex-direction: column;
+        /* justify-content: center; */
+      }}
+
+      .tweet-header {{
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-shrink: 0;
+        padding-bottom: 10px;
+      }}
+
+      .header-left {{
+        display: flex;
+        align-items: center;
+      }}
+
+      .three-dots {{
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        padding-right: 30px;
+        padding-bottom: 30px;
+      }}
+
+      .dot {{
+        width: 8px;
+        height: 8px;
+        background-color: #c0c9c8;
+        border-radius: 50%;
+      }}
+
+      .profile-pic {{
+        width: 100px;
+        height: 110px;
+        border-radius: 50%;
+        margin-right: 24px;
+        object-fit: cover;
+      }}
+
+      .user-info {{
+        display: flex;
+        flex-direction: column;
+        line-height: 1.2;
+      }}
+
+      .user-name {{
+        font-weight: 700;
+        font-size: 36px;
+        color: #0f1419;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }}
+
+      .verified-badge {{
+        width: 28px;
+        height: 28px;
+        background-color: #1d9bf0;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }}
+
+      .verified-badge::after {{
+        content: "✓";
+        color: white;
+        font-size: 18px;
+        font-weight: bold;
+      }}
+
+      .user-handle {{
+        font-size: 32px;
+        color: #536471;
+      }}
+
+      .tweet-content {{
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+      }}
+
+      .tweet-text {{
+        font-size: 42px;
+        color: #0f1419;
+        line-height: 1.3;
+        margin: 15px 0 60px 0;
+        word-wrap: break-word;
+        flex-shrink: 0;
+      }}
+
+      .tweet-media {{
+        border-radius: 24px;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }}
+
+      .tweet-image {{
+        width: 100%;
+        display: block;
+        border-radius: 24px;
+      }}
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="tweet-header">
+        <div class="header-left">
+          <img src="{profile_pic}" alt="Profile Picture" class="profile-pic" />
+          <div class="user-info">
+            <span class="user-name">
+              {user_name}
+              {add_verified_badge}
+            </span>
+            <span class="user-handle">{user_handle}</span>
+          </div>
+        </div>
+        <div class="three-dots">
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+        </div>
+      </div>
+      <div class="tweet-content">
+        <p class="tweet-text">
+          {tweet_text}
+        </p>
+      </div>
+    </div>
+  </body>
+</html>
+"""
+
+tweet_image_template = {
+    "page_name": "twitter",
+    "template_type": "tweet_image",
+    "text_template": {"template_description":TEMPLATE_DESCRIPTION,
+            "json_description":JSON_DESCRIPTION},
+    "slides": {
+        "twitter_post": {
+            "html_template": HEADLINE_SLIDE_HTML_TEMPLATE,
+            "overlay_template": HEADLINE_SLIDE_OVERLAY_TEMPLATE,
+            "text": {
+                    "user_name": {"type": "text", "tag": "span", "class": "user-name"},
+                    "user_handle": {"type": "text", "tag": "span", "class": "user-handle"},
+                    "tweet_text": {"type": "text", "tag": "p", "class": "tweet-text"},
+                    "add_verified_badge": {"type": "checkbox", "html_snippet": VERIFIED_BADGE},
+            },
+            "assets":{
+                "background_video": {"type":"bytes", "file_type":"mp4"},
+                "background_image": {"type":"bytes", "file_type":"png"},
+                "profile_pic": {"type":"bytes", "file_type":"png", "default": "profile_pic.png"},
+            },
+            "image_edits": {
+                "crop_type": {"type": "dropdown", "values": ["cover", "contain"], "default": "cover"},
+            },
+            "video_edits":{
+                "type": {"type":"default", "values": "video_overlay"},
+                "crop_type": {"type": "dropdown", "values": ["cover", "contain"], "default": "cover"},
+            }
+        },
+    },
+}
