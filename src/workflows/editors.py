@@ -18,34 +18,32 @@ from src.utils import (
 logger = logging.getLogger(__name__)
 
 
-def image_editor(text: dict, assets: dict, image_edits: dict, html_template: str, session_id: str) -> bytes:
+def image_editor(text: dict,page_name:str, assets: dict, image_edits: dict, html_template: str, session_id: str) -> bytes:
     try:
         if html_template is None:
             raise ValueError("HTML template is None")
         if text is None:
             raise ValueError("Text template is None")
         
-        temp_dir = Path("./data/scoopwhoop/temp")
+        temp_dir = Path(f"./data/{page_name}/temp")
         temp_dir.mkdir(exist_ok=True)
-        temp_files = []
+
+        for key, value in assets.items():
+            assets[key] = value.split("/")[-1]
 
         # Check if this is a text-based template 
         html_content = html_template.format(**assets, **image_edits, **text)
 
-        html_path = f"./data/scoopwhoop/temp/temp_overlay_{session_id}.html"
+        html_path = f"./data/{page_name}/temp/temp_overlay_{session_id}.html"
         with open(html_path, "w", encoding="utf-8") as f:
             f.write(html_content)
 
-        temp_files.append(html_path)
-
-        overlay_image_path = f"./data/scoopwhoop/temp/overlay_{session_id}.png"
+        overlay_image_path = f"./data/{page_name}/temp/overlay_{session_id}.png"
         capture_html_screenshot(
             file_path=html_path,
             element_selector=".container",
             output=overlay_image_path,
         )
-
-        temp_files.append(overlay_image_path)
 
         with open(overlay_image_path, "rb") as f:
             return f.read()
@@ -53,23 +51,23 @@ def image_editor(text: dict, assets: dict, image_edits: dict, html_template: str
         logger.error(f"Error in workflow: {e}")
         return None
     finally:
-        cleanup_files(temp_files)
+        cleanup_files(temp_dir,session_id)
 
 
 def _create_overlay_image(
-    text: dict, assets: dict, html_template: str, session_id: str
+    text: dict, assets: dict, html_template: str, session_id: str, page_name: str
 ) -> Tuple[str, str]:
     """
     Create the overlay image with text using HTML template
     """
     # Save HTML template
     html_content = html_template.format(**text, **assets)
-    html_path = f"./data/scoopwhoop/temp/temp_overlay_{session_id}.html"
+    html_path = f"./data/{page_name}/temp/temp_overlay_{session_id}.html"
     with open(html_path, "w", encoding="utf-8") as f:
         f.write(html_content)
 
     # Create overlay image from HTML
-    overlay_image_path = f"./data/scoopwhoop/temp/overlay_{session_id}.png"
+    overlay_image_path = f"./data/{page_name}/temp/overlay_{session_id}.png"
     capture_html_screenshot(
         file_path=html_path,
         element_selector=".container",
@@ -82,6 +80,7 @@ def _create_overlay_image(
 def _create_image_over_video(
     video_path: str,
     overlay_image_path: str,
+    page_name: str,
     session_id: str,
     target_width: int = 1080,
     target_height: int = 1350,
@@ -138,7 +137,7 @@ def _create_image_over_video(
         # Add gradient overlay if requested
         if add_gradient:
             gradient_img = create_gradient_overlay(target_width, target_height)
-            gradient_path = f"./data/scoopwhoop/temp/gradient_{session_id}.png"
+            gradient_path = f"./data/{page_name}/temp/gradient_{session_id}.png"
             gradient_img.save(gradient_path, "PNG")
 
             gradient_clip = ImageClip(gradient_path).with_duration(final_clip.duration)
@@ -152,7 +151,7 @@ def _create_image_over_video(
             (target_width, target_height), Image.Resampling.LANCZOS
         )
         overlay_resized_path = (
-            f"./data/scoopwhoop/temp/overlay_resized_{session_id}.png"
+            f"./data/{page_name}/temp/overlay_resized_{session_id}.png"
         )
         overlay_resized.save(overlay_resized_path, "PNG")
 
@@ -162,7 +161,7 @@ def _create_image_over_video(
 
         # Composite all clips together
         final_composite = CompositeVideoClip(clips_to_composite)
-        output_path = f"./data/scoopwhoop/temp/final_video_{session_id}.mp4"
+        output_path = f"./data/{page_name}/temp/final_video_{session_id}.mp4"
 
         # Write the final file
         final_composite.write_videofile(
@@ -185,66 +184,72 @@ def _create_image_over_video(
 
     except Exception as e:
         print(f"Error during video processing: {e}")
-        return None
+        return None, []
 
 
-def _create_video_over_image(image_path:str, video_path:str, session_id:str, max_scale:float = 0.8, duration:float = None) -> Tuple[str, str]:
+def _create_video_over_image(image_path:str, page_name:str, video_path:str, session_id:str, max_scale:float = 0.8, duration:float = None) -> Tuple[str, str]:
     """
     Create a video with a background image and a video overlay
     """
-    # Load the background image
-    background = ImageClip(image_path)
-    bg_width, bg_height = background.size
-    
-    # Load the video to overlay
-    video_clip = VideoFileClip(video_path)
-    video_width, video_height = video_clip.size
-    
-    # Calculate appropriate size while maintaining aspect ratio
-    # Scale video to fit within the background with some padding
-    scale_x = (bg_width * max_scale) / video_width
-    scale_y = (bg_height * max_scale) / video_height
-    
-    # Use the smaller scale to ensure video fits completely
-    scale_factor = min(scale_x, scale_y)
-    
-    new_width = int(video_width * scale_factor)
-    new_height = int(video_height * scale_factor)
-    
-    # Resize the video while maintaining aspect ratio
-    video_clip = video_clip.resized((new_width, new_height))
-    
-    # Set duration (use video duration if not specified)
-    if duration is None:
-        duration = video_clip.duration
-    
-    # Set background duration to match
-    background = background.with_duration(duration)
-    
-    # Center the video on the background
-    video_clip = video_clip.with_position('center')
-    
-    # Create composite video
-    final_video = CompositeVideoClip([background, video_clip])
-    
-    # Write the result
-    output_path = f"./data/scoopwhoop/temp/final_video_{session_id}.mp4"
-    final_video.write_videofile(output_path, 
-                               codec='libx264', 
-                               audio_codec='aac',
-                               fps=video_clip.fps,
-                               preset="medium",
-                               bitrate="2500k",
-                               audio_bitrate="128k",
-                               logger=None)
-    
-    # Clean up
-    background.close()
-    video_clip.close()
-    final_video.close()
+    try:
+        # Load the background image
+        background = ImageClip(image_path)
+        bg_width, bg_height = background.size
+
+        # Load the video to overlay
+        video_clip = VideoFileClip(video_path)
+        video_width, video_height = video_clip.size
+
+        # Calculate appropriate size while maintaining aspect ratio
+        # Scale video to fit within the background with some padding
+        scale_x = (bg_width * max_scale) / video_width
+        scale_y = (bg_height * max_scale) / video_height
+
+        # Use the smaller scale to ensure video fits completely
+        scale_factor = min(scale_x, scale_y)
+
+        new_width = int(video_width * scale_factor)
+        new_height = int(video_height * scale_factor)
+
+        # Resize the video while maintaining aspect ratio
+        video_clip = video_clip.resized((new_width, new_height))
+
+        # Set duration (use video duration if not specified)
+        if duration is None:
+            duration = video_clip.duration
+
+        # Set background duration to match
+        background = background.with_duration(duration)
+
+        # Center the video on the background
+        video_clip = video_clip.with_position('center')
+
+        # Create composite video
+        final_video = CompositeVideoClip([background, video_clip])
+
+        # Write the result
+        output_path = f"./data/{page_name}/temp/final_video_{session_id}.mp4"
+        final_video.write_videofile(output_path, 
+                                   codec='libx264', 
+                                   audio_codec='aac',
+                                   fps=video_clip.fps,
+                                   preset="medium",
+                                   bitrate="2500k",
+                                   audio_bitrate="128k",
+                                   logger=None)
+
+        # Clean up
+        background.close()
+        video_clip.close()
+        final_video.close()
+
+        return output_path, [image_path, video_path]
+    except Exception as e:
+        print(f"Error during video processing: {e}")
+        return None, []
 
 
-def video_editor(text: dict,assets:dict ,video_edits: dict, html_template: str, session_id: str) -> bytes:
+def video_editor(text: dict,page_name:str,assets:dict ,video_edits: dict, html_template: str, session_id: str) -> bytes:
     """
     Complete workflow to create edited video with text overlay
 
@@ -256,13 +261,12 @@ def video_editor(text: dict,assets:dict ,video_edits: dict, html_template: str, 
     Returns:
         str: Path to the final video file, or None if failed
     """
-    temp_files = []
 
     try:
         # Create temp directory
-        temp_dir = Path("./data/scoopwhoop")
+        temp_dir = Path(f"./data/{page_name}/temp")
         temp_dir.mkdir(exist_ok=True)
-        temp_files.extend([value for key, value in assets.items()])
+
         video_src = assets.get("background_video")
         del assets['background_video']
 
@@ -271,9 +275,9 @@ def video_editor(text: dict,assets:dict ,video_edits: dict, html_template: str, 
             text=text,
             assets=assets,
             html_template=html_template,
-            session_id=session_id,
+            session_id=session_id,  
+            page_name=page_name,
         )
-        temp_files.extend([overlay_image_path, html_path])
         if video_edits.get("type") == "image_overlay":
             processed_overlay_path = process_overlay_for_transparency(
                 image_path=overlay_image_path,
@@ -285,6 +289,7 @@ def video_editor(text: dict,assets:dict ,video_edits: dict, html_template: str, 
             final_video_path, video_temp_files = _create_image_over_video(
                 video_path=video_src,
                 overlay_image_path=processed_overlay_path,
+                page_name=page_name,
                 session_id=session_id,
                 add_gradient=video_edits.get("add_gradient", True),
                 target_width=1080,
@@ -292,15 +297,13 @@ def video_editor(text: dict,assets:dict ,video_edits: dict, html_template: str, 
                 crop_type=video_edits.get("crop_type", "cover"),
                 offset=video_edits.get("offset", 0),
             )
-            temp_files.append(processed_overlay_path)
         else:
             final_video_path, video_temp_files = _create_video_over_image(
                 image_path=overlay_image_path,
+                page_name=page_name,
                 video_path=video_src,
                 session_id=session_id,
             )
-
-        temp_files.extend(video_temp_files)
 
         if not final_video_path:
             logger.error("Failed to create final video")
@@ -308,7 +311,6 @@ def video_editor(text: dict,assets:dict ,video_edits: dict, html_template: str, 
 
         logger.info(f"Workflow completed successfully: {final_video_path}")
         with open(final_video_path, "rb") as f:
-            temp_files.append(final_video_path)
             return f.read()
 
     except Exception as e:
@@ -317,12 +319,12 @@ def video_editor(text: dict,assets:dict ,video_edits: dict, html_template: str, 
 
     finally:
         # Step 5: Clean up temp files
-        cleanup_files(temp_files)
-        logger.info(f"Cleaned up {len(temp_files)} temporary files")
+        cleanup_files(temp_dir,session_id)
 
 
 def text_editor(
     template: dict,
+    page_name: str,
     image_edits: dict,
     video_edits: dict,
     text: dict,
@@ -392,6 +394,7 @@ def text_editor(
     if is_video:
         return video_editor(
             text=text_input,
+            page_name=page_name,
             assets=assets_input,
             video_edits=processed_edits,
             html_template=html_template,
@@ -400,6 +403,7 @@ def text_editor(
     else:
         return image_editor(
             text=text_input,
+            page_name=page_name,
             assets=assets_input,
             image_edits=processed_edits,
             html_template=html_template,
@@ -409,20 +413,21 @@ def text_editor(
 
 # Test function for development
 if __name__ == "__main__":
-    from src.templates.scoopwhoop.thumbnail import thumbnail_template
+    from src.templates.twitter.tweet_image import tweet_image_template
     ## Test Image Workflow
     final_image = text_editor(
-        template=thumbnail_template['slides']['headline_slide'],
+        template=tweet_image_template['slides']['twitter_post'],
+        page_name="twitter",
         image_edits={"crop_type": "cover"},
         video_edits={},
-        text={"headline": "**IPL just doesn't** seem that exciting anymore.",
-              "subtext": "The IPL is a cricket tournament that is played in India. It is a very popular tournament and is watched by millions of people all over the world.",
-              "is_trigger": True,
-              "source":"Source: IPL"},
-        assets={"background_image": "test.png"},
-        is_video=False,
+        text={"user_name": "John Doe",
+              "user_handle": "@johndoe",
+              "tweet_text": "This is a test tweet",
+              "add_verified_badge": True},
+        assets={"background_video": "./data_/2.mp4"},
+        is_video=True,
         session_id="test",
     )
 
-    with open("./data_/test_out.png", "wb") as f:
+    with open("./data_/test_out.mp4", "wb") as f:
         f.write(final_image)

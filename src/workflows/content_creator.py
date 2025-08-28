@@ -5,7 +5,7 @@ import asyncio
 from concurrent.futures import ThreadPoolExecutor
 
 from src.agents import story_board_generator, content_research_agent
-from src.workflows.editors import image_editor
+from src.workflows.editors import text_editor
 from src.services.mongo_client import get_mongo_client
 from src.workflows.image_gen import fetch_multiple_images, generate_single_image
 
@@ -38,10 +38,12 @@ async def story_board_creator(headline: str, text_template: str,image_bytes: byt
         raise
 
 
-async def slide_creator(slide_template: dict, html_template: dict) -> List[Dict]:
+async def slide_creator(slide_template: dict, html_template: dict, page_name:str) -> List[Dict]:
     """Create slides with images and handle errors gracefully"""
     try:
         session_id = str(uuid.uuid4())[:8]
+        name = slide_template["name"]
+        text = slide_template["text"]
 
         # Generate images from different sources
         image_tasks = [
@@ -50,16 +52,16 @@ async def slide_creator(slide_template: dict, html_template: dict) -> List[Dict]
                 reference_image=None,
                 session_id=session_id,
             ),
-            generate_single_image(
-                headline=slide_template["image_description"],
-                session_id=session_id,
-                model="gpt-image-1",
-            ),
-            generate_single_image(
-                headline=slide_template['image_description'],
-                session_id=session_id,
-                model="imagen-4.0-ultra-generate-preview-06-06"
-            ),
+            # generate_single_image(
+            #     headline=slide_template["image_description"],
+            #     session_id=session_id,
+            #     model="gpt-image-1",
+            # ),
+            # generate_single_image(
+            #     headline=slide_template['image_description'],
+            #     session_id=session_id,
+            #     model="imagen-4.0-ultra-generate-preview-06-06"
+            # ),
         ]
 
         results = await asyncio.gather(*image_tasks, return_exceptions=True)
@@ -96,15 +98,26 @@ async def slide_creator(slide_template: dict, html_template: dict) -> List[Dict]
         async def process_image(img_data):
             """Add text overlay to image"""
             try:
+                file_name = f"background_image_{session_id}.png"
+                file_path = f"./data/{page_name}/temp/{file_name}"
+                
+                with open(file_path, "wb") as f:
+                    f.write(img_data["image_bytes"])
                 loop = asyncio.get_event_loop()
                 with_text_bytes = await loop.run_in_executor(
                     None,
-                    image_editor,
-                    img_data["image_bytes"],
-                    slide_template["text_template"],
-                    html_template[slide_template["name"]]["html_template"]
+                    text_editor,
+                    html_template[name],
+                    page_name,
+                    {"crop_type": "cover"},
+                    {},
+                    text,
+                    {"background_image": file_path},
+                    session_id,
+                    False,
                 )
-                
+                with open("./data_/test_out.png", "wb") as f:
+                    f.write(with_text_bytes)
                 return {
                     "images": {
                         "without_text": img_data["image_bytes"],
@@ -159,7 +172,6 @@ async def workflow(headline: str, template: dict,image_bytes: bytes = None, save
         story_board = await story_board_creator(
             headline=headline, text_template=template["text_template"],image_bytes=image_bytes
         )
-
         # Generate all slides in parallel using threads
         slides = story_board.get("storyboard", [])
         if not slides:
@@ -167,7 +179,7 @@ async def workflow(headline: str, template: dict,image_bytes: bytes = None, save
         else:
             def create_slide(slide):
                 """Run slide creator in thread"""
-                return asyncio.run(slide_creator(slide, template["slides"]))
+                return asyncio.run(slide_creator(slide, template["slides"], template["page_name"]))
             
             # Run each slide in its own thread
             loop = asyncio.get_event_loop()
@@ -226,12 +238,12 @@ if __name__ == "__main__":
     import asyncio
     import base64
     # from src.templates.timeline import timeline_template
-    from src.templates.timeline import timeline_template
+    from src.templates.twitter.tweet_image import tweet_image_template
 
     headline = "UttarKashi Cloud Burst India"
 
     try:
-        session_id = asyncio.run(workflow(headline=headline, template=timeline_template))
+        session_id = asyncio.run(workflow(headline=headline, template=tweet_image_template,save=False))
         # session_id = "5a935915"
         print(f"Workflow completed successfully!")
         print(f"Document ID: {session_id}")
