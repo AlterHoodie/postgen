@@ -1,6 +1,7 @@
 import uuid
 import os
 from pathlib import Path
+import re
 
 from src.services.rapidapi import get_tweet_data
 from src.workflows.editors import text_editor
@@ -8,6 +9,12 @@ from src.templates.twitter.tweet_image import tweet_image_template
 from src.templates.twitter.tweet_text import tweet_text_template
 
 from src.clients import download_image, download_video
+
+def clean_tweet_text(tweet_text: str) -> str:
+    """
+    Clean tweet text by removing URLs and special characters
+    """
+    return re.sub(r'https://t\.co/\w+', '', tweet_text)
 
 async def create_tweet_content(tweet_url: str) -> bytes:
     """
@@ -65,7 +72,7 @@ async def create_tweet_content(tweet_url: str) -> bytes:
     text = {
         "user_name": tweet_data["username"],
         "user_handle": f"@{tweet_data['userhandle']}",
-        "tweet_text": tweet_data["text"],
+        "tweet_text": clean_tweet_text(tweet_data["text"]),
         "add_verified_badge": tweet_data["is_verified"]
     }
     
@@ -91,7 +98,7 @@ async def create_tweet_content(tweet_url: str) -> bytes:
         is_video=is_video
     )
     
-    return result
+    return result, is_video
 
 
 if __name__ == "__main__":
