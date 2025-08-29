@@ -1,10 +1,11 @@
-
 import logging
 from typing import List, Dict, Optional
 import time
 import threading
 import time
 from datetime import datetime
+import os
+from dotenv import load_dotenv
 
 from src.services.mongo_client import get_mongo_client
 from src.services.rapidapi import get_latest_instagram_post
@@ -12,10 +13,11 @@ from src.services.rapidapi import get_latest_instagram_post
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+load_dotenv(override=True)
 
 
 
-def fetch_and_update_sources(page_name: str = "scoopwhoop", max_posts: int = 50) -> Dict[str, any]:
+def fetch_and_update_sources(page_id: str, max_posts: int = 10) -> Dict[str, any]:
     """
     Fetch latest Instagram posts and update sources collection.
     
@@ -53,9 +55,9 @@ def fetch_and_update_sources(page_name: str = "scoopwhoop", max_posts: int = 50)
             latest_timestamp = int(time.time()) - (30 * 24 * 60 * 60)
         
         # Step 3: Fetch new Instagram posts after latest timestamp
-        logger.info(f"Fetching new Instagram posts for {page_name} after timestamp {latest_timestamp}")
+        logger.info(f"Fetching new Instagram posts for {page_id} after timestamp {latest_timestamp}")
         new_posts = get_latest_instagram_post(
-            page_name=page_name,
+            page_id=page_id,
             last_created_at=latest_timestamp,
             n_posts=max_posts
         )
@@ -138,9 +140,9 @@ def get_sources_summary(limit: int = 5) -> Dict[str, any]:
 class SourcesDaemon:
     """Background daemon for updating Instagram sources periodically."""
     
-    def __init__(self, update_interval_hours: int = 2, page_name: str = "scoopwhoop"):
+    def __init__(self, update_interval_hours: int = 2, page_id: str = ""):
         self.update_interval_hours = update_interval_hours
-        self.page_name = page_name
+        self.page_id = page_id or os.getenv("INSTA_USER_ID")
         self.update_interval_seconds = update_interval_hours * 3600
         self.is_running = False
         self.thread: Optional[threading.Thread] = None
@@ -159,7 +161,7 @@ class SourcesDaemon:
         while not self.stop_event.is_set():
             try:
                 result = fetch_and_update_sources(
-                    page_name=self.page_name,
+                    page_id=self.page_id,
                     max_posts=10
                 )
                 
@@ -218,11 +220,11 @@ class SourcesDaemon:
 # Global daemon instance
 _daemon_instance: Optional[SourcesDaemon] = None
 
-def get_daemon(update_interval_hours: int = 1, page_name: str = "thetatvaindia"):
+def get_daemon(update_interval_hours: int = 1, page_id: str = ""):
     """Get or create the global daemon instance."""
     global _daemon_instance
     if _daemon_instance is None:
-        _daemon_instance = SourcesDaemon(update_interval_hours, page_name)
+        _daemon_instance = SourcesDaemon(update_interval_hours, page_id)
     return _daemon_instance
 
 def start_background_daemon():
@@ -230,7 +232,7 @@ def start_background_daemon():
     daemon = get_daemon()
     if not daemon.is_running:
         daemon.start()
-        logger.info(f"Started daemon for {daemon.page_name}")
+        logger.info(f"Started daemon for {daemon.page_id}")
     else:
         logger.info("Daemon already running")
     return daemon
@@ -254,7 +256,7 @@ if __name__ == "__main__":
     
     # Run the update workflow
     print("\n2. Running fetch and update workflow:")
-    result = fetch_and_update_sources(page_name="scoopwhoop", max_posts=10)
+    result = fetch_and_update_sources(page_id="", max_posts=10)
     
     print(f"   Success: {result['success']}")
     print(f"   Latest posts in DB: {result['latest_posts_count']}")

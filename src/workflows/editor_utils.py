@@ -226,14 +226,17 @@ def create_video_over_image(image_path:str, page_name:str, video_path:str, sessi
 
         # Write the result
         output_path = f"./data/{page_name}/temp/final_video_{session_id}.mp4"
-        final_video.write_videofile(output_path,
-                                   codec='libx264',
-                                   audio_codec='aac', 
-                                   fps=15,
-                                   preset="ultrafast",
-                                   bitrate="1000k",
-                                   audio_bitrate="64k",
-                                   logger=None)
+        final_video.write_videofile(
+            output_path,
+            codec="libx264",
+            audio_codec="aac",
+            threads=4,
+            fps=20,
+            preset="medium",
+            bitrate="2500k",
+            audio_bitrate="128k",
+            logger=None
+            )
 
         # Clean up
         background.close()
