@@ -247,7 +247,7 @@ HEADLINE_SLIDE_HTML_TEMPLATE = """
               {user_name}
               {add_verified_badge}
             </span>
-            <span class="user-handle">{user_handle}</span>
+            {user_handle}
           </div>
         </div>
         <div class="three-dots">
@@ -257,7 +257,7 @@ HEADLINE_SLIDE_HTML_TEMPLATE = """
         </div>
       </div>
       <div class="tweet-content">
-        <p class="tweet-text">{tweet_text}</p>
+        {tweet_text}
         <div class="tweet-media">
           <img src="{background_image}" alt="Tweet Media" class="tweet-image" />
         </div>
@@ -292,14 +292,14 @@ HEADLINE_SLIDE_OVERLAY_TEMPLATE = """
 
       .container {{
         width: 1080px;
-        height: 1350px;
+        height: 1920px;
         background-color: #ffffff;
         padding: 85px;
         box-sizing: border-box;
 
         display: flex;
         flex-direction: column;
-        /* justify-content: center; */
+        justify-content: center;
       }}
 
       .tweet-header {{
@@ -307,7 +307,6 @@ HEADLINE_SLIDE_OVERLAY_TEMPLATE = """
         align-items: center;
         justify-content: space-between;
         flex-shrink: 0;
-        padding-bottom: 10px;
       }}
 
       .header-left {{
@@ -379,6 +378,7 @@ HEADLINE_SLIDE_OVERLAY_TEMPLATE = """
       .tweet-content {{
         display: flex;
         flex-direction: column;
+        align-items: stretch;
         min-height: 0;
       }}
 
@@ -386,23 +386,21 @@ HEADLINE_SLIDE_OVERLAY_TEMPLATE = """
         font-size: 42px;
         color: #0f1419;
         line-height: 1.3;
-        margin: 15px 0 60px 0;
         word-wrap: break-word;
         flex-shrink: 0;
       }}
 
       .tweet-media {{
-        border-radius: 24px;
         overflow: hidden;
         display: flex;
         align-items: center;
         justify-content: center;
       }}
 
-      .tweet-image {{
+      .tweet-video {{
         width: 100%;
         display: block;
-        border-radius: 24px;
+        object-fit: cover;
       }}
     </style>
   </head>
@@ -416,7 +414,7 @@ HEADLINE_SLIDE_OVERLAY_TEMPLATE = """
               {user_name}
               {add_verified_badge}
             </span>
-            <span class="user-handle">{user_handle}</span>
+            {user_handle}
           </div>
         </div>
         <div class="three-dots">
@@ -426,9 +424,10 @@ HEADLINE_SLIDE_OVERLAY_TEMPLATE = """
         </div>
       </div>
       <div class="tweet-content">
-        <p class="tweet-text">
           {tweet_text}
-        </p>
+        <div class="tweet-media">
+          <video src="{background_video}" alt="Tweet Media" class="tweet-video" />
+        </div>
       </div>
     </div>
   </body>
@@ -445,7 +444,7 @@ tweet_image_template = {
             "html_template": HEADLINE_SLIDE_HTML_TEMPLATE,
             "overlay_template": HEADLINE_SLIDE_OVERLAY_TEMPLATE,
             "text": {
-                    "user_name": {"type": "text", "tag": "span", "class": "user-name"},
+                    "user_name": {"type": "text", "tag": "span", "class": ""},
                     "user_handle": {"type": "text", "tag": "span", "class": "user-handle"},
                     "tweet_text": {"type": "text", "tag": "p", "class": "tweet-text"},
                     "add_verified_badge": {"type": "checkbox", "html_snippet": VERIFIED_BADGE},
