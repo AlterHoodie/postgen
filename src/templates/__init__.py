@@ -30,7 +30,7 @@ def get_template_config(template_type: str, page_name: str) -> dict:
     elif page_name == "twitter":
         if template_type == "tweet_image":
             return tweet_image_template
-        elif template_type == "tweet_text":
+        elif template_type == "text_based":
             return tweet_text_template
         else:
             raise ValueError(f"Unknown template type for given {page_name}: {template_type}")

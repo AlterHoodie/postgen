@@ -257,6 +257,20 @@ def convert_text_to_html(tag: str, class_name: str, text: str) -> str:
 
     return f"<{tag} class='{class_name}'>{('<br />').join(html_parts)}</{tag}>"
 
+def get_file_type(filename: str) -> str:
+    """Determine if file is image or video based on extension"""
+    image_extensions = [".png", ".jpg", ".jpeg", ".gif"]
+    video_extensions = [".mp4", ".mov", ".avi"]
+
+    ext = os.path.splitext(filename.lower())[1]
+
+    if ext in image_extensions:
+        return "image"
+    elif ext in video_extensions:
+        return "video"
+    else:
+        return "unknown"
+
 
 if __name__ == "__main__":
     pass

@@ -5,23 +5,24 @@ import uuid
 from typing import Dict, Tuple
 
 from src.workflows.editors import text_editor
-from src.utils import extract_text_from_html
+from src.utils import extract_text_from_html, get_file_type
 from src.templates import get_template_config
 
 
 def text_editor_form(
     text_values: Dict,
-    content_bytes: bytes,
     template: Dict,
     slide_name: str,
     form_key: str,
     page_name: str,
-    is_video: bool = False,
+    content_bytes: bytes,
     show_image_upload: bool = False,
+    is_video: bool = False,
     session_id: str = None,
 ) -> Tuple[bytes, bool]:
     """
-    Simple Streamlit form for text editing using text_editor from editors.py
+    Dynamic Streamlit form generator that handles all template configurations
+    including text fields, assets, dropdowns, checkboxes, and file uploads
 
     Args:
         text_values: Current text values
@@ -32,6 +33,7 @@ def text_editor_form(
         page_name: Page name (e.g., 'scoopwhoop', 'twitter')
         is_video: Whether content is video
         show_image_upload: Whether to show image upload option
+        session_id: Session ID for file naming
 
     Returns:
         (new_content_bytes, submitted)
@@ -43,7 +45,6 @@ def text_editor_form(
         image_edits_input = {}
         video_edits_input = {}
         custom_content_bytes = content_bytes
-        
         if show_image_upload:
             uploaded_image = st.file_uploader(
                 "Dont like the background? Upload your own background image",
@@ -65,7 +66,6 @@ def text_editor_form(
                 custom_content_bytes = content_bytes
             
             st.markdown("---")
-        
         # Create inputs for text fields
         st.subheader("Text Content")
         text_fields = slide_config["text"]
@@ -98,6 +98,35 @@ def text_editor_form(
                         options=options,
                         index=default_index
                     )
+
+        if is_video:
+            assets_input["background_video"] = {"file_type": "bytes", "content": custom_content_bytes, "extension": "mp4"}
+        else:
+            assets_input["background_image"] = {"file_type": "bytes", "content": custom_content_bytes, "extension": "png"}
+
+        if "assets" in slide_config:
+            for field_name, config in slide_config["assets"].items():
+                if field_name in ["background_image","background_video"]:
+                    continue
+                display_name = field_name.replace("_", " ").title()
+                if config.get("type") == "dropdown":
+                    options = config.get("values", [])
+                    default_value = config.get("default", options[0] if options else "")
+                    value = st.selectbox(
+                        f"{display_name}:",
+                        options=options,
+                        index=options.index(default_value) if default_value in options else 0
+                    )
+                    assets_input[field_name] = {"file_type": "path", "content": value}
+                elif config.get("type") == "bytes":
+                    value = st.file_uploader(
+                        f"{display_name}:",
+                        type=config.get("file_type", ""),
+                        help=config.get("help", "")
+                    )
+                    if value is not None:
+                        assets_input[field_name] = {"file_type": "bytes", "content": value.getvalue(), "extension": get_file_type(value.name)}
+
             
         # Create inputs for image/video edits
         if is_video and "video_edits" in slide_config:
@@ -132,21 +161,16 @@ def text_editor_form(
             try:
                 if session_id is None:
                     session_id = str(uuid.uuid4())[:8]
-                if is_video:
-                    file_name = f"background_video_{session_id}.mp4"
-                    file_path = f"./data/{page_name}/temp/{file_name}"
 
-                    with open(file_path, "wb") as f:
-                        f.write(custom_content_bytes)
-                    assets_input["background_video"] = file_path
-                else:
-                    # Handle assets (uploaded content)
-                    file_name = f"background_image_{session_id}.png"
-                    file_path = f"./data/{page_name}/temp/{file_name}"
-
-                    with open(file_path, "wb") as f:
-                        f.write(custom_content_bytes)
-                    assets_input["background_image"] = file_path
+                for key, value in assets_input.items():
+                    if value.get("file_type") == "bytes":
+                        file_name = f"{key}_{session_id}.{value.get('extension')}"
+                        file_path = f"./data/{page_name}/temp/{file_name}"
+                        with open(file_path, "wb") as f:
+                            f.write(value.get("content"))
+                        assets_input[key] = file_path
+                    elif value.get("file_type") == "path":
+                        assets_input[key] = value.get("content")
                 
                 new_content_bytes = text_editor(
                     template=slide_config,
@@ -164,170 +188,6 @@ def text_editor_form(
                 return None, False
 
         return None, False
-
-def show_text_only_editor():
-    """Simple text-only editor for templates that don't need uploaded images"""
-    
-    # Page and template selection
-    page_name = st.selectbox(
-        "Select page:",
-        ["scoopwhoop", "the_sarcastic_indian"],
-        help="Choose which page/brand to create content for"
-    )
-    
-    # Template selection - only text_based for now
-    text_only_template_config = get_template_config("text_based", page_name)
-    
-    # Get the slide (text_based only has one slide)
-    slide_name = "text_based_slide"
-    
-    # Initialize session state for text-only editor
-    if "text_only_data" not in st.session_state:
-        st.session_state.text_only_data = initialize_slide_fields(
-            text_only_template_config["slides"][slide_name]
-        )
-    if "text_only_page" not in st.session_state:
-        st.session_state.text_only_page = page_name
-    elif st.session_state.text_only_page != page_name:
-        # Page changed, reset data
-        st.session_state.text_only_data = initialize_slide_fields(
-            text_only_template_config["slides"][slide_name]
-        )
-        st.session_state.text_only_page = page_name
-    
-    # Create the form
-    col1, col2 = st.columns([1, 1])
-    
-    with col1:
-        st.markdown("**Create Text-Based Post:**")
-        
-        # Create a simple form for text-based template
-        with st.form(key="text_only_form"):
-            text_input = {}
-            assets_input = {}
-            image_edits_input = {}
-            st.info("Use \*\*<text>\*\* for highlighting text in Yellow.")
-            
-            # Get slide config
-            slide_config = text_only_template_config["slides"][slide_name]
-            
-            text_fields = slide_config["text"]                    
-            for field_name, config in text_fields.items():
-                    display_name = field_name.replace("_", " ").title()
-                    if config.get("type") == "dropdown":
-                        current_value = st.session_state.text_only_data.get(field_name, config.get("default", ""))
-                        options = config.get("values", [])
-                        default_index = 0
-                        if current_value in options:
-                            default_index = options.index(current_value)
-                        text_input[field_name] = st.selectbox(
-                            f"{display_name}:",
-                            options=options,
-                            index=default_index
-                        )
-                    elif config.get("type") == "text_area":
-                        text_input[field_name] = st.text_area(
-                            f"{display_name}:",
-                            value=st.session_state.text_only_data.get(field_name, ""),
-                            help="Use <span class=\"yellow\">text</span> for highlighting"
-                        )
-                    elif config.get("type") == "text":
-                        text_input[field_name] = st.text_input(
-                            f"{display_name}:",
-                            value=st.session_state.text_only_data.get(field_name, ""),
-                            help="Use <span class=\"yellow\">text</span> for highlighting"
-                        )
-                    elif config.get("type") == "checkbox":
-                        text_input[field_name] = st.checkbox(
-                            display_name,
-                            value=st.session_state.text_only_data.get(field_name, False)
-                        )
-            
-            # Assets inputs (if any)
-            if "assets" in slide_config:
-                for field_name, config in slide_config["assets"].items():
-                    if config.get("type") == "dropdown":
-                        display_name = field_name.replace("_", " ").title()
-                        options = config.get("values", [])
-                        default_value = config.get("default", options[0] if options else "")
-                        assets_input[field_name] = st.selectbox(
-                            f"{display_name}:",
-                            options=options,
-                            index=options.index(default_value) if default_value in options else 0
-                        )
-            
-            # Image edits (if any)
-            if "image_edits" in slide_config:
-                for field_name, config in slide_config["image_edits"].items():
-                    if config.get("type") == "dropdown":
-                        display_name = field_name.replace("_", " ").title()
-                        options = config.get("values", [])
-                        default_value = config.get("default", options[0] if options else "")
-                        image_edits_input[field_name] = st.selectbox(
-                            f"{display_name}:",
-                            options=options,
-                            index=options.index(default_value) if default_value in options else 0
-                        )
-            submitted = st.form_submit_button("Generate Image", type="primary")
-            
-            if submitted:
-                try:
-                    # Generate the image using text_editor
-                    session_id = str(uuid.uuid4())
-                    new_image_bytes = text_editor(
-                        template=slide_config,
-                        page_name=page_name,
-                        image_edits=image_edits_input,
-                        video_edits={},
-                        text=text_input,
-                        assets=assets_input,
-                        session_id=session_id,
-                        is_video=False
-                    )
-                    
-                    if new_image_bytes:
-                        st.session_state.text_only_data.update(text_input)
-                        st.session_state.text_only_data["generated_image"] = new_image_bytes
-                        st.success("✅ Image generated!")
-                    else:
-                        st.error("Failed to generate image")
-                        
-                except Exception as e:
-                    st.error(f"Error: {e}")
-    
-    with col2:
-        st.markdown("**Preview:**")
-        
-        if "generated_image" in st.session_state.text_only_data:
-            image_bytes = st.session_state.text_only_data["generated_image"]
-            st.image(image_bytes, width=500)
-            
-            # Download button
-            st.download_button(
-                label="📥 Download Image",
-                data=image_bytes,
-                file_name="text_based_post.png",
-                mime="image/png",
-                use_container_width=True,
-            )
-        else:
-            st.info("👆 Fill out the form and click 'Generate Image' to see preview")
-
-
-def show_post_editor_page():
-    """Simple post editor with image/video upload, template selection, and slide editing"""
-    st.title("✏️ Post Editor")
-    st.markdown("Create posts with your own images/videos")
-    
-    # Add tabs for different editor types
-    tab1, tab2 = st.tabs(["📷 Image/Video Editor", "📝 Text-Only Editor"])
-    
-    with tab1:
-        show_media_editor()
-    
-    with tab2:
-        show_text_only_editor()
-
 
 def show_media_editor():
     """Media editor for image/video uploads"""
@@ -371,7 +231,7 @@ def show_media_editor():
     # Page selection
     page_name = st.selectbox(
         "Select page:",
-        ["scoopwhoop", "twitter", "social_village", "the_sarcastic_indian"],
+        ["scoopwhoop", "twitter", "social_village"],
         help="Choose which page/brand to create content for"
     )
     
@@ -382,21 +242,15 @@ def show_media_editor():
             "Writeup": "writeup",
             "Thumbnail": "thumbnail",
             "Meme": "meme",
-            "Text Based": "text_based"
         }
     elif page_name == "twitter":
         template_options = {
             "Tweet Image": "tweet_image",
-            "Tweet Text": "tweet_text"
         }
     elif page_name == "social_village":
         template_options = {
             "Content": "content",
             "Thumbnail": "thumbnail"
-        }
-    elif page_name == "the_sarcastic_indian":
-        template_options = {
-            "Text Based": "text_based"
         }
     else:
         template_options = {}
@@ -493,21 +347,186 @@ def show_media_editor():
                 st.image(media_bytes, width=500)
                 st.caption("Original image")
 
+def show_text_only_editor():
+    """Simple text-only editor for templates that don't need uploaded images"""
+    
+    # Page and template selection
+    page_name = st.selectbox(
+        "Select page:",
+        ["scoopwhoop", "the_sarcastic_indian","twitter"],
+        help="Choose which page/brand to create content for"
+    )
+    
+    # Template selection - only text_based for now
+    text_only_template_config = get_template_config("text_based", page_name)
+    
+    # Get the slide (text_based only has one slide)
+    slide_name = "text_based_slide"
+    
+    # Initialize session state for text-only editor
+    if "text_only_data" not in st.session_state:
+        st.session_state.text_only_data = initialize_slide_fields(
+            text_only_template_config["slides"][slide_name]
+        )
+    if "text_only_page" not in st.session_state:
+        st.session_state.text_only_page = page_name
+    elif st.session_state.text_only_page != page_name:
+        # Page changed, reset data
+        st.session_state.text_only_data = initialize_slide_fields(
+            text_only_template_config["slides"][slide_name]
+        )
+        st.session_state.text_only_page = page_name
+    
+    # Create the form
+    col1, col2 = st.columns([1, 1])
+    
+    with col1:
+        st.markdown("**Create Text-Based Post:**")
+        
+        # Create a simple form for text-based template
+        with st.form(key="text_only_form"):
+            text_input = {}
+            assets_input = {}
+            image_edits_input = {}
+            st.info("Use \*\*<text>\*\* for highlighting text in Yellow.")
+            
+            # Get slide config
+            slide_config = text_only_template_config["slides"][slide_name]
+            
+            text_fields = slide_config["text"]                    
+            for field_name, config in text_fields.items():
+                    display_name = field_name.replace("_", " ").title()
+                    if config.get("type") == "dropdown":
+                        current_value = st.session_state.text_only_data.get(field_name, config.get("default", ""))
+                        options = config.get("values", [])
+                        default_index = 0
+                        if current_value in options:
+                            default_index = options.index(current_value)
+                        text_input[field_name] = st.selectbox(
+                            f"{display_name}:",
+                            options=options,
+                            index=default_index
+                        )
+                    elif config.get("type") == "text_area":
+                        text_input[field_name] = st.text_area(
+                            f"{display_name}:",
+                            value=st.session_state.text_only_data.get(field_name, ""),
+                            help="Use <span class=\"yellow\">text</span> for highlighting"
+                        )
+                    elif config.get("type") == "text":
+                        text_input[field_name] = st.text_input(
+                            f"{display_name}:",
+                            value=st.session_state.text_only_data.get(field_name, ""),
+                            help="Use <span class=\"yellow\">text</span> for highlighting"
+                        )
+                    elif config.get("type") == "checkbox":
+                        text_input[field_name] = st.checkbox(
+                            display_name,
+                            value=st.session_state.text_only_data.get(field_name, False)
+                        )
+            
+            # Assets inputs (if any)
+            if "assets" in slide_config:
+                for field_name, config in slide_config["assets"].items():
+                    display_name = field_name.replace("_", " ").title()
+                    if config.get("type") == "dropdown":
+                        options = config.get("values", [])
+                        default_value = config.get("default", options[0] if options else "")
+                        value = st.selectbox(
+                            f"{display_name}:",
+                            options=options,
+                            index=options.index(default_value) if default_value in options else 0
+                        )
+                        assets_input[field_name] = {"file_type": "path", "content": value}
+                    elif config.get("type") == "bytes":
+                        value = st.file_uploader(
+                            f"{display_name}:",
+                            type=config.get("file_type", ""),
+                            help=config.get("help", "")
+                        )
+                        if value is not None:
+                            assets_input[field_name] = {"file_type": "bytes", "content": value.getvalue(), "extension": get_file_type(value.name)}
+            
+            # Image edits (if any)
+            if "image_edits" in slide_config:
+                for field_name, config in slide_config["image_edits"].items():
+                    if config.get("type") == "dropdown":
+                        display_name = field_name.replace("_", " ").title()
+                        options = config.get("values", [])
+                        default_value = config.get("default", options[0] if options else "")
+                        image_edits_input[field_name] = st.selectbox(
+                            f"{display_name}:",
+                            options=options,
+                            index=options.index(default_value) if default_value in options else 0
+                        )
+            submitted = st.form_submit_button("Generate Image", type="primary")
+            
+            if submitted:
+                try:
+                    # Generate the image using text_editor
+                    session_id = str(uuid.uuid4())
+                    for key, value in assets_input.items():
+                        if value.get("file_type") == "bytes":
+                            file_name = f"{key}_{session_id}.{value.get('extension')}"
+                            file_path = f"./data/{page_name}/temp/{file_name}"
+                            with open(file_path, "wb") as f:
+                                f.write(value.get("content"))
+                            assets_input[key] = file_path
+                        elif value.get("file_type") == "path":
+                            assets_input[key] = value.get("content")
+                    new_image_bytes = text_editor(
+                        template=slide_config,
+                        page_name=page_name,
+                        image_edits=image_edits_input,
+                        video_edits={},
+                        text=text_input,
+                        assets=assets_input,
+                        session_id=session_id,
+                        is_video=False
+                    )
+                    
+                    if new_image_bytes:
+                        st.session_state.text_only_data.update(text_input)
+                        st.session_state.text_only_data["generated_image"] = new_image_bytes
+                        st.success("✅ Image generated!")
+                    else:
+                        st.error("Failed to generate image")
+                        
+                except Exception as e:
+                    st.error(f"Error: {e}")
+    
+    with col2:
+        st.markdown("**Preview:**")
+        
+        if "generated_image" in st.session_state.text_only_data:
+            image_bytes = st.session_state.text_only_data["generated_image"]
+            st.image(image_bytes, width=500)
+            
+            # Download button
+            st.download_button(
+                label="📥 Download Image",
+                data=image_bytes,
+                file_name="text_based_post.png",
+                mime="image/png",
+                use_container_width=True,
+            )
+        else:
+            st.info("👆 Fill out the form and click 'Generate Image' to see preview")
 
-def get_file_type(filename: str) -> str:
-    """Determine if file is image or video based on extension"""
-    image_extensions = [".png", ".jpg", ".jpeg", ".gif"]
-    video_extensions = [".mp4", ".mov", ".avi"]
 
-    ext = os.path.splitext(filename.lower())[1]
-
-    if ext in image_extensions:
-        return "image"
-    elif ext in video_extensions:
-        return "video"
-    else:
-        return "unknown"
-
+def show_post_editor_page():
+    """Simple post editor with image/video upload, template selection, and slide editing"""
+    st.title("✏️ Post Editor")
+    st.markdown("Create posts with your own images/videos")
+    
+    # Add tabs for different editor types
+    tab1, tab2 = st.tabs(["📷 Image/Video Editor", "📝 Text-Only Editor"])
+    
+    with tab1:
+        show_media_editor()
+    
+    with tab2:
+        show_text_only_editor()
 
 def initialize_slide_fields(slide_config: Dict) -> Dict:
     """Initialize fields for a single slide"""

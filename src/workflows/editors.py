@@ -268,6 +268,8 @@ def video_editor(text: dict,page_name:str,assets:dict ,video_edits: dict, html_t
 
         video_src = assets.get("background_video")
         del assets['background_video']
+        for key, value in assets.items():
+            assets[key] = value.split("/")[-1]
 
         # Step 2: Create the overlay image with text
         overlay_image_path, html_path = _create_overlay_image(
