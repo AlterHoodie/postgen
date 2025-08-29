@@ -253,7 +253,7 @@ HEADLINE_SLIDE_HTML_TEMPLATE = """
           <div class="user-info">
             <span class="user-name">
               {user_name}
-              {verified_badge}
+              {add_verified_badge}
             </span>
             <span class="user-handle">{user_handle}</span>
           </div>
@@ -274,11 +274,11 @@ HEADLINE_SLIDE_HTML_TEMPLATE = """
 
 tweet_text_template = {
     "page_name": "twitter",
-    "template_type": "tweet_text",
+    "template_type": "text_based",
     "text_template": {"template_description":TEMPLATE_DESCRIPTION,
             "json_description":JSON_DESCRIPTION},
     "slides": {
-        "twitter_post": {
+        "text_based_slide": {
             "html_template": HEADLINE_SLIDE_HTML_TEMPLATE,
             "overlay_template": "",
             "text": {
