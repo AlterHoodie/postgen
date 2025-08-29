@@ -2,13 +2,12 @@ import requests
 import os 
 from dotenv import load_dotenv
 from typing import List
+from datetime import datetime
 
 from src.clients import sync_download_image
 
 load_dotenv(override=True)
 api_key = os.getenv("RAPID_API_KEY")
-
-headers = {"x-rapidapi-key": api_key, "x-rapidapi-host": "media-api4.p.rapidapi.com"}
 
 def call_rapid_api(url: str, params: dict, headers: dict) -> dict:
     tries = 3
@@ -52,8 +51,19 @@ def extract_instagram_post_data(posts_data: List[dict]) -> List[dict]:
             continue
 
         post_info = {}
-        post_info["code"] = post["code"]
-        post_info["taken_at"] = post["taken_at"]
+        post_info["code"] = post.get("code", "")
+        post_info["taken_at"] = int(datetime.strptime(post.get("taken_at", "2025-08-29T05:38:02Z"), "%Y-%m-%dT%H:%M:%SZ").timestamp())
+        
+        # Add user information
+        user_data = post.get("user", {})
+        post_info["username"] = user_data.get("username", "")
+        post_info["user_full_name"] = user_data.get("full_name", "")
+        post_info["user_is_verified"] = user_data.get("is_verified", False)
+        
+        # Location information
+        location_data = post.get("location", {})
+        post_info["location_name"] = location_data.get("name", "") if location_data else ""
+        
         # 1. Type of post
         media_type = post.get("media_type")
         if media_type == 1:
@@ -74,81 +84,123 @@ def extract_instagram_post_data(posts_data: List[dict]) -> List[dict]:
         post_info["comment_count"] = post.get("comment_count", 0)
         post_info["sponsor_tags"] = post.get("sponsor_tags", [])
 
-        # 4. Played count (only for videos)
-        if post_info["type"] == "video":
-            # Use play_count if available, fallback to ig_play_count
+        # 4. View/Play count (for videos)
+        if post_info["type"] == "video" or post_info["type"] == "carousel":
+            # Use play_count if available, fallback to view_count
             play_count = post.get("play_count")
             if play_count is None:
-                play_count = post.get("ig_play_count")  # Check alternative key
+                play_count = post.get("view_count")  # Check alternative key
 
             post_info["played_count"] = play_count if play_count is not None else 0
         else:
-            post_info["played_count"] = None  # Not applicable for images/carousels
+            post_info["played_count"] = None  # Not applicable for images
 
-        # 5. Hashtags
-        caption_data = post.get("caption")
-        if caption_data and isinstance(caption_data, dict):
-            post_info["hashtags"] = caption_data.get("hashtags", [])
-            post_info["mentions"] = caption_data.get("mentions", [])
-        else:
-            post_info["hashtags"] = []
-            post_info["mentions"] = []
+        # 5. Extract hashtags and mentions from caption text
+        caption_text = post.get("caption_text", "")
+        hashtags = []
+        mentions = []
+        
+        if caption_text:
+            # Extract hashtags (words starting with #)
+            import re
+            hashtags = re.findall(r'#\w+', caption_text)
+            # Extract mentions (words starting with @)
+            mentions = re.findall(r'@\w+', caption_text)
+        
+        post_info["hashtags"] = hashtags
+        post_info["mentions"] = mentions
 
         # 6. Is paid partnership
         post_info["is_paid_partnership"] = post.get("is_paid_partnership", False)
 
         # 7. Caption
-        if caption_data and isinstance(caption_data, dict):
-            post_info["caption"] = caption_data.get("text", "")
-        else:
-            post_info["caption"] = ""
+        post_info["caption"] = caption_text
 
         # 8. Media list (URLs and types)
         media_list = []
         if post_info["type"] == "carousel":
-            carousel_items = post.get("carousel_media", [])
+            # New format uses 'resources' for carousel items
+            carousel_items = post.get("resources", [])
             for item in carousel_items:
                 # Check if it's an image or video within the carousel
                 if item.get("media_type") == 1:  # Image
-                    image_versions = item.get("image_versions", {}).get("items", [])
+                    image_versions = item.get("image_versions", [])
                     if image_versions:
+                        # Take the highest quality image (first in list)
                         media_list.append({
                             "url": image_versions[0].get("url"),
                             "type": "image"
                         })
                 elif item.get("media_type") == 2:  # Video
-                    video_versions = item.get("video_versions", [])
-                    if video_versions:
+                    # Check for direct video_url first
+                    video_url = item.get("video_url")
+                    if video_url:
                         media_list.append({
-                            "url": video_versions[0].get("url"),
+                            "url": video_url,
                             "type": "video"
+                        })
+                    else:
+                        # Fallback to video_versions
+                        video_versions = item.get("video_versions", [])
+                        if video_versions:
+                            media_list.append({
+                                "url": video_versions[0].get("url"),
+                                "type": "video"
+                            })
+                    
+                    # Add thumbnail for video
+                    thumbnail_url = item.get("thumbnail_url")
+                    if thumbnail_url:
+                        media_list.append({
+                            "url": thumbnail_url,
+                            "type": "thumbnail"
                         })
 
         elif post_info["type"] == "image":
-            image_versions = post.get("image_versions", {}).get("items", [])
+            # For single images, use main image_versions
+            image_versions = post.get("image_versions", [])
             if image_versions:
+                # Take the highest quality image (first in list)
                 media_list.append({
                     "url": image_versions[0].get("url"),
                     "type": "image"
                 })
 
         elif post_info["type"] == "video":
-            video_versions = post.get("video_versions", [])
-            if video_versions:
+            # Check for direct video_url first
+            video_url = post.get("video_url")
+            if video_url:
                 media_list.append({
-                    "url": video_versions[0].get("url"),
+                    "url": video_url,
                     "type": "video"
                 })
-            # Add thumbnail as well
-            image_versions = post.get("image_versions", {}).get("items", [])
-            if image_versions:
+            else:
+                # Fallback to video_versions
+                video_versions = post.get("video_versions", [])
+                if video_versions:
+                    media_list.append({
+                        "url": video_versions[0].get("url"),
+                        "type": "video"
+                    })
+            
+            # Add thumbnail for video
+            thumbnail_url = post.get("thumbnail_url")
+            if thumbnail_url:
                 media_list.append({
-                    "url": image_versions[0].get("url"),
+                    "url": thumbnail_url,
                     "type": "thumbnail"
                 })
+            else:
+                # Fallback to image_versions for thumbnail
+                image_versions = post.get("image_versions", [])
+                if image_versions:
+                    media_list.append({
+                        "url": image_versions[0].get("url"),
+                        "type": "thumbnail"
+                    })
 
         # Filter out any potential None values if URLs weren't found
-        post_info["media_list"] = [media for media in media_list if media["url"]]
+        post_info["media_list"] = [media for media in media_list if media.get("url")]
         image_data = None
         post_info['media_bytes'] = {
             "type":"",
@@ -171,7 +223,7 @@ def extract_instagram_post_data(posts_data: List[dict]) -> List[dict]:
 
 
 
-def get_latest_instagram_post(page_name: str, last_created_at: int = None, n_posts: int = 10) -> List[dict]:
+def get_latest_instagram_post(last_created_at: int = None, n_posts: int = 10) -> List[dict]:
     """
     Get latest Instagram posts for a given page.
     
@@ -187,18 +239,20 @@ def get_latest_instagram_post(page_name: str, last_created_at: int = None, n_pos
     post_array = []
     should_continue = True
 
-    query_string = {"username_or_id_or_url": page_name}
-    url = "https://media-api4.p.rapidapi.com/v1/posts"
+    query_string = {"amount":n_posts,"user_id":os.getenv("INSTA_USER_ID")}
+    url = "https://instagram-premium-api-2023.p.rapidapi.com/v1/user/medias/chunk"
+    headers = {"x-rapidapi-key": api_key, "x-rapidapi-host": "instagram-premium-api-2023.p.rapidapi.com"}
 
     while should_continue:
         if pagination_token:
-            query_string["pagination_token"] = pagination_token
+            query_string["end_cursor"] = pagination_token
 
         data = call_rapid_api(url=url, params=query_string, headers=headers)
-        if data.get("error"):
-            return data
+        if not data:
+            return []
 
-        posts = data["data"]["items"]
+        posts = data[0]
+        pagination_token = data[1]
 
         if posts:
             posts_info = extract_instagram_post_data(posts)
@@ -223,25 +277,114 @@ def get_latest_instagram_post(page_name: str, last_created_at: int = None, n_pos
         # 3. If we're filtering by timestamp and found old posts
         if len(post_array) >= n_posts:
             should_continue = False
-        elif not data.get("pagination_token"):
+        elif not pagination_token:
             should_continue = False
-        else:
-            pagination_token = data["pagination_token"]
 
     # Limit to requested number of posts
     return post_array[:n_posts]
 
+
+def extract_tweet_details(tweet_data: dict) -> dict:
+    """
+    Extracts key details from a tweet's JSON data, including user info,
+    verification status, profile picture, text, and media URLs.
+    
+    For videos, it finds the highest bitrate MP4 URL.
+    For photos, it uses the standard media URL.
+
+    Args:
+        tweet_data: A dictionary containing the full tweet data structure.
+
+    Returns:
+        A dictionary containing user details, verification status, text,
+        and a list of media objects. Returns a dictionary with empty
+        values if the data cannot be parsed.
+    """
+    extracted_info = {
+        "username": None,
+        "userhandle": None,
+        "is_verified": False, # Default to False
+        "profile_picture_url": None,
+        "text": None,
+        "media": []
+    }
+
+    try:
+        # Navigate through the nested JSON to the main result object
+        tweet_result = tweet_data['result']['tweetResult']['result']
+        user_result = tweet_result['core']['user_results']['result']
+
+        # --- Extract User Info ---
+        user_legacy = user_result['legacy']
+        extracted_info['username'] = user_legacy.get('name')
+        extracted_info['userhandle'] = user_legacy.get('screen_name')
+        extracted_info['profile_picture_url'] = user_legacy.get('profile_image_url_https')
+        
+        # --- Extract Verification Status ---
+        extracted_info['is_verified'] = user_result.get('is_blue_verified', False)
+
+        # --- Extract Tweet Text ---
+        extracted_info['text'] = tweet_result['legacy'].get('full_text')
+
+        # --- Extract Media Details ---
+        if 'extended_entities' not in tweet_result['legacy']:
+            return extracted_info
+
+        media_list = tweet_result['legacy']['extended_entities'].get('media', [])
+        
+        for media_item in media_list:
+            media_type = media_item.get('type')
+            media_detail = {"type": media_type}
+
+            # If it's a video or animated GIF, find the best video file
+            if media_type in ['video', 'animated_gif']:
+                video_variants = media_item.get('video_info', {}).get('variants', [])
+                best_variant_url = None
+                max_bitrate = -1
+
+                for variant in video_variants:
+                    if variant.get('content_type') == 'video/mp4':
+                        bitrate = variant.get('bitrate', 0)
+                        if bitrate > max_bitrate:
+                            max_bitrate = bitrate
+                            best_variant_url = variant.get('url')
+                
+                media_detail['url'] = best_variant_url
+
+            # If it's a photo, get the standard media URL
+            elif media_type == 'photo':
+                media_detail['url'] = media_item.get('media_url_https')
+            
+            if media_detail.get('url'):
+              extracted_info['media'].append(media_detail)
+
+    except (KeyError, TypeError) as e:
+        print(f"An error occurred while parsing the tweet data: {e}")
+        return {
+            "username": None,
+            "userhandle": None,
+            "is_verified": False,
+            "profile_picture_url": None,
+            "text": None,
+            "media": []
+        }
+        
+    return extracted_info
+
+
+def get_tweet_data(tweet_url:str) -> dict:
+    tweet_id = tweet_url.split("/")[-1]
+    url = "https://twitter241.p.rapidapi.com/tweet-v2"
+    query_string = {"pid": tweet_id}
+    headers = {"x-rapidapi-key": api_key, "x-rapidapi-host": "twitter241.p.rapidapi.com"}
+    data = call_rapid_api(url=url, params=query_string, headers=headers)
+    return extract_tweet_details(data)
+
 if __name__ == "__main__":
-    import time
-    
-    page_name = "scoopwhoop"
-    
-    # Test case 2: Get posts after a specific timestamp (e.g., 7 days ago)
-    print("\n=== Test 2: Posts after timestamp ===")
-    seven_days_ago = int(time.time()) - (2*60 * 60) # 7 days ago
-    recent_posts = get_latest_instagram_post(page_name, last_created_at=seven_days_ago, n_posts=10)
-    print(f"Found {len(recent_posts)}")
-    
-    if recent_posts:
-        print(f"Most recent post timestamp: {recent_posts[0]['taken_at']}")
-        print(f"Oldest post timestamp: {recent_posts[-1]['taken_at']}")
+    import json 
+    import pickle
+    with open("./data_/insta.json","r") as f:
+        insta_data = json.load(f)
+    insta_data = insta_data[:10]
+    with open("./data_/insta_extracted.p","wb") as f:
+        pickle.dump(get_latest_instagram_post(last_created_at=(datetime.now().timestamp() - 86400)),f)
