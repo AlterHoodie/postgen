@@ -223,7 +223,7 @@ def extract_instagram_post_data(posts_data: List[dict]) -> List[dict]:
 
 
 
-def get_latest_instagram_post(last_created_at: int = None, n_posts: int = 10) -> List[dict]:
+def get_latest_instagram_post(page_id:str, last_created_at: int = None, n_posts: int = 10) -> List[dict]:
     """
     Get latest Instagram posts for a given page.
     
@@ -239,7 +239,7 @@ def get_latest_instagram_post(last_created_at: int = None, n_posts: int = 10) ->
     post_array = []
     should_continue = True
 
-    query_string = {"amount":n_posts,"user_id":os.getenv("INSTA_USER_ID")}
+    query_string = {"amount":n_posts,"user_id":page_id}
     url = "https://instagram-premium-api-2023.p.rapidapi.com/v1/user/medias/chunk"
     headers = {"x-rapidapi-key": api_key, "x-rapidapi-host": "instagram-premium-api-2023.p.rapidapi.com"}
 
@@ -381,10 +381,12 @@ def get_tweet_data(tweet_url:str) -> dict:
     return extract_tweet_details(data)
 
 if __name__ == "__main__":
-    import json 
-    import pickle
-    with open("./data_/insta.json","r") as f:
-        insta_data = json.load(f)
-    insta_data = insta_data[:10]
-    with open("./data_/insta_extracted.p","wb") as f:
-        pickle.dump(get_latest_instagram_post(last_created_at=(datetime.now().timestamp() - 86400)),f)
+    # import json 
+    # import pickle
+    # with open("./data_/insta.json","r") as f:
+    #     insta_data = json.load(f)
+    # insta_data = insta_data[:10]
+    # with open("./data_/insta_extracted.p","wb") as f:
+    #     pickle.dump(get_latest_instagram_post(last_created_at=(datetime.now().timestamp() - 86400)),f)
+
+    print(get_tweet_data("https://x.com/mainkyabatau/status/1798776283926859825"))
