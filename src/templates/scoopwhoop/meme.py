@@ -350,15 +350,12 @@ meme_template = {
             "html_template": MEME_UP_HTML_TEMPLATE,
             "overlay_template": MEME_UP_OVERLAY_TEMPLATE,
             "text": {
-                "name": "meme_up_slide",
-                "text_template": {
-                    "headline": {"type": "text", "tag": "h1", "class": ""},
-                },
+                "headline": {"type": "text", "tag": "h1", "class": ""},
             },
             "assets":{
                 "background_video": {"type":"bytes", "file_type":"mp4"},
                 "background_image": {"type":"bytes", "file_type":"png"},
-                "logo_image": {"type": "dropdown", "values": ["logo_original.png", "logo_hottake.png"], "default": "logo.png"},
+                "logo_image": {"type": "dropdown", "values": ["logo.png","logo_original.png", "logo_hottake.png"], "default": "logo.png"},
             },
             "image_edits": {
                 "crop_type": {"type": "dropdown", "values": ["cover", "contain"]},
@@ -374,15 +371,12 @@ meme_template = {
             "html_template": MEME_DOWN_HTML_TEMPLATE,
             "overlay_template": MEME_DOWN_OVERLAY_TEMPLATE,
             "text": {
-                "name": "meme_down_slide",
-                "text_template": {
-                    "headline": {"type": "text", "tag": "h1", "class": ""},
-                },
+                "headline": {"type": "text", "tag": "h1", "class": ""},
             },
             "assets":{
                 "background_video": {"type":"bytes", "file_type":"mp4"},
                 "background_image": {"type":"bytes", "file_type":"png"},
-                "logo_image": {"type": "dropdown", "values": ["logo_original.png", "logo_hottake.png"], "default": "logo.png"},
+                "logo_image": {"type": "dropdown", "values": ["logo.png","logo_original.png", "logo_hottake.png"], "default": "logo.png"},
             },
             "image_edits": {
                 "crop_type": {"type": "dropdown", "values": ["cover", "contain"]},
