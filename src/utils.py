@@ -44,14 +44,16 @@ def capture_html_screenshot(
     zoom: float = 1.0,
     delay: float = 0.6,
     headless: bool = True,
+    get_video: bool = False,
 ):
     file_url = Path(file_path).resolve().as_uri()
+    video_rect = None
 
     options = Options()
     if headless:
         options.add_argument("--headless=new")
     options.add_argument("--hide-scrollbars")
-    options.add_argument("--window-size=1920,2000")
+    options.add_argument("--window-size=1920,2300")
     options.add_argument("--disable-gpu")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
@@ -68,15 +70,21 @@ def capture_html_screenshot(
 
         # Find the element (e.g., an <img> tag)
         element = driver.find_element("css selector", element_selector)
+        if get_video:
+            video_element = driver.find_element("css selector", ".tweet-media")
+            video_rect = video_element.rect  # Returns {'x': int, 'y': int, 'width': int, 'height': int}
 
         # Capture screenshot of the element
         element.screenshot(output)
         logger.info(f"Image element captured and saved to {output}")
+
+        return video_rect
     except Exception as e:
         logger.error(f"Error capturing image element: {e}")
         raise e
     finally:
         driver.quit()
+        return video_rect
 
 
 def pil_image_to_bytes(image, format="PNG"):
@@ -193,7 +201,7 @@ def create_gradient_overlay(
 
 
 def process_overlay_for_transparency(
-    image_path: str, session_id: str, target_width: int = 576, target_height: int = 720
+    image_path: str, session_id: str, target_width: int = 576, target_height: int = 720, page_name: str = "scoopwhoop"
 ) -> str:
     """
     Process overlay image to make black areas transparent
@@ -214,7 +222,7 @@ def process_overlay_for_transparency(
         resized_img = img.resize(
             (target_width, target_height), Image.Resampling.LANCZOS
         )
-        output_path = f"./data/scoopwhoop/temp/processed_overlay_{session_id}.png"
+        output_path = f"./data/{page_name}/temp/processed_overlay_{session_id}.png"
         resized_img.save(output_path, format="PNG")
         return output_path
 
@@ -274,6 +282,7 @@ def get_file_type(filename: str) -> str:
 
 if __name__ == "__main__":
     pass
-    # # with open("./data_/test_cropped.png","wb") as f:
-    # #     f.write(crop_image(image_bytes=open("./data_/test.png","rb").read(),bias=0.5))
-    # capture_html_screenshot(file_path="./data_/overlay_test.html",element_selector=".container",output="./data_/test_out.png",delay=0.1,headless=True)
+    # with open("./data_/test_cropped.png","wb") as f:
+    #     f.write(crop_image(image_bytes=open("./data_/test.png","rb").read(),bias=0.5))
+    video = capture_html_screenshot(file_path="./data_/bleh_22.html",element_selector=".container",output="./data_/test_out.png",delay=2,headless=True, get_video=True)
+    print(video)
