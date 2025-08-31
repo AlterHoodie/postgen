@@ -10,7 +10,7 @@ from src.utils import (
 )
 
 def create_overlay_image(
-    text: dict, assets: dict, html_template: str, session_id: str, page_name: str, get_video: bool = False
+    text: dict, assets: dict, html_template: str, session_id: str, page_name: str, get_video: bool = False, class_name:str = ""
 ) -> Tuple[str, str]:
     """
     Create the overlay image with text using HTML template
@@ -28,6 +28,7 @@ def create_overlay_image(
         element_selector=".container",
         output=overlay_image_path,
         get_video=get_video,
+        class_name=class_name,
     )
 
     return overlay_image_path, html_path, video_rect
@@ -143,7 +144,7 @@ def create_image_over_video(
         return None, []
 
 
-def create_video_over_image(image_path:str, page_name:str, video_path:str, session_id:str, max_scale:float = 0.8, duration:float = None, width:int = 0, height:int = 0, x:int = 0, y:int = 0) -> Tuple[str, str]:
+def create_video_over_image(image_path:str, page_name:str, video_path:str, session_id:str, max_scale:float = 0.8, duration:float = None, width:int = 0, height:int = 0, x:int = 0, y:int = 0, padding:int = 0) -> Tuple[str, str]:
     """
     Create a video with a background image and a video overlay
     Uses Selenium coordinates to position video with CSS-like styling (width: 100%, height: 80%, object-fit: cover)
@@ -219,7 +220,7 @@ def create_video_over_image(image_path:str, page_name:str, video_path:str, sessi
         # Position the video using Selenium coordinates
         if x and y:
             # Use exact Selenium coordinates for positioning
-            final_video = CompositeVideoClip([background, final_clip.with_position((x - (width - 85)//2 , y))])
+            final_video = CompositeVideoClip([background, final_clip.with_position((x - (width - padding)//2 , y))])
         else:
             # Center the video if no coordinates provided
             final_video = CompositeVideoClip([background, final_clip.with_position("center")])

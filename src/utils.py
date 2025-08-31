@@ -45,6 +45,7 @@ def capture_html_screenshot(
     delay: float = 0.6,
     headless: bool = True,
     get_video: bool = False,
+    class_name:str = ''
 ):
     file_url = Path(file_path).resolve().as_uri()
     video_rect = None
@@ -55,7 +56,7 @@ def capture_html_screenshot(
     options.add_argument("--hide-scrollbars")
     options.add_argument("--window-size=1920,2300")
     options.add_argument("--disable-gpu")
-    options.add_argument("--no-sandbox")
+    options.add_argument("--no-sandbox")    
     options.add_argument("--disable-dev-shm-usage")
 
     driver = webdriver.Chrome(options=options)
@@ -71,7 +72,7 @@ def capture_html_screenshot(
         # Find the element (e.g., an <img> tag)
         element = driver.find_element("css selector", element_selector)
         if get_video:
-            video_element = driver.find_element("css selector", ".tweet-media")
+            video_element = driver.find_element("css selector", f".{class_name}")
             video_rect = video_element.rect  # Returns {'x': int, 'y': int, 'width': int, 'height': int}
 
         # Capture screenshot of the element

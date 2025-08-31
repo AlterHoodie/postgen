@@ -106,6 +106,7 @@ def video_editor(text: dict,page_name:str,assets:dict ,video_edits: dict, html_t
                 session_id=session_id,  
                 page_name=page_name,
                 get_video=True,
+                class_name = video_edits.get("class_name", ""),
             )
             print(video_rect)
             final_video_path, video_temp_files = create_video_over_image(
@@ -117,6 +118,7 @@ def video_editor(text: dict,page_name:str,assets:dict ,video_edits: dict, html_t
                 height=video_rect.get("height"),
                 x=video_rect.get("x"),
                 y=video_rect.get("y"),
+                padding = video_edits.get("padding", 0),
             )
 
         if not final_video_path:
@@ -232,7 +234,7 @@ if __name__ == "__main__":
     #     template=tweet_image_template['slides']['twitter_post'],
     #     page_name="twitter",
     #     image_edits={"crop_type": "cover"},
-    #     video_edits={},
+    #     video_edits={"type":"video_overlay","class_name":"tweet-media","padding":85},
     #     text={"user_name": "John Doe",
     #           "user_handle": "@johndoe",
     #           "tweet_text": "This is a test tweet",
@@ -241,17 +243,31 @@ if __name__ == "__main__":
     #     is_video=True,
     #     session_id="test",
     # )
-    from src.templates.scoopwhoop.thumbnail import thumbnail_template
+    # from src.templates.scoopwhoop.thumbnail import thumbnail_template
+    # final_image = text_editor(
+    #     template=thumbnail_template['slides']['headline_slide'],
+    #     page_name="scoopwhoop",
+    #     image_edits={"crop_type": "cover"},
+    #     video_edits={"type": "image_overlay"},
+    #     text={"headline": "This is a test headline",
+    #           "subtext": "This is a test subtext",
+    #           "is_trigger": True,
+    #           "source": "This is a test source"},
+    #     assets={"background_video": "./data_/2.mp4"},
+    #     is_video=True,
+    #     session_id="test",
+    # )
+
+    from src.templates.infomance.content import infomance_content_template
     final_image = text_editor(
-        template=thumbnail_template['slides']['headline_slide'],
-        page_name="scoopwhoop",
-        image_edits={"crop_type": "cover"},
-        video_edits={"type": "image_overlay"},
-        text={"headline": "This is a test headline",
-              "subtext": "This is a test subtext",
-              "is_trigger": True,
-              "source": "This is a test source"},
+        template=infomance_content_template['slides']['infomance_content_slide'],
+        page_name="infomance",
+        text={
+            "content_text": "This is a test content text",
+        },
         assets={"background_video": "./data_/2.mp4"},
+        image_edits={},
+        video_edits={"type":"video_overlay","class_name":"main-video","padding":256},
         is_video=True,
         session_id="test",
     )
