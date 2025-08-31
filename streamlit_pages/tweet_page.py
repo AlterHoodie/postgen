@@ -109,7 +109,7 @@ def generate_tweet_content(tweet_url: str):
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
             future = executor.submit(run_tweet_workflow)
-            result_bytes = future.result()
+            result_bytes, is_video = future.result()
 
         # Step 4: Finalize
         progress_bar.progress(80)
@@ -122,6 +122,7 @@ def generate_tweet_content(tweet_url: str):
 
         # Store result in session state
         st.session_state["latest_tweet_result"] = result_bytes
+        st.session_state["is_video"] = is_video
         st.session_state["latest_tweet_url"] = tweet_url
         st.session_state["show_tweet_results"] = True
 
@@ -143,20 +144,23 @@ def show_tweet_preview():
     """Display the generated tweet content in the left column preview"""
     try:
         result_bytes = st.session_state.get("latest_tweet_result")
-
+        is_video = st.session_state.get("is_video")
         if not result_bytes:
             st.error("No results found")
             return
 
         # Display the generated image
-        st.image(result_bytes, caption="Generated Tweet Content", width=500)
+        if is_video:
+            st.video(result_bytes, width=500)
+        else:
+            st.image(result_bytes, width=500)
         
         # Download button
         st.download_button(
-            label="⬇️ Download Image",
+            label="⬇️ Download",
             data=result_bytes,
-            file_name=f"tweet_content_{int(time.time())}.png",
-            mime="image/png",
+            file_name=f"tweet_content_{int(time.time())}.{is_video and 'mp4' or 'png'}",
+            mime=is_video and "video/mp4" or "image/png",
             use_container_width=True
         )
 

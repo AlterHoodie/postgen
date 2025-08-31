@@ -17,7 +17,7 @@ def show_generate_page():
     # Page selection
     page_name = st.selectbox(
         "Select Page/Brand:",
-        ["scoopwhoop", "twitter", "social_village", "the_sarcastic_indian"],
+        ["scoopwhoop", "twitter", "social_village", "infomance"],
         help="Choose which page/brand to create content for"
     )
     
@@ -28,21 +28,20 @@ def show_generate_page():
             "Thumbnail": "thumbnail",
             "Writeup": "writeup",
             "Meme": "meme",
-            "Text Based": "text_based"
         }
     elif page_name == "twitter":
         template_options = {
-            "Tweet Image": "tweet_image",
-            "Tweet Text": "tweet_text"
+            "Tweet Image": "tweet_image"
         }
     elif page_name == "social_village":
         template_options = {
             "Content": "content",
             "Thumbnail": "thumbnail"
         }
-    elif page_name == "the_sarcastic_indian":
+    elif page_name == "infomance":
         template_options = {
-            "Text Based": "text_based"
+            "Content": "content",
+            "Thumbnail": "thumbnail"
         }
     else:
         template_options = {}

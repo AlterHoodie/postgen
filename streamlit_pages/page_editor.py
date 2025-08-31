@@ -4,6 +4,8 @@ import io
 import uuid
 from typing import Dict, Tuple
 
+from PIL import Image
+
 from src.workflows.editors import text_editor
 from src.utils import extract_text_from_html, get_file_type
 from src.templates import get_template_config
@@ -141,6 +143,9 @@ def text_editor_form(
                         options=options,
                         index=options.index(default_value) if default_value in options else 0
                     )
+                elif config.get("type") == "default":
+                    video_edits_input[field_name] = config.get("values", "")
+                
         elif not is_video and "image_edits" in slide_config:
             st.subheader("Image Settings")
             for field_name, config in slide_config["image_edits"].items():
@@ -153,6 +158,8 @@ def text_editor_form(
                         options=options,
                         index=options.index(default_value) if default_value in options else 0
                     )
+                elif config.get("type") == "default":
+                    image_edits_input[field_name] = config.get("default", "")
 
         submitted = st.form_submit_button("Generate New Video" if is_video else "Generate New Image", type="primary")
         st.info("Use \*\*<text>\*\* for highlighting text in Yellow.")
@@ -214,7 +221,6 @@ def show_media_editor():
         
         # For images, try to validate with PIL
         if file_type == "image":
-            from PIL import Image
             try:
                 # Test if image can be opened
                 test_img = Image.open(io.BytesIO(file_bytes))
@@ -231,7 +237,7 @@ def show_media_editor():
     # Page selection
     page_name = st.selectbox(
         "Select page:",
-        ["scoopwhoop", "twitter", "social_village"],
+        ["scoopwhoop", "twitter", "social_village", "infomance"],
         help="Choose which page/brand to create content for"
     )
     
@@ -248,6 +254,11 @@ def show_media_editor():
             "Tweet Image": "tweet_image",
         }
     elif page_name == "social_village":
+        template_options = {
+            "Content": "content",
+            "Thumbnail": "thumbnail"
+        }
+    elif page_name == "infomance":
         template_options = {
             "Content": "content",
             "Thumbnail": "thumbnail"

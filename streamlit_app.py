@@ -1,13 +1,13 @@
 import logging
-from pathlib import Path
 
 import streamlit as st
 
 from streamlit_pages.generate_page import show_generate_page
 from streamlit_pages.page_editor import show_post_editor_page
+from streamlit_pages.tweet_page import show_tweet_page
 from streamlit_pages.history_page import show_history_page
 from streamlit_pages.sources_page import show_sources_page
-from src.workflows.sources import start_background_daemon, get_daemon_status
+from src.workflows.sources import start_background_daemon
 
 # Configure page
 st.set_page_config(
@@ -84,7 +84,7 @@ def main():
     # Navigation
     page = st.sidebar.selectbox(
         "Choose a page:",
-        ["Generate Posts", "Sources", "Post Editor", "History"],
+        ["Generate Posts", "Sources", "Post Editor", "Tweet Generator", "History"],
         key="page_selector",
     )
 
@@ -95,8 +95,10 @@ def main():
     # Route to appropriate page
     if page == "Generate Posts":
         show_generate_page()
-    elif page == "Post Editor":
+    if page == "Post Editor":
         show_post_editor_page()
+    elif page == "Tweet Generator":
+        show_tweet_page()
     elif page == "History":
         show_history_page()
     elif page == "Sources":

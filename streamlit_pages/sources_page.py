@@ -5,7 +5,6 @@ import concurrent.futures
 import time
 
 import streamlit as st
-import pandas as pd
 import pytz
 
 from src.workflows.sources import get_sources_summary
@@ -101,12 +100,44 @@ def show_sources_page():
                             key=f"headline_{idx}"
                         )
                         
-                        # Template selection
-                        template_options = {
-                            "Timeline": "timeline",
-                            "Thumbnail": "thumbnail", 
-                            "Writeup": "writeup",
-                        }
+                        # Page/Brand selection
+                        page_name = st.selectbox(
+                            "Select Page/Brand:",
+                            ["scoopwhoop", "twitter", "social_village", "infomance", "the_sarcastic_indian"],
+                            help="Choose which page/brand to create content for",
+                            key=f"page_{idx}"
+                        )
+                        
+                        # Template options based on selected page
+                        if page_name == "scoopwhoop":
+                            template_options = {
+                                "Timeline": "timeline",
+                                "Thumbnail": "thumbnail",
+                                "Writeup": "writeup",
+                                "Meme": "meme",
+                                "Text Based": "text_based",
+                            }
+                        elif page_name == "twitter":
+                            template_options = {
+                                "Tweet Image": "tweet_image",
+                                "Tweet Text": "text_based"
+                            }
+                        elif page_name == "social_village":
+                            template_options = {
+                                "Content": "content",
+                                "Thumbnail": "thumbnail"
+                            }
+                        elif page_name == "the_sarcastic_indian":
+                            template_options = {
+                                "Text Based": "text_based"
+                            }
+                        elif page_name == "infomance":
+                            template_options = {
+                                "Content": "content",
+                                "Thumbnail": "thumbnail"
+                            }
+                        else:
+                            template_options = {}
                         
                         selected_template = st.selectbox(
                             "Select Template",
@@ -128,6 +159,7 @@ def show_sources_page():
                             generate_content_from_source(
                                 headline,
                                 template_options[selected_template],
+                                page_name,
                                 session_key,
                                 post
                             )
@@ -140,7 +172,7 @@ def show_sources_page():
         st.info("No posts found in sources collection")
 
 
-def generate_content_from_source(headline: str, template_type: str, session_key: str, post_data: dict):
+def generate_content_from_source(headline: str, template_type: str, page_name: str, session_key: str, post_data: dict):
     """Generate content from a source post with progress tracking"""
     
     # Create progress tracking
@@ -153,7 +185,7 @@ def generate_content_from_source(headline: str, template_type: str, session_key:
     
     try:
         # Get template configuration
-        template = get_template_config(template_type)
+        template = get_template_config(template_type, page_name)
         
         # Step 1: Initialize
         progress_bar.progress(20)
@@ -333,7 +365,8 @@ def show_generation_results(session_key: str, container_key: str):
                             
                             # Get template and slide info for text editor
                             template_type = result.get("template_type", "timeline")
-                            template = get_template_config(template_type)
+                            page_name = result.get("page_name", "scoopwhoop")
+                            template = get_template_config(template_type, page_name)
                             slide_name = selected_slide.get("name", "headline_slide")
                             
                             if (
@@ -350,6 +383,7 @@ def show_generation_results(session_key: str, container_key: str):
                                         new_image, submitted = text_editor_form(
                                             text_values=current_text_values,
                                             content_bytes=without_text_bytes,
+                                            page_name=page_name,
                                             template=template,
                                             slide_name=slide_name,
                                             form_key=f"edit_form_{container_key}_{selected_slide_idx}_{tab_idx}",
@@ -364,6 +398,7 @@ def show_generation_results(session_key: str, container_key: str):
                                         st.error("No image data available for editing")
                                         
                                 except Exception as e:
+                                    print(e)
                                     st.error("Failed to load text editor")
                             else:
                                 st.info("Text editing not available for this slide type")
