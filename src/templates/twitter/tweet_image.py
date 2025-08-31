@@ -455,11 +455,11 @@ tweet_image_template = {
                 "profile_pic": {"type":"bytes", "file_type":"png", "default": "profile_pic.png"},
             },
             "image_edits": {
-                "crop_type": {"type": "dropdown", "values": ["cover", "contain"], "default": "cover"},
             },
             "video_edits":{
                 "type": {"type":"default", "values": "video_overlay"},
-                "crop_type": {"type": "dropdown", "values": ["cover", "contain"], "default": "cover"},
+                "class_name":{"type":"default","values":"tweet-media"},
+                "padding":{"type":"default","values":85},
             }
         },
     },

@@ -23,11 +23,11 @@ Thumbnail Slide:
   - circle_image_3_description: Description for the small circle (right position).
     EX: "Infrastructure development project site"
   
-  - text_content: The main text content with highlighted portions using span class="highlight".
-    EX: <span class="highlight">Street Dogs to be released</span> back to their localities, says supreme court
+  - text_content: The main text content. Use **str** for highlighting important words and \n for line breaks.
+    EX: **Street Dogs to be released** back to their localities, says supreme court
   
-  - source: A p tag with classname-"source" for the source of the post.
-    Ex: <p class="source">Source: TOI</p>
+  - source: The source attribution for the news story.
+    Ex: Source: TOI
 
   ### Text Input:
     {{
@@ -36,17 +36,16 @@ Thumbnail Slide:
       "circle_image_1_description": "str", 
       "circle_image_2_description": "str",
       "circle_image_3_description": "str",
-      "text_template":{{
-      "text_content": "<html_snippet_code>",
-      "source": "<html_snippet_code>"
+      "text": {{
+      "text_content": "str",
+      "source": "str"
       }}
     }}
 
 NOTE: 
-- YOU CAN USE class name "highlight" to highlight key words in red color and make the content more engaging.
+- Use **str** to highlight key words and make the content more engaging. Use \n for line breaks if needed.
 - DO NOT COMPLICATE THE IMAGE DESCRIPTIONS, KEEP IT SIMPLE AND DIRECT.
-- DO NOT CITE SOURCES USING <a> tags. 
-- Use Source tag to only cite external sources NOT INFOMANCE
+- Use Source to only cite external sources NOT INFOMANCE
 - The three circle images should complement the main background image and provide additional visual context to the story.
 """
 
@@ -294,3 +293,28 @@ HEADLINE_SLIDE_HTML_TEMPLATE = """
   </body>
 </html>
 """
+
+thumbnail_3_template = {
+    "page_name": "infomance",
+    "template_type": "thumbnail_3",
+    "text_template": {"template_description":TEMPLATE_DESCRIPTION,
+            "json_description":JSON_DESCRIPTION},
+    "slides": {
+        "thumbnail_3_slide": {
+            "html_template": HEADLINE_SLIDE_HTML_TEMPLATE,
+            "overlay_template": "",
+            "text": {
+                    "text_content": {"type": "text", "tag": "div", "class": "text-content"},
+                    "source": {"type": "text", "tag": "p", "class": "source"},
+            },
+            "assets":{
+                "main_image": {"type":"bytes", "file_type":"png"},
+                "circle_image_1": {"type":"bytes", "file_type":"png"},
+                "circle_image_2": {"type":"bytes", "file_type":"png"},
+                "circle_image_3": {"type":"bytes", "file_type":"png"},
+            },
+            "image_edits": {},
+            "video_edits":{}
+        },
+    },
+}
