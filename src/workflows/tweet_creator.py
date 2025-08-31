@@ -84,7 +84,7 @@ async def create_tweet_content(tweet_url: str) -> bytes:
     
     # Set up edit parameters
     image_edits = {"crop_type": "cover"}
-    video_edits = {"crop_type": "cover", "type": "video_overlay"}
+    video_edits = {"crop_type": "cover", "type": "video_overlay", "class_name":"tweet-media", "padding":85}
     
     # Call text_editor to generate content
     result = text_editor(

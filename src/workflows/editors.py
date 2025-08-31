@@ -228,21 +228,21 @@ def text_editor(
 
 # Test function for development
 if __name__ == "__main__":
-    # from src.templates.twitter.tweet_image import tweet_image_template
-    # ## Test Image Workflow
-    # final_image = text_editor(
-    #     template=tweet_image_template['slides']['twitter_post'],
-    #     page_name="twitter",
-    #     image_edits={"crop_type": "cover"},
-    #     video_edits={"type":"video_overlay","class_name":"tweet-media","padding":85},
-    #     text={"user_name": "John Doe",
-    #           "user_handle": "@johndoe",
-    #           "tweet_text": "This is a test tweet",
-    #           "add_verified_badge": True},
-    #     assets={"background_video": "./data_/2.mp4"},
-    #     is_video=True,
-    #     session_id="test",
-    # )
+    from src.templates.twitter.tweet_image import tweet_image_template
+    ## Test Image Workflow
+    final_image = text_editor(
+        template=tweet_image_template['slides']['twitter_post'],
+        page_name="twitter",
+        image_edits={"crop_type": "cover"},
+        video_edits={"type":"video_overlay","class_name":"tweet-media","padding":85},
+        text={"user_name": "John Doe",
+              "user_handle": "@johndoe",
+              "tweet_text": "This is a test tweet",
+              "add_verified_badge": True},
+        assets={"background_video": "./data_/2.mp4"},
+        is_video=True,
+        session_id="test",
+    )
     # from src.templates.scoopwhoop.thumbnail import thumbnail_template
     # final_image = text_editor(
     #     template=thumbnail_template['slides']['headline_slide'],
@@ -258,19 +258,19 @@ if __name__ == "__main__":
     #     session_id="test",
     # )
 
-    from src.templates.infomance.content import infomance_content_template
-    final_image = text_editor(
-        template=infomance_content_template['slides']['infomance_content_slide'],
-        page_name="infomance",
-        text={
-            "content_text": "This is a test content text",
-        },
-        assets={"background_video": "./data_/2.mp4"},
-        image_edits={},
-        video_edits={"type":"video_overlay","class_name":"main-video","padding":256},
-        is_video=True,
-        session_id="test",
-    )
+    # from src.templates.infomance.content import infomance_content_template
+    # final_image = text_editor(
+    #     template=infomance_content_template['slides']['infomance_content_slide'],
+    #     page_name="infomance",
+    #     text={
+    #         "content_text": "This is a test content text",
+    #     },
+    #     assets={"background_video": "./data_/2.mp4"},
+    #     image_edits={},
+    #     video_edits={"type":"video_overlay","class_name":"main-video","padding":256},
+    #     is_video=True,
+    #     session_id="test",
+    # )
 
     with open("./data_/test_out.mp4", "wb") as f:
         f.write(final_image)
