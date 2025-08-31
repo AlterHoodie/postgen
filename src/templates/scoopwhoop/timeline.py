@@ -1291,7 +1291,7 @@ timeline_template = {
             "assets":{
                 "background_video": {"type":"bytes", "file_type":"mp4"},
                 "background_image": {"type":"bytes", "file_type":"png"},
-                "logo_image": {"type": "dropdown", "values": ["logo_original.png", "logo_hottake.png"], "default": "logo.png"},
+                "logo_image": {"type": "dropdown", "values": ["logo.png","logo_original.png", "logo_hottake.png"], "default": "logo.png"},
             },
             "image_edits": {
                 "crop_type": {"type": "dropdown", "values": ["cover", "contain"] , "default": "cover"},
@@ -1319,7 +1319,7 @@ timeline_template = {
             "assets":{
                 "background_video": {"type":"bytes", "file_type":"mp4"},
                 "background_image": {"type":"bytes", "file_type":"png"},
-                "logo_image": {"type": "dropdown", "values": ["logo_original.png", "logo_hottake.png"], "default": "logo.png"},
+                "logo_image": {"type": "dropdown", "values": ["logo.png","logo_original.png", "logo_hottake.png"], "default": "logo.png"},
             },
             "image_edits": {
                 "crop_type": {"type": "dropdown", "values": ["cover", "contain"] , "default": "cover"},
@@ -1347,7 +1347,7 @@ timeline_template = {
             "assets":{
                 "background_video": {"type":"bytes", "file_type":"mp4"},
                 "background_image": {"type":"bytes", "file_type":"png"},
-                "logo_image": {"type": "dropdown", "values": ["logo_original.png", "logo_hottake.png"], "default": "logo.png"},
+                "logo_image": {"type": "dropdown", "values": ["logo.png","logo_original.png", "logo_hottake.png"], "default": "logo.png"},
             },
             "image_edits": {
                 "crop_type": {"type": "dropdown", "values": ["cover", "contain"] , "default": "cover"},
@@ -1375,7 +1375,7 @@ timeline_template = {
             "assets":{
                 "background_video": {"type":"bytes", "file_type":"mp4"},
                 "background_image": {"type":"bytes", "file_type":"png"},
-                "logo_image": {"type": "dropdown", "values": ["logo_original.png", "logo_hottake.png"], "default": "logo.png"},
+                "logo_image": {"type": "dropdown", "values": ["logo.png","logo_original.png", "logo_hottake.png"], "default": "logo.png"},
             },
             "image_edits": {
                 "crop_type": {"type": "dropdown", "values": ["cover", "contain"] , "default": "cover"},
