@@ -146,7 +146,7 @@ THUMBNAIL_SLIDE_OVERLAY_TEMPLATE = """<!DOCTYPE html>
         padding: 0;
         height: 100%;
         font-family: "Poppins", sans-serif;
-        background-color: #f0f0f0;
+        background-color: #000000;
       }}
       .container {{
         position: relative;
@@ -251,6 +251,9 @@ thumbnail_template = {
             },
             "video_edits":{
                 "type": {"type":"default", "values": "image_overlay"},
+                "crop_type": {"type": "dropdown", "values": ["cover", "contain"]},
+                "add_gradient": {"type":"default", "values": False},
+                "offset": {"type":"default", "values": 0},
             }
         },
     },
