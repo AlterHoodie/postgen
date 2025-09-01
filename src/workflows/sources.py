@@ -43,7 +43,6 @@ def fetch_and_update_sources(page_id: str, max_posts: int = 10) -> Dict[str, any
         mongo_client = get_mongo_client()
         
         # Step 1: Get latest timestamp
-        logger.info("Getting latest timestamp...")
         latest_timestamp = mongo_client.get_latest_source_timestamp()
         result["latest_timestamp"] = latest_timestamp
         
@@ -72,7 +71,6 @@ def fetch_and_update_sources(page_id: str, max_posts: int = 10) -> Dict[str, any
             logger.info(f"  Oldest post: {new_posts[-1]['taken_at']}")
             
             # Step 4: Add new posts to sources collection
-            logger.info("Adding new posts to sources collection...")
             inserted_ids = mongo_client.add_sources(new_posts)
             result["new_posts_added"] = len(inserted_ids)
             

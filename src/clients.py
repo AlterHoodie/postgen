@@ -14,6 +14,10 @@ from google.genai import types
 load_dotenv(override=True)
 logging.basicConfig(level=logging.INFO)
 
+logging.getLogger("openai").setLevel(logging.WARNING)
+logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("google").setLevel(logging.WARNING)
+
 openai_client = openai.AsyncClient(api_key=os.getenv("OPENAI_API_KEY"), timeout=150)
 google_client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY"))
 

@@ -13,7 +13,7 @@ from bs4 import BeautifulSoup
 
 
 logger = logging.getLogger(__name__)
-
+logger.setLevel(logging.WARNING)
 
 ## General Utils
 def extract_x(response: str, code_type: str) -> str:
@@ -58,6 +58,13 @@ def capture_html_screenshot(
     options.add_argument("--disable-gpu")
     options.add_argument("--no-sandbox")    
     options.add_argument("--disable-dev-shm-usage")
+    
+    # Suppress Chrome DevTools messages
+    options.add_argument("--log-level=2")  # Show warnings and errors only
+    options.add_experimental_option('excludeSwitches', ['enable-logging'])
+    options.add_experimental_option('useAutomationExtension', False)
+    options.add_argument("--disable-blink-features=AutomationControlled")
+    options.add_argument("--silent")
 
     driver = webdriver.Chrome(options=options)
     try:

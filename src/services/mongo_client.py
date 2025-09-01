@@ -12,7 +12,7 @@ from src.utils import compress_image
 
 load_dotenv(override=True)
 logger = logging.getLogger(__name__)
-
+logger.setLevel(logging.WARNING)
 
 class SimpleMongoClient:
     def __init__(self):

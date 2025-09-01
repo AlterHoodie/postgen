@@ -98,6 +98,7 @@ async def slide_creator(slide_template: dict, html_template: dict, page_name:str
         async def process_image(img_data):
             """Add text overlay to image"""
             try:
+                session_id = str(uuid.uuid4())[:8]
                 file_name = f"background_image_{session_id}.png"
                 file_path = f"./data/{page_name}/temp/{file_name}"
                 

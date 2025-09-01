@@ -228,7 +228,7 @@ async def image_search_agent(query: str, reference_image: bytes = None) -> List[
             )
             filtered_images = downloaded_images
 
-        # Step 5: Select top 5 images based on score
+        # Step 5: Select top 3 images based on score
         top_image = sorted(
             filtered_images, key=lambda x: x.get("score", 0), reverse=True
         )[:3]
