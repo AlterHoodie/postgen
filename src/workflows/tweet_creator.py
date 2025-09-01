@@ -16,7 +16,7 @@ def clean_tweet_text(tweet_text: str) -> str:
     """
     return re.sub(r'https://t\.co/\w+', '', tweet_text)
 
-async def create_tweet_content(tweet_url: str) -> bytes:
+async def create_tweet_content_from_url(tweet_url: str) -> tuple[bytes, bool]:
     """
     Complete workflow to create Twitter content from tweet URL
     
@@ -24,13 +24,34 @@ async def create_tweet_content(tweet_url: str) -> bytes:
         tweet_url: Twitter URL to extract data from
         
     Returns:
-        bytes: Generated image/video content
+        tuple: (Generated image/video content bytes, is_video boolean)
+    """
+    # First fetch tweet data
+    tweet_data = get_tweet_data(tweet_url)
+    # Then create content from data
+    return await create_tweet_content(tweet_data)
+
+async def create_tweet_content(tweet_data: dict) -> tuple[bytes, bool]:
+    """
+    Complete workflow to create Twitter content from tweet data
+    
+    Args:
+        tweet_data: Twitter data dictionary with structure:
+            {
+                'username': str,
+                'userhandle': str, 
+                'is_verified': bool,
+                'profile_picture_url': str,
+                'text': str,
+                'media': [{'type': str, 'url': str}, ...]
+            }
+        
+    Returns:
+        tuple: (Generated image/video content bytes, is_video boolean)
     """
     # Generate session ID for file management
     session_id = str(uuid.uuid4())[:8]
-    
-    # Get tweet data
-    tweet_data = get_tweet_data(tweet_url)
+
     # Create temp directory for twitter assets
     temp_dir = Path("./data/twitter/temp")
     temp_dir.mkdir(parents=True, exist_ok=True)
@@ -104,6 +125,6 @@ async def create_tweet_content(tweet_url: str) -> bytes:
 if __name__ == "__main__":
     import asyncio
     tweet_url = "https://x.com/Riocasm/status/1957472065084440822"
-    result = asyncio.run(create_tweet_content(tweet_url))
+    result, is_video = asyncio.run(create_tweet_content_from_url(tweet_url))
     with open("./data_/tweet_test.png", "wb") as f:
         f.write(result)
