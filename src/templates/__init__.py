@@ -10,10 +10,11 @@ from src.templates.twitter.tweet_text import tweet_text_template
 from src.templates.social_village.content import content_template
 from src.templates.social_village.thumbnail import thumbnail_template as social_village_thumbnail_template
 
-from src.templates.the_sarcastic_indian.text_based import text_based_template as sarcastic_text_based_template
+from src.templates.the_sarcastic_indian.writeup import writeup_template as sarcastic_writeup_template
 
 from src.templates.infomance.content import infomance_content_template
 from src.templates.infomance.thumbnail import infomance_thumbnail_template
+from src.templates.infomance.thumbnail_3 import infomance_thumbnail_3_template
 
 def get_template_config(template_type: str, page_name: str) -> dict:
     """Get template configuration based on type"""
@@ -47,8 +48,8 @@ def get_template_config(template_type: str, page_name: str) -> dict:
             raise ValueError(f"Unknown template type for given {page_name}: {template_type}")
     
     elif page_name == "the_sarcastic_indian":
-        if template_type == "text_based":
-            return sarcastic_text_based_template
+        if template_type == "writeup":
+            return sarcastic_writeup_template
         else:
             raise ValueError(f"Unknown template type for given {page_name}: {template_type}")
     
@@ -57,6 +58,8 @@ def get_template_config(template_type: str, page_name: str) -> dict:
             return infomance_content_template
         elif template_type == "thumbnail":
             return infomance_thumbnail_template
+        elif template_type == "thumbnail_3":
+            return infomance_thumbnail_3_template
         else:
             raise ValueError(f"Unknown template type for given {page_name}: {template_type}")
     else:
