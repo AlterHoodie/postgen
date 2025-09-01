@@ -260,7 +260,8 @@ def show_media_editor():
     elif page_name == "infomance":
         template_options = {
             "Content": "content",
-            "Thumbnail": "thumbnail"
+            "Thumbnail": "thumbnail",
+            "Thumbnail 3": "thumbnail_3"
         }
     else:
         template_options = {}
@@ -366,24 +367,52 @@ def show_text_only_editor():
         ["scoopwhoop", "the_sarcastic_indian","twitter"],
         help="Choose which page/brand to create content for"
     )
+
+    # Template options based on page
+    if page_name == "scoopwhoop":
+        template_options = {
+            "Text Based": "text_based",
+        }
+    elif page_name == "twitter":
+        template_options = {
+            "Tweet Text": "text_based",
+        }
+    elif page_name == "the_sarcastic_indian":
+        template_options = {
+            "Writeup": "writeup",
+        }
+    else:
+        template_options = {}
     
-    # Template selection - only text_based for now
-    text_only_template_config = get_template_config("text_based", page_name)
+    # Template selection
+    selected_template = st.selectbox(
+        "Choose template:",
+        options=list(template_options.keys()),
+        help="Choose the template style for your content",
+    )
     
-    # Get the slide (text_based only has one slide)
-    slide_name = "text_based_slide"
+    # Get template config
+    template_key = template_options[selected_template]
+    template_config = get_template_config(template_key, page_name)
+
+    slides = list(template_config["slides"].keys())
+    selected_slide = st.selectbox(
+        "Choose slide to edit:",
+        slides,
+        format_func=lambda x: x.replace("_", " ").title(),
+    )
     
     # Initialize session state for text-only editor
     if "text_only_data" not in st.session_state:
         st.session_state.text_only_data = initialize_slide_fields(
-            text_only_template_config["slides"][slide_name]
+            template_config["slides"][selected_slide]
         )
     if "text_only_page" not in st.session_state:
         st.session_state.text_only_page = page_name
     elif st.session_state.text_only_page != page_name:
         # Page changed, reset data
         st.session_state.text_only_data = initialize_slide_fields(
-            text_only_template_config["slides"][slide_name]
+            template_config["slides"][selected_slide]
         )
         st.session_state.text_only_page = page_name
     
@@ -401,7 +430,7 @@ def show_text_only_editor():
             st.info("Use \*\*<text>\*\* for highlighting text in Yellow.")
             
             # Get slide config
-            slide_config = text_only_template_config["slides"][slide_name]
+            slide_config = template_config["slides"][selected_slide]
             
             text_fields = slide_config["text"]                    
             for field_name, config in text_fields.items():
@@ -488,7 +517,7 @@ def show_text_only_editor():
                         template=slide_config,
                         page_name=page_name,
                         image_edits=image_edits_input,
-                        video_edits={},
+                        video_edits=slide_config.get("video_edits", {}),
                         text=text_input,
                         assets=assets_input,
                         session_id=session_id,
