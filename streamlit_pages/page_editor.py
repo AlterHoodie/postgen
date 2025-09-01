@@ -146,7 +146,7 @@ def text_editor_form(
                 elif config.get("type") == "default":
                     video_edits_input[field_name] = config.get("values", "")
                 
-        elif not is_video and "image_edits" in slide_config:
+        elif not is_video and "image_edits" in slide_config and slide_config["image_edits"]:
             st.subheader("Image Settings")
             for field_name, config in slide_config["image_edits"].items():
                 display_name = field_name.replace("_", " ").title()
