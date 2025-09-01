@@ -229,7 +229,7 @@ def display_content_workflow(workflow_result):
 
                         # Get template and slide info for text editor
                         template_type = workflow_result.get("template_type", "timeline")
-                        template = get_template_config(template_type)
+                        template = get_template_config(template_type, page_name = workflow_result.get("page_name", "scoopwhoop"))
                         slide_name = selected_slide.get("name", "headline_slide")
 
                         if "slides" in template and slide_name in template["slides"]:
