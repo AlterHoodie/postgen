@@ -142,6 +142,35 @@ async def slide_creator(slide_template: dict, html_template: dict, page_name:str
         return []
 
 
+async def text_only_slide_creator(slide_template: dict, html_template: dict, page_name:str) -> List[Dict]:
+    session_id = str(uuid.uuid4())[:8]
+    name = slide_template["name"]
+    text = slide_template["text"]
+
+    loop = asyncio.get_event_loop()
+    with_text_bytes = await loop.run_in_executor(
+                    None,
+                    text_editor,
+                    html_template[name],
+                    page_name,
+                    {},
+                    {},
+                    text,
+                    {},
+                    session_id,
+                    False,
+                )
+    
+    return [{
+                    "images": {
+                        "without_text": None,
+                        "with_text": with_text_bytes
+                    },
+                    "type": "text",
+                    "model": "unknown"
+            }]
+
+
 async def save_to_mongo(session_id: str, headline: str, template_type: str, 
                       story_board: dict, slide_images: list, page_name: str = "scoopwhoop", error: str = None) -> str:
     """Save workflow results to MongoDB"""
@@ -180,8 +209,11 @@ async def workflow(headline: str, template: dict,image_bytes: bytes = None, save
         else:
             def create_slide(slide):
                 """Run slide creator in thread"""
-                return asyncio.run(slide_creator(slide, template["slides"], template["page_name"]))
-            
+                if slide.get("image_description", None) is None:
+                    return asyncio.run(text_only_slide_creator(slide, template["slides"], template["page_name"]))
+                else:
+                    return asyncio.run(slide_creator(slide, template["slides"], template["page_name"]))
+
             # Run each slide in its own thread
             loop = asyncio.get_event_loop()
             with ThreadPoolExecutor(max_workers=3) as executor:
@@ -241,12 +273,13 @@ if __name__ == "__main__":
     import asyncio
     import base64
     # from src.templates.timeline import timeline_template
-    from src.templates.twitter.tweet_image import tweet_image_template
+    # from src.templates.twitter.tweet_image import tweet_image_template
+    from src.templates.the_sarcastic_indian.writeup import writeup_template
 
     headline = "UttarKashi Cloud Burst India"
 
     try:
-        session_id = asyncio.run(workflow(headline=headline, template=tweet_image_template,save=False))
+        session_id = asyncio.run(workflow(headline=headline, template=writeup_template,save=True))
         # session_id = "5a935915"
         print(f"Workflow completed successfully!")
         print(f"Document ID: {session_id}")
