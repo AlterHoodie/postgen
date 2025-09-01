@@ -393,7 +393,7 @@ infomance_content_template = {
             "video_edits":{
                 "type": {"type":"default", "values": "video_overlay"},
                 "class_name":{"type":"default","values":"main-video"},
-                "padding":{"type":"default","values":256}
+                "padding":{"type":"default","values":258}
             }
         },
     },
