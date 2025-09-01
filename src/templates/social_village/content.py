@@ -219,11 +219,9 @@ content_template = {
                 "logo_image": {"type": "dropdown", "values": ["logo.png"], "default": "logo.png"},
             },
             "image_edits": {
-                "crop_type": {"type": "dropdown", "values": ["cover", "contain"] , "default": "cover"},
             },
             "video_edits":{
                 "type": {"type":"default", "values": "image_overlay"},
-                "crop_type": {"type": "dropdown", "values": ["cover", "contain"] , "default": "cover"},
             }
         }
     }
