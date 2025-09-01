@@ -89,6 +89,53 @@ def show_sources_page():
                 with col_generate:
                     st.markdown(f"**Generate Content from Post {idx + 1}**")
                     
+                    # Page/Brand selection (outside form for dynamic updates)
+                    page_name = st.selectbox(
+                        "Select Page/Brand:",
+                        ["scoopwhoop", "twitter", "social_village", "infomance", "the_sarcastic_indian"],
+                        help="Choose which page/brand to create content for",
+                        key=f"page_{idx}"
+                    )
+                    
+                    # Template options based on selected page
+                    if page_name == "scoopwhoop":
+                        template_options = {
+                            "Timeline": "timeline",
+                            "Thumbnail": "thumbnail",
+                            "Writeup": "writeup",
+                            "Meme": "meme",
+                            "Text Based": "text_based",
+                        }
+                    elif page_name == "twitter":
+                        template_options = {
+                            "Tweet Image": "tweet_image",
+                            "Tweet Text": "text_based"
+                        }
+                    elif page_name == "social_village":
+                        template_options = {
+                            "Content": "content",
+                            "Thumbnail": "thumbnail"
+                        }
+                    elif page_name == "the_sarcastic_indian":
+                        template_options = {
+                            "Writeup": "writeup"
+                        }
+                    elif page_name == "infomance":
+                        template_options = {
+                            "Content": "content",
+                            "Thumbnail": "thumbnail"
+                        }
+                    else:
+                        template_options = {}
+                    
+                    # Template selection (outside form for dynamic updates)
+                    selected_template = st.selectbox(
+                        "Select Template",
+                        options=list(template_options.keys()),
+                        help="Choose the template style for your content",
+                        key=f"template_{idx}"
+                    )
+                    
                     # Generation form
                     with st.form(key=f"generate_form_{idx}"):
                         # Use caption as default headline or let user modify
@@ -99,52 +146,6 @@ def show_sources_page():
                             value=default_headline,
                             placeholder="Enter headline for content generation",
                             key=f"headline_{idx}"
-                        )
-                        
-                        # Page/Brand selection
-                        page_name = st.selectbox(
-                            "Select Page/Brand:",
-                            ["scoopwhoop", "twitter", "social_village", "infomance", "the_sarcastic_indian"],
-                            help="Choose which page/brand to create content for",
-                            key=f"page_{idx}"
-                        )
-                        
-                        # Template options based on selected page
-                        if page_name == "scoopwhoop":
-                            template_options = {
-                                "Timeline": "timeline",
-                                "Thumbnail": "thumbnail",
-                                "Writeup": "writeup",
-                                "Meme": "meme",
-                                "Text Based": "text_based",
-                            }
-                        elif page_name == "twitter":
-                            template_options = {
-                                "Tweet Image": "tweet_image",
-                                "Tweet Text": "text_based"
-                            }
-                        elif page_name == "social_village":
-                            template_options = {
-                                "Content": "content",
-                                "Thumbnail": "thumbnail"
-                            }
-                        elif page_name == "the_sarcastic_indian":
-                            template_options = {
-                                "Writeup": "writeup"
-                            }
-                        elif page_name == "infomance":
-                            template_options = {
-                                "Content": "content",
-                                "Thumbnail": "thumbnail"
-                            }
-                        else:
-                            template_options = {}
-                        
-                        selected_template = st.selectbox(
-                            "Select Template",
-                            options=list(template_options.keys()),
-                            help="Choose the template style for your content",
-                            key=f"template_{idx}"
                         )
                         
                         # Generate button
