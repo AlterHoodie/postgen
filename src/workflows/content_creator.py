@@ -52,11 +52,11 @@ async def slide_creator(slide_template: dict, html_template: dict, page_name:str
                 reference_image=None,
                 session_id=session_id,
             ),
-            # generate_single_image(
-            #     headline=slide_template["image_description"],
-            #     session_id=session_id,
-            #     model="gpt-image-1",
-            # ),
+            generate_single_image(
+                headline=slide_template["image_description"],
+                session_id=session_id,
+                model="gpt-image-1",
+            ),
             # generate_single_image(
             #     headline=slide_template['image_description'],
             #     session_id=session_id,
