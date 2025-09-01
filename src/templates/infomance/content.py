@@ -147,7 +147,7 @@ CONTENT_HTML_TEMPLATE = """<!DOCTYPE html>
         line-height: 1.4;
       }}
 
-      .text-content .highlight {{
+      .text-content .yellow {{
         color: #dc1341;
       }}
 
@@ -319,7 +319,7 @@ CONTENT_OVERLAY_TEMPLATE = """<!DOCTYPE html>
         line-height: 1.4;
       }}
 
-      .text-content .highlight {{
+      .text-content .yellow {{
         color: #dc1341;
       }}
 

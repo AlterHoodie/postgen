@@ -156,7 +156,7 @@ HEADLINE_SLIDE_HTML_TEMPLATE = """
         line-height: 1.4;
       }}
 
-      .text-content .highlight {{
+      .text-content .yellow {{
         color: #d93a49;
       }}
 
@@ -331,7 +331,7 @@ HEADLINE_SLIDE_OVERLAY_TEMPLATE = """
         line-height: 1.4;
       }}
 
-      .text-content .highlight {{
+      .text-content .yellow {{
         color: #d93a49;
       }}
 
@@ -375,7 +375,7 @@ HEADLINE_SLIDE_OVERLAY_TEMPLATE = """
 
       <div class="text-content">
         {main_text}
-        <p class="source">{source}</p>
+        {source}
       </div>
 
       <div class="footer">

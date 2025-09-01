@@ -119,7 +119,7 @@ HEADLINE_SLIDE_HTML_TEMPLATE = """
         margin: 0;
       }}
 
-      .header {
+      .header {{
         background-color: #ffffff;
         text-align: center;
         position: relative;
@@ -157,7 +157,7 @@ HEADLINE_SLIDE_HTML_TEMPLATE = """
         display: block;
       }}
 
-      .circles-container {
+      .circles-container {{
         position: absolute;
         left: 60px;
         top: 60px;
@@ -223,7 +223,7 @@ HEADLINE_SLIDE_HTML_TEMPLATE = """
         line-height: 1.4;
       }}
 
-      .text-content .highlight {{
+      .text-content .yellow {{
         color: #dc1341;
       }}
 
@@ -260,7 +260,7 @@ HEADLINE_SLIDE_HTML_TEMPLATE = """
       </div>
 
       <div class="image-banner">
-        <img src="{main_image}" alt="Main Image" class="main-image" />
+        <img src="{background_image}" alt="Main Image" class="main-image" />
         <div class="circles-container">
           <div class="circle-column">
             <div class="circle large">
@@ -277,12 +277,7 @@ HEADLINE_SLIDE_HTML_TEMPLATE = """
           </div>
         </div>
       </div>
-
-      <div class="text-content">
         {text_content}
-      </div>
-
-      {source}
 
       <div class="footer">
         <div class="footer-container">
@@ -294,7 +289,7 @@ HEADLINE_SLIDE_HTML_TEMPLATE = """
 </html>
 """
 
-thumbnail_3_template = {
+infomance_thumbnail_3_template = {
     "page_name": "infomance",
     "template_type": "thumbnail_3",
     "text_template": {"template_description":TEMPLATE_DESCRIPTION,
@@ -305,10 +300,9 @@ thumbnail_3_template = {
             "overlay_template": "",
             "text": {
                     "text_content": {"type": "text", "tag": "div", "class": "text-content"},
-                    "source": {"type": "text", "tag": "p", "class": "source"},
             },
             "assets":{
-                "main_image": {"type":"bytes", "file_type":"png"},
+                "background_image": {"type":"bytes", "file_type":"png"},
                 "circle_image_1": {"type":"bytes", "file_type":"png"},
                 "circle_image_2": {"type":"bytes", "file_type":"png"},
                 "circle_image_3": {"type":"bytes", "file_type":"png"},
