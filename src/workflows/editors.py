@@ -108,7 +108,7 @@ def video_editor(text: dict,page_name:str,assets:dict ,video_edits: dict, html_t
                 get_video=True,
                 class_name = video_edits.get("class_name", ""),
             )
-            print(video_rect)
+            
             final_video_path, video_temp_files = create_video_over_image(
                 image_path=overlay_image_path,
                 page_name=page_name,
