@@ -12,7 +12,7 @@ Text Based Slide:
     EX: logo_1.png or logo_hottake.png
   - background_image: The background image to be used for the slide. For normal posts, use blue_background.png. For "hottakes", use black_background.png
     EX: blue_background.png or black_background.png
-  - headline: The main headline of the story must be given as an html H1 tag 
+  - headline: The main headline of the story.
     EX: IPL just doesn't seem that **exciting** anymore.
   - subtext: A short subtext for the post, one sentence max.
     Ex: And then I realized mummy hamesha last mai kyun khaati thi.
