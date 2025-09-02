@@ -39,6 +39,22 @@ This template has the following slides/sections:
       }}
     }}
 
+3. End Content Slide:
+  This is the final slide of the storyboard. It should contain the final content of the story. It should have a picture of the story. There can only be one end content slide showing the visual picture of the story.
+  ### Attributes:
+  - image_description: A one line description of the image you would like to use for the slide.
+  - content: Use this to write content. Use **str** to highlight important sentences and \\n for line breaks.
+    EX: **Rahul quit his dream job** after just 3 weeks.\\nHis parents were devastated, but he knew the toxic work culture was destroying his mental health.
+    
+  ### Text Input:
+    {{
+      "name": "end_content_slide",
+      "image_description": "str",
+      "text": {{
+      "content": "str",
+      }}
+    }}
+
 NOTE: 
 - Use **str** to highlight parts of the text and \\n for new line.
 - Use news_source tag to only cite external sources NOT the_sarcastic_indian.
@@ -90,7 +106,7 @@ CONTENT_SLIDE_HTML_TEMPLATE = """
       }}
 
       .headline {{
-        font-size: 60px;
+        font-size: 50px;
         font-weight: 700;
         line-height: 1.3;
         text-align: left;
@@ -124,7 +140,6 @@ CONTENT_SLIDE_HTML_TEMPLATE = """
   </body>
 </html>
 """
-
 
 HEADLINE_SLIDE_HTML_TEMPLATE = """
 <!DOCTYPE html>
@@ -209,6 +224,167 @@ HEADLINE_SLIDE_HTML_TEMPLATE = """
 </html>
 """
 
+END_CONTENT_SLIDE_HTML_TEMPLATE = """
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>The Sarcastic Indian</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body,
+      html {{
+        margin: 0;
+        padding: 0;
+        font-family: "Inter", sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: #000000;
+      }}
+
+      .container {{
+        width: 1080px;
+        height: 1350px;
+        background-image: url("{background_image}");
+        background-size: {crop_type};
+        background-position: center;
+        background-repeat: no-repeat;
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        box-sizing: border-box;
+        padding: 85px;
+      }}
+
+      .logo {{
+        position: absolute;
+        top: -40px;
+        left: 10px;
+        width: 270px;
+      }}
+
+      .headline {{
+        font-size: 50px;
+        font-weight: 700;
+        line-height: 1.3;
+        text-align: left;
+        width: 100%;
+        text-shadow: 4px 6px 5px rgb(45, 44, 44);
+      }}
+
+      .swipe {{
+        position: absolute;
+        bottom: 0px;
+        right: 55px;
+        font-size: 40px;
+        font-weight: 700;
+        margin-bottom: 20px;
+      }}
+
+      .source {{
+        position: absolute;
+        bottom: 0px;
+        left: 20px;
+        font-size: 25px;
+        font-style: italic;
+        font-weight: 500; /* Regular weight */
+        margin-bottom: 20px;
+      }}
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      {content}
+    </div>
+  </body>
+</html>
+"""
+
+END_CONTENT_SLIDE_OVERLAY_TEMPLATE = """
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>The Sarcastic Indian</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body,
+      html {{
+        margin: 0;
+        padding: 0;
+        font-family: "Inter", sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: #000000;
+      }}
+
+      .container {{
+        width: 1080px;
+        height: 1350px;
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        box-sizing: border-box;
+        padding: 85px;
+      }}
+
+      .logo {{
+        position: absolute;
+        top: -40px;
+        left: 10px;
+        width: 270px;
+      }}
+
+      .headline {{
+        font-size: 50px;
+        font-weight: 700;
+        line-height: 1.3;
+        text-align: left;
+        width: 100%;
+        text-shadow: 4px 6px 5px rgb(45, 44, 44);
+      }}
+
+      .swipe {{
+        position: absolute;
+        bottom: 0px;
+        right: 55px;
+        font-size: 40px;
+        font-weight: 700;
+        margin-bottom: 20px;
+      }}
+
+      .source {{
+        position: absolute;
+        bottom: 0px;
+        left: 20px;
+        font-size: 25px;
+        font-style: italic;
+        font-weight: 500; /* Regular weight */
+        margin-bottom: 20px;
+      }}
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      {content}
+    </div>
+  </body>
+</html>
+"""
 
 writeup_template = {
     "page_name": "the_sarcastic_indian",
@@ -219,6 +395,7 @@ writeup_template = {
         "headline_slide": {
             "html_template": HEADLINE_SLIDE_HTML_TEMPLATE,
             "overlay_template": "",
+            "text_only": True,
             "text": {
                 "headline": {"type": "text_area", "tag": "h1", "class": "headline"},
                 "news_source": {"type": "text", "tag": "p", "class": "source"},
@@ -236,6 +413,7 @@ writeup_template = {
         "content_slide": {
             "html_template": CONTENT_SLIDE_HTML_TEMPLATE,
             "overlay_template": "",
+            "text_only": True,
             "text": {
                 "content": {"type": "text_area", "tag": "h1", "class": "headline"},
             },
@@ -249,5 +427,24 @@ writeup_template = {
                 "type": {"type":"default", "values": "image_overlay"},
             }
         },
+          "end_content_slide":{
+            "html_template": END_CONTENT_SLIDE_HTML_TEMPLATE,
+            "overlay_template": END_CONTENT_SLIDE_OVERLAY_TEMPLATE,
+            "text_only": False,
+            "text": {
+                "content": {"type": "text_area", "tag": "h1", "class": "headline"},
+            },
+            "assets":{
+                "background_image": {"type": "bytes", "file_type": "png"},
+            },
+            ## No edits because background image not there
+            "image_edits": {
+                "crop_type": {"type": "dropdown", "values": ["cover", "contain"] , "default": "cover"},
+            },
+            "video_edits":{
+                "type": {"type":"default", "values": "image_overlay"},
+                "crop_type": {"type": "dropdown", "values": ["cover", "contain"] , "default": "cover"},
+            }
+          }
     },
 }

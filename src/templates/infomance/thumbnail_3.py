@@ -298,6 +298,7 @@ infomance_thumbnail_3_template = {
         "thumbnail_3_slide": {
             "html_template": HEADLINE_SLIDE_HTML_TEMPLATE,
             "overlay_template": "",
+            "text_only": False,
             "text": {
                     "text_content": {"type": "text_area", "tag": "div", "class": "text-content"},
             },

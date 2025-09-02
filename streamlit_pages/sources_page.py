@@ -103,7 +103,6 @@ def show_sources_page():
                             "Timeline": "timeline",
                             "Thumbnail": "thumbnail",
                             "Writeup": "writeup",
-                            "Meme": "meme",
                             "Text Based": "text_based",
                         }
                     elif page_name == "twitter":
@@ -266,32 +265,32 @@ def show_generation_results(session_key: str, container_key: str):
         if not slides:
             st.warning("No slides found in results")
             return
-
+        # Slide selection dropdown
+        slide_options = [
+            f"Slide {i+1}: {slide.get('name', f'slide_{i}')}"
+            for i, slide in enumerate(slides)
+        ]
+        selected_slide_idx = st.selectbox(
+            "Select a slide:",
+            range(len(slide_options)),
+            format_func=lambda i: slide_options[i],
+        )
         # Check if this is text-only content
-        is_text_only = slides[0].get("image_description", "") == ""
+        is_text_only = slides[selected_slide_idx].get("image_description", "") == ""
         
         if is_text_only:
-            show_sources_text_only_results(result, slides, session_id, container_key)
+            show_sources_text_only_results(result, slides, session_id, container_key, selected_slide_idx)
         else:
-            show_sources_media_results(result, slides, session_id, container_key)
+            show_sources_media_results(result, slides, session_id, container_key, selected_slide_idx)
         
     except Exception as e:
         st.error(f"Error displaying results: {str(e)}")
 
 
-def show_sources_text_only_results(result, slides, session_id, container_key):
+def show_sources_text_only_results(result, slides, session_id, container_key, selected_slide_idx):
     """Display text-only content results from sources"""
     # Slide selection dropdown
-    slide_options = [
-        f"Slide {i+1}: {slide.get('name', f'slide_{i}')}"
-        for i, slide in enumerate(slides)
-    ]
-    selected_slide_idx = st.selectbox(
-        "Select a slide:",
-        range(len(slide_options)),
-        format_func=lambda i: slide_options[i],
-        key=f"{container_key}_slide_select"
-    )
+    
     
     # Show selected slide details
     if selected_slide_idx is not None and selected_slide_idx < len(slides):
@@ -469,19 +468,10 @@ def show_sources_text_only_results(result, slides, session_id, container_key):
         st.rerun()
 
 
-def show_sources_media_results(result, slides, session_id, container_key):
+def show_sources_media_results(result, slides, session_id, container_key, selected_slide_idx):
     """Display media content results from sources"""
     # Slide selection dropdown
-    slide_options = [
-        f"Slide {i+1}: {slide.get('name', f'slide_{i}')}"
-        for i, slide in enumerate(slides)
-    ]
-    selected_slide_idx = st.selectbox(
-        "Select a slide:",
-        range(len(slide_options)),
-        format_func=lambda i: slide_options[i],
-        key=f"{container_key}_slide_select"
-    )
+    
     
     # Show selected slide details
     if selected_slide_idx is not None and selected_slide_idx < len(slides):

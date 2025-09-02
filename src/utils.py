@@ -263,6 +263,8 @@ def convert_text_to_html(tag: str, class_name: str, text: str) -> str:
     """
     text_lines = text.strip().split("\n")
     html_parts = []
+    if not text:
+        return ""
     for line in text_lines:
         line = line.strip()
         if line:

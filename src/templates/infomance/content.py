@@ -45,20 +45,20 @@ CONTENT_HTML_TEMPLATE = """<!DOCTYPE html>
         justify-content: center;
         min-height: 100vh;
         background-color: #000000;
-      }}
+      }}    
 
       .container {{
         width: 1080px;
-        background-color: #000000;
+        background-color: #ffffff;
         height: 1350px;
         overflow: hidden;
         display: flex;
         flex-direction: column;
-        justify-content: center;
+        justify-content: space-between;
       }}
 
       .red-bar {{
-        background-color: #dc1341;
+        background-color: #d93a49;
         height: 25px;
         width: 100%;
         position: relative;
@@ -89,8 +89,7 @@ CONTENT_HTML_TEMPLATE = """<!DOCTYPE html>
       .logo {{
         font-family: "Times New Roman", Times, serif;
         color: #ffffff;
-        border-radius: 0 0 5px 5px;
-        background-color: #dc1341;
+        background-color: #d93a49;
         font-size: 50px;
         font-weight: 600;
         letter-spacing: 2px;
@@ -104,18 +103,18 @@ CONTENT_HTML_TEMPLATE = """<!DOCTYPE html>
         position: relative;
         display: flex;
         flex-direction: column;
-        padding-bottom: 40px;
         border-bottom: 1px solid #ffffff;
+        padding-bottom: 20px;
       }}
 
       .headline {{
         text-align: center;
-        padding: 15px 20px 25px 20px;
+        padding: 20px 20px 10px 20px;
         background-color: #ffffff;
         font-family: "Poppins", sans-serif;
-        font-weight: 800;
-        font-size: 100px;
-        color: #dc1341;
+        font-weight: 700;
+        font-size: 70px;
+        color: #d93a49;
         margin: 0;
         line-height: 1.2;
       }}
@@ -133,38 +132,59 @@ CONTENT_HTML_TEMPLATE = """<!DOCTYPE html>
         height: auto;
         object-fit: contain;
         display: block;
+        background-color: #000000;
       }}
 
-      .text-content {{
-        padding: 40px 40px 60px 40px;
+      .text-content-container {{
+        padding: 0px 20px 0px 20px;
         background-color: #ffffff;
         text-align: center;
         font-family: "Poppins", sans-serif;
         font-weight: 700;
-        font-size: 55px;
+        font-size: 57px;
         color: #333;
         margin: 0;
-        line-height: 1.4;
+        line-height: 1.6;
+      }}
+
+      .text-content {{
+        padding: 30px 20px 40px 20px;
+        background-color: #ffffff;
+        text-align: center;
+        font-family: "Poppins", sans-serif;
+        font-weight: 700;
+        font-size: 57px;
+        color: #333;
+        margin: 0;
+        line-height: 1.6;
       }}
 
       .text-content .yellow {{
-        color: #dc1341;
+        color: #d93a49;
+      }}
+
+      .yellow {{
+        color: #d93a49;
       }}
 
       .source {{
         font-family: "Poppins", sans-serif;
         font-size: 40px;
         font-weight: 800;
-        color: #dc1341;
-        margin-top: 20px;
+        margin-top: 0;
+        margin-bottom: 40px;
         text-align: right;
+      }}
+
+      .footer{{
+        background-color: #000000;
       }}
 
       .footer-link {{
         font-family: "Poppins", sans-serif;
         font-weight: 300;
         font-size: 35px;
-        background-color: #dc1341;
+        background-color: #d93a49;
         padding: 0px 10px;
         letter-spacing: 1px;
         border-radius: 5px;
@@ -187,7 +207,7 @@ CONTENT_HTML_TEMPLATE = """<!DOCTYPE html>
         <img src="{background_image}" alt="Main Image" class="main-image" />
       </div>
 
-      <div class="text-content">
+      <div class="text-content-container">
         {content_text}
       </div>
 
@@ -217,20 +237,20 @@ CONTENT_OVERLAY_TEMPLATE = """<!DOCTYPE html>
         justify-content: center;
         min-height: 100vh;
         background-color: #000000;
-      }}
+      }}    
 
       .container {{
         width: 1080px;
-        background-color: #000000;
+        background-color: #ffffff;
         height: 1350px;
         overflow: hidden;
         display: flex;
         flex-direction: column;
-        justify-content: center;
+        justify-content: space-between;
       }}
 
       .red-bar {{
-        background-color: #dc1341;
+        background-color: #d93a49;
         height: 25px;
         width: 100%;
         position: relative;
@@ -261,8 +281,7 @@ CONTENT_OVERLAY_TEMPLATE = """<!DOCTYPE html>
       .logo {{
         font-family: "Times New Roman", Times, serif;
         color: #ffffff;
-        border-radius: 0 0 5px 5px;
-        background-color: #dc1341;
+        background-color: #d93a49;
         font-size: 50px;
         font-weight: 600;
         letter-spacing: 2px;
@@ -276,18 +295,18 @@ CONTENT_OVERLAY_TEMPLATE = """<!DOCTYPE html>
         position: relative;
         display: flex;
         flex-direction: column;
-        padding-bottom: 40px;
         border-bottom: 1px solid #ffffff;
+        padding-bottom: 20px;
       }}
 
       .headline {{
         text-align: center;
-        padding: 15px 20px 25px 20px;
+        padding: 20px 20px 10px 20px;
         background-color: #ffffff;
         font-family: "Poppins", sans-serif;
-        font-weight: 800;
-        font-size: 100px;
-        color: #dc1341;
+        font-weight: 700;
+        font-size: 70px;
+        color: #d93a49;
         margin: 0;
         line-height: 1.2;
       }}
@@ -307,36 +326,55 @@ CONTENT_OVERLAY_TEMPLATE = """<!DOCTYPE html>
         display: block;
       }}
 
-      .text-content {{
-        padding: 40px 40px 60px 40px;
+      .text-content-container {{
+        padding: 0px 20px 0px 20px;
         background-color: #ffffff;
         text-align: center;
         font-family: "Poppins", sans-serif;
         font-weight: 700;
-        font-size: 55px;
+        font-size: 57px;
         color: #333;
         margin: 0;
-        line-height: 1.4;
+        line-height: 1.6;
+      }}
+
+      .text-content {{
+        padding: 30px 20px 40px 20px;
+        background-color: #ffffff;
+        text-align: center;
+        font-family: "Poppins", sans-serif;
+        font-weight: 700;
+        font-size: 57px;
+        color: #333;
+        margin: 0;
+        line-height: 1.6;
       }}
 
       .text-content .yellow {{
-        color: #dc1341;
+        color: #d93a49;
+      }}
+      .yellow {{    
+        color: #d93a49;
       }}
 
       .source {{
         font-family: "Poppins", sans-serif;
         font-size: 40px;
         font-weight: 800;
-        color: #dc1341;
-        margin-top: 20px;
+        margin-top: 0;
+        margin-bottom: 40px;
         text-align: right;
+      }}
+
+      .footer{{
+        background-color: #000000;
       }}
 
       .footer-link {{
         font-family: "Poppins", sans-serif;
         font-weight: 300;
         font-size: 35px;
-        background-color: #dc1341;
+        background-color: #d93a49;
         padding: 0px 10px;
         letter-spacing: 1px;
         border-radius: 5px;
@@ -359,7 +397,7 @@ CONTENT_OVERLAY_TEMPLATE = """<!DOCTYPE html>
         <video src="{background_video}" autoplay muted loop class="main-video"></video>
       </div>
 
-      <div class="text-content">
+      <div class="text-content-container">
         {content_text}
       </div>
 
@@ -382,6 +420,7 @@ infomance_content_template = {
         "infomance_content_slide": {
             "html_template": CONTENT_HTML_TEMPLATE,
             "overlay_template": CONTENT_OVERLAY_TEMPLATE,
+            "text_only": False,
             "text": {
                     "content_text": {"type": "text_area", "tag": "div", "class": "text-content"},
             },

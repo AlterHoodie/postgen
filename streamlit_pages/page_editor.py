@@ -97,7 +97,8 @@ def text_editor_form(
                     text_input[field_name] = st.selectbox(
                         f"{display_name}:",
                         options=options,
-                        index=default_index
+                        index=default_index,
+                        key=f"{form_key}_{field_name}_text_selectbox"
                     )
 
         if is_video:
@@ -116,7 +117,8 @@ def text_editor_form(
                     value = st.selectbox(
                         f"{display_name}:",
                         options=options,
-                        index=options.index(default_value) if default_value in options else 0
+                        index=options.index(default_value) if default_value in options else 0,
+                        key=f"{form_key}_{field_name}_asset_selectbox"
                     )
                     assets_input[field_name] = {"file_type": "path", "content": value}
                 elif config.get("type") == "bytes":
@@ -140,7 +142,8 @@ def text_editor_form(
                     video_edits_input[field_name] = st.selectbox(
                         f"{display_name}:",
                         options=options,
-                        index=options.index(default_value) if default_value in options else 0
+                        index=options.index(default_value) if default_value in options else 0,
+                        key=f"{form_key}_{field_name}_video_selectbox"
                     )
                 elif config.get("type") == "default":
                     video_edits_input[field_name] = config.get("values", "")
@@ -155,7 +158,8 @@ def text_editor_form(
                     image_edits_input[field_name] = st.selectbox(
                         f"{display_name}:",
                         options=options,
-                        index=options.index(default_value) if default_value in options else 0
+                        index=options.index(default_value) if default_value in options else 0,
+                        key=f"{form_key}_{field_name}_image_selectbox"
                     )
                 elif config.get("type") == "default":
                     image_edits_input[field_name] = config.get("default", "")
@@ -236,8 +240,9 @@ def show_media_editor():
     # Page selection
     page_name = st.selectbox(
         "Select page:",
-        ["scoopwhoop", "twitter", "social_village", "infomance"],
-        help="Choose which page/brand to create content for"
+        ["scoopwhoop", "twitter", "social_village", "infomance", "the_sarcastic_indian"],
+        help="Choose which page/brand to create content for",
+        key="media_editor_page_selectbox"
     )
     
     # Template options based on page
@@ -263,6 +268,10 @@ def show_media_editor():
             "Thumbnail": "thumbnail",
             "Thumbnail 3": "thumbnail_3"
         }
+    elif page_name == "the_sarcastic_indian":
+        template_options = {
+            "Writeup": "writeup",
+        }
     else:
         template_options = {}
 
@@ -271,6 +280,7 @@ def show_media_editor():
         "Choose template:",
         options=list(template_options.keys()),
         help="Choose the template style for your content",
+        key="media_editor_template_selectbox"
     )
 
     template_key = template_options[selected_template]
@@ -278,10 +288,12 @@ def show_media_editor():
 
 
     slides = list(template_config["slides"].keys())
+    slides_image_only = [slide for slide in slides if template_config["slides"][slide].get("text_only", False) == False]
     selected_slide = st.selectbox(
         "Choose slide to edit:",
-        slides,
+        slides_image_only,
         format_func=lambda x: x.replace("_", " ").title(),
+        key="media_editor_slide_selectbox"
     )
 
     # Check if a new file was uploaded (different from previous)
@@ -365,7 +377,8 @@ def show_text_only_editor():
     page_name = st.selectbox(
         "Select page:",
         ["scoopwhoop", "the_sarcastic_indian","twitter"],
-        help="Choose which page/brand to create content for"
+        help="Choose which page/brand to create content for",
+        key="text_only_page_selectbox"
     )
 
     # Template options based on page
@@ -389,6 +402,7 @@ def show_text_only_editor():
         "Choose template:",
         options=list(template_options.keys()),
         help="Choose the template style for your content",
+        key="text_only_template_selectbox"
     )
     
     # Get template config
@@ -396,9 +410,12 @@ def show_text_only_editor():
     template_config = get_template_config(template_key, page_name)
 
     slides = list(template_config["slides"].keys())
+    slides_text_only = [slide for slide in slides if template_config["slides"][slide].get("text_only", False) == True]
+    print(slides)
     selected_slide = st.selectbox(
         "Choose slide to edit:",
-        slides,
+        slides_text_only,
+        key=f"text_only_slide_selectbox_{page_name}_{selected_template}",
         format_func=lambda x: x.replace("_", " ").title(),
     )
     
@@ -444,7 +461,8 @@ def show_text_only_editor():
                         text_input[field_name] = st.selectbox(
                             f"{display_name}:",
                             options=options,
-                            index=default_index
+                            index=default_index,
+                            key=f"text_only_{field_name}_text_selectbox"
                         )
                     elif config.get("type") == "text_area":
                         text_input[field_name] = st.text_area(
@@ -474,7 +492,8 @@ def show_text_only_editor():
                         value = st.selectbox(
                             f"{display_name}:",
                             options=options,
-                            index=options.index(default_value) if default_value in options else 0
+                            index=options.index(default_value) if default_value in options else 0,
+                            key=f"text_only_asset_{field_name}_selectbox"
                         )
                         assets_input[field_name] = {"file_type": "path", "content": value}
                     elif config.get("type") == "bytes":
@@ -496,7 +515,8 @@ def show_text_only_editor():
                         image_edits_input[field_name] = st.selectbox(
                             f"{display_name}:",
                             options=options,
-                            index=options.index(default_value) if default_value in options else 0
+                            index=options.index(default_value) if default_value in options else 0,
+                            key=f"text_only_image_edit_{field_name}_selectbox"
                         )
             submitted = st.form_submit_button("Generate Image", type="primary")
             

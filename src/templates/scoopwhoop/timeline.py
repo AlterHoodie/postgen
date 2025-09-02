@@ -1279,6 +1279,7 @@ timeline_template = {
         "headline_slide": {
             "html_template": HEADLINE_SLIDE_TEMPLATE,
             "overlay_template": HEADLINE_SLIDE_OVERLAY_TEMPLATE,
+            "text_only": False,
             "text": {
                     "first_line": {"type": "text", "tag": "div", "class": "first-line"},
                     "highlight": {"type": "text", "tag": "div", "class": "highlight"},
@@ -1304,6 +1305,7 @@ timeline_template = {
         "timeline_start_slide": {
             "html_template": TIMELINE_START_SLIDE_TEMPLATE,
             "overlay_template": TIMELINE_START_SLIDE_OVERLAY_TEMPLATE,
+            "text_only": False,
             "text": {
                     "timeline_highlight": {
                         "type": "text",
@@ -1332,6 +1334,7 @@ timeline_template = {
         "timeline_middle_slide": {
             "html_template": TIMELINE_MIDDLE_SLIDE_TEMPLATE,
             "overlay_template": TIMELINE_MIDDLE_SLIDE_OVERLAY_TEMPLATE,
+            "text_only": False,
             "text": {
                     "timeline_highlight": {
                         "type": "text",
@@ -1360,6 +1363,7 @@ timeline_template = {
         "timeline_end_slide": {
             "html_template": TIMELINE_END_SLIDE_TEMPLATE,
             "overlay_template": TIMELINE_END_SLIDE_OVERLAY_TEMPLATE,
+            "text_only": False,
             "text": {
                     "timeline_highlight": {
                         "type": "text",
