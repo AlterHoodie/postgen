@@ -131,6 +131,7 @@ HEADLINE_SLIDE_HTML_TEMPLATE = """
         display: flex;
         flex-direction: column;
         justify-content: center;
+        align-items: center;
       }}
 
       .tweet-header {{
@@ -211,13 +212,14 @@ HEADLINE_SLIDE_HTML_TEMPLATE = """
         display: flex;
         flex-direction: column;
         min-height: 0;
+        align-items: center;
       }}
 
       .tweet-text {{
         font-size: 42px;
         color: #0f1419;
         line-height: 1.3;
-        margin: 15px 0 60px 0;
+        margin: 15px 0 20px 0;
         word-wrap: break-word;
         flex-shrink: 0;
       }}
@@ -231,7 +233,9 @@ HEADLINE_SLIDE_HTML_TEMPLATE = """
       }}
 
       .tweet-image {{
-        width: 100%;
+        width: auto;
+        height: 95%;
+        object-fit: cover;
         display: block;
         border-radius: 24px;
       }}
@@ -264,6 +268,49 @@ HEADLINE_SLIDE_HTML_TEMPLATE = """
       </div>
     </div>
   </body>
+  <script>
+    function alignWidths() {{
+        const tweetImage = document.querySelector(".tweet-image");
+        const tweetVideo = document.querySelector(".tweet-video");
+        const tweetHeader = document.querySelector(".tweet-header");
+        const tweetText = document.querySelector(".tweet-text");
+
+        // Determine which media element exists
+        const mediaElement = tweetImage || tweetVideo;
+
+        if (mediaElement && tweetHeader && tweetText) {{
+          function setWidths() {{
+            const mediaWidth = mediaElement.offsetWidth;
+            tweetHeader.style.width = mediaWidth + "px";
+            tweetText.style.width = mediaWidth + "px";
+          }}
+
+          // Handle different media types
+          if (tweetImage) {{
+            // For images
+            if (tweetImage.complete && tweetImage.naturalWidth > 0) {{
+              setWidths();
+            }} else {{  
+              tweetImage.onload = setWidths;
+            }}
+          }} else if (tweetVideo) {{
+            // For videos
+            if (tweetVideo.readyState >= 2) {{
+              // Video metadata is loaded
+              setWidths();
+            }} else {{
+              tweetVideo.addEventListener("loadedmetadata", setWidths);
+            }}
+          }}
+        }}
+      }}
+
+      // Run when DOM is loaded
+      document.addEventListener("DOMContentLoaded", alignWidths);
+
+      // Run when window is resized (in case of responsive changes)
+      window.addEventListener("resize", alignWidths);
+    </script>
 </html>
 """
 
@@ -378,7 +425,6 @@ HEADLINE_SLIDE_OVERLAY_TEMPLATE = """
       .tweet-content {{
         display: flex;
         flex-direction: column;
-        align-items: stretch;
         min-height: 0;
       }}
 
