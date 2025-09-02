@@ -383,7 +383,7 @@ infomance_content_template = {
             "html_template": CONTENT_HTML_TEMPLATE,
             "overlay_template": CONTENT_OVERLAY_TEMPLATE,
             "text": {
-                    "content_text": {"type": "text", "tag": "div", "class": "text-content"},
+                    "content_text": {"type": "text_area", "tag": "div", "class": "text-content"},
             },
             "assets":{
                 "background_video": {"type":"bytes", "file_type":"mp4"},

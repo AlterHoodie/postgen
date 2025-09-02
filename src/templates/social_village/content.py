@@ -211,7 +211,7 @@ content_template = {
             "html_template": CONTENT_SLIDE_HTML_TEMPLATE,
             "overlay_template": CONTENT_SLIDE_OVERLAY_TEMPLATE,
             "text": {
-                    "headline": {"type": "text", "tag": "h1", "class": ""}
+                    "headline": {"type": "text_area", "tag": "h1", "class": ""}
                 },
             "assets":{
                 "background_image": {"type":"bytes", "file_type":"png"},

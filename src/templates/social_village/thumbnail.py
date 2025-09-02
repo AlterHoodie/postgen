@@ -239,8 +239,8 @@ thumbnail_template = {
             "html_template": THUMBNAIL_SLIDE_HTML_TEMPLATE,
             "overlay_template": THUMBNAIL_SLIDE_OVERLAY_TEMPLATE,
             "text": {
-                    "headline": {"type": "text", "tag": "h1", "class": ""},
-                    "subtext": {"type": "text", "tag": "p", "class": "subtext"},
+                    "headline": {"type": "text_area", "tag": "h1", "class": ""},
+                    "subtext": {"type": "text_area", "tag": "p", "class": "subtext"},
             },
             "assets":{
                 "background_video": {"type":"bytes", "file_type":"mp4"},

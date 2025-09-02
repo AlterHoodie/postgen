@@ -446,7 +446,7 @@ tweet_image_template = {
             "text": {
                     "user_name": {"type": "text", "tag": "span", "class": ""},
                     "user_handle": {"type": "text", "tag": "span", "class": "user-handle"},
-                    "tweet_text": {"type": "text", "tag": "p", "class": "tweet-text"},
+                    "tweet_text": {"type": "text_area", "tag": "p", "class": "tweet-text"},
                     "add_verified_badge": {"type": "checkbox", "html_snippet": VERIFIED_BADGE},
             },
             "assets":{

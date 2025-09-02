@@ -350,7 +350,7 @@ meme_template = {
             "html_template": MEME_UP_HTML_TEMPLATE,
             "overlay_template": MEME_UP_OVERLAY_TEMPLATE,
             "text": {
-                "headline": {"type": "text", "tag": "h1", "class": ""},
+                "headline": {"type": "text_area", "tag": "h1", "class": ""},
             },
             "assets":{
                 "background_video": {"type":"bytes", "file_type":"mp4"},
@@ -371,7 +371,7 @@ meme_template = {
             "html_template": MEME_DOWN_HTML_TEMPLATE,
             "overlay_template": MEME_DOWN_OVERLAY_TEMPLATE,
             "text": {
-                "headline": {"type": "text", "tag": "h1", "class": ""},
+                "headline": {"type": "text_area", "tag": "h1", "class": ""},
             },
             "assets":{
                 "background_video": {"type":"bytes", "file_type":"mp4"},

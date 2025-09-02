@@ -568,8 +568,8 @@ writeup_template = {
             "html_template": HEADLINE_SLIDE_HTML_TEMPLATE,
             "overlay_template": HEADLINE_SLIDE_OVERLAY_TEMPLATE,
             "text": {
-                    "headline": {"type": "text", "tag": "h1", "class": ""},
-                    "subtext": {"type": "text", "tag": "p", "class": "subtext"},
+                    "headline": {"type": "text_area", "tag": "h1", "class": ""},
+                    "subtext": {"type": "text_area", "tag": "p", "class": "subtext"},
                     "is_trigger": {
                         "type": "checkbox",
                         "html_snippet": "<p class='trigger-warning'>Trigger Warning</p>",

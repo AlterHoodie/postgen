@@ -398,8 +398,8 @@ infomance_thumbnail_template = {
             "html_template": HEADLINE_SLIDE_HTML_TEMPLATE,
             "overlay_template": HEADLINE_SLIDE_OVERLAY_TEMPLATE,
             "text": {
-                    "headline": {"type": "text", "tag": "h1", "class": "headline"},
-                    "main_text": {"type": "text", "tag": "div", "class": "text-content"},
+                    "headline": {"type": "text_area", "tag": "h1", "class": "headline"},
+                    "main_text": {"type": "text_area", "tag": "div", "class": "text-content"},
                     "source": {"type": "text", "tag": "p", "class": "source"},
             },
             "assets":{

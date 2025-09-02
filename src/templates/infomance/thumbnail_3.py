@@ -299,7 +299,7 @@ infomance_thumbnail_3_template = {
             "html_template": HEADLINE_SLIDE_HTML_TEMPLATE,
             "overlay_template": "",
             "text": {
-                    "text_content": {"type": "text", "tag": "div", "class": "text-content"},
+                    "text_content": {"type": "text_area", "tag": "div", "class": "text-content"},
             },
             "assets":{
                 "background_image": {"type":"bytes", "file_type":"png"},

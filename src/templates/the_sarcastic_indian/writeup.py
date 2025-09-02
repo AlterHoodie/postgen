@@ -220,7 +220,7 @@ writeup_template = {
             "html_template": HEADLINE_SLIDE_HTML_TEMPLATE,
             "overlay_template": "",
             "text": {
-                "headline": {"type": "text", "tag": "h1", "class": "headline"},
+                "headline": {"type": "text_area", "tag": "h1", "class": "headline"},
                 "news_source": {"type": "text", "tag": "p", "class": "source"},
             },
             "assets":{
@@ -237,7 +237,7 @@ writeup_template = {
             "html_template": CONTENT_SLIDE_HTML_TEMPLATE,
             "overlay_template": "",
             "text": {
-                "content": {"type": "text", "tag": "h1", "class": "headline"},
+                "content": {"type": "text_area", "tag": "h1", "class": "headline"},
             },
             "assets":{
                 "logo_image": {"type": "dropdown", "values": ["logo.png"], "default": "logo.png"},
