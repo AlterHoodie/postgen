@@ -177,29 +177,29 @@ def show_content_results(session_id: str):
         if not slides:
             st.warning("No slides found in results")
             return
-        is_text_only = slides[0].get("image_description", "") == ""
+        # Slide selection dropdown
+        slide_options = [
+            f"Slide {i+1}: {slide.get('name', f'slide_{i}')}"
+            for i, slide in enumerate(slides)
+        ]
+        selected_slide_idx = st.selectbox(
+            "Select a slide:",
+            range(len(slide_options)),
+            format_func=lambda i: slide_options[i],
+        )
+        is_text_only = slides[selected_slide_idx].get("image_description", "") == ""
 
         if is_text_only:
-            show_text_only_results(session_id, result, slides)
+            show_text_only_results(session_id, result, slides, selected_slide_idx)
         else:
-            show_media_results(session_id, result, slides)
+            show_media_results(session_id, result, slides, selected_slide_idx)
 
     except Exception as e:
         st.error(f"Error displaying results: {str(e)}")
 
 
-def show_text_only_results(session_id: str, result: dict, slides: list):
+def show_text_only_results(session_id: str, result: dict, slides: list, selected_slide_idx: int):
     """Display text-only content results (no without_text overlay, only with_text)"""
-    # Slide selection dropdown
-    slide_options = [
-        f"Slide {i+1}: {slide.get('name', f'slide_{i}')}"
-        for i, slide in enumerate(slides)
-    ]
-    selected_slide_idx = st.selectbox(
-        "Select a slide:",
-        range(len(slide_options)),
-        format_func=lambda i: slide_options[i],
-    )
 
     # Show selected slide details
     if selected_slide_idx is not None and selected_slide_idx < len(slides):
@@ -388,18 +388,8 @@ def show_text_only_results(session_id: str, result: dict, slides: list):
         st.rerun()
 
 
-def show_media_results(session_id: str, result: dict, slides: list):
+def show_media_results(session_id: str, result: dict, slides: list, selected_slide_idx: int):
     """Display media content results (with both without_text and with_text overlays)"""
-    # Slide selection dropdown
-    slide_options = [
-        f"Slide {i+1}: {slide.get('name', f'slide_{i}')}"
-        for i, slide in enumerate(slides)
-    ]
-    selected_slide_idx = st.selectbox(
-        "Select a slide:",
-        range(len(slide_options)),
-        format_func=lambda i: slide_options[i],
-    )
 
     # Show selected slide details
     if selected_slide_idx is not None and selected_slide_idx < len(slides):

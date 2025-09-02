@@ -133,18 +133,8 @@ def display_content_workflow(workflow_result):
         return
 
     # Check if this is text-only content
-    is_text_only = slides[0].get("image_description", "") == ""
+
     session_id = workflow_result.get("session_id", "unknown")
-    
-    if is_text_only:
-        show_history_text_only_results(workflow_result, slides, session_id)
-    else:
-        show_history_media_results(workflow_result, slides, session_id)
-
-
-def show_history_text_only_results(workflow_result, slides, session_id):
-    """Display text-only content history results"""
-    # Slide selection dropdown
     slide_options = [
         f"Slide {i+1}: {slide.get('name', f'slide_{i}')}"
         for i, slide in enumerate(slides)
@@ -156,6 +146,18 @@ def show_history_text_only_results(workflow_result, slides, session_id):
         format_func=lambda i: slide_options[i],
         key=f"history_slide_select_{session_id}",
     )
+    is_text_only = slides[selected_slide_idx].get("image_description", "") == ""
+
+    
+    if is_text_only:
+        show_history_text_only_results(workflow_result, slides, session_id, selected_slide_idx)
+    else:
+        show_history_media_results(workflow_result, slides, session_id, selected_slide_idx)
+
+
+def show_history_text_only_results(workflow_result, slides, session_id, selected_slide_idx):
+    """Display text-only content history results"""
+    # Slide selection dropdown
 
     # Show selected slide details
     if selected_slide_idx is not None and selected_slide_idx < len(slides):
@@ -320,20 +322,9 @@ def show_history_text_only_results(workflow_result, slides, session_id):
             st.warning("No images found for this slide")
 
 
-def show_history_media_results(workflow_result, slides, session_id):
+def show_history_media_results(workflow_result, slides, session_id, selected_slide_idx):
     """Display media content history results"""
     # Slide selection dropdown
-    slide_options = [
-        f"Slide {i+1}: {slide.get('name', f'slide_{i}')}"
-        for i, slide in enumerate(slides)
-    ]
-
-    selected_slide_idx = st.selectbox(
-        "Select a slide:",
-        range(len(slide_options)),
-        format_func=lambda i: slide_options[i],
-        key=f"history_slide_select_{session_id}",
-    )
 
     # Show selected slide details
     if selected_slide_idx is not None and selected_slide_idx < len(slides):
