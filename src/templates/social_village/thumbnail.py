@@ -66,10 +66,10 @@ THUMBNAIL_SLIDE_HTML_TEMPLATE = """<!DOCTYPE html>
       }}
       .logo {{
         position: absolute;
-        top: -50px;
-        right: -50px;
-        width: 250px;
-        height: 250px;
+        top: -60px;
+        right: -40px;
+        width: 220px;
+        height: auto;
       }}
       .text-overlay {{
         position: absolute;
@@ -83,7 +83,7 @@ THUMBNAIL_SLIDE_HTML_TEMPLATE = """<!DOCTYPE html>
           rgba(0, 0, 0, 0.6) 50%,
           transparent 100%
         );
-        padding: 60px 40px 35px 40px;
+        padding: 60px 40px 45px 40px;
         color: white;
         display: flex;
         flex-direction: column;
@@ -94,7 +94,7 @@ THUMBNAIL_SLIDE_HTML_TEMPLATE = """<!DOCTYPE html>
       .text-content h1 {{
         margin: 0 0 0 0;
         font-size: 60px;
-        font-weight: 600;
+        font-weight: 700;
         line-height: 1;
         text-align: center;
         /* -webkit-text-stroke: 1px black; */
@@ -106,8 +106,8 @@ THUMBNAIL_SLIDE_HTML_TEMPLATE = """<!DOCTYPE html>
 
       .text-content .subtext {{
         margin: 20px 0 0;
-        font-size: 40px;
-        font-weight: 600;
+        font-size: 30px;
+        font-weight: 800;
         text-align: center;
         -webkit-text-stroke: 1px black;
         text-shadow: 4px 4px 8px rgba(0, 0, 0, 1);
@@ -121,9 +121,7 @@ THUMBNAIL_SLIDE_HTML_TEMPLATE = """<!DOCTYPE html>
       <img src="{background_image}" class="background-image" />
       <div class="text-overlay">
         <div class="text-content">
-          <h1>
             {headline}
-          </h1>
           <div class="subtext">{subtext}</div>
         </div>
       </div>
@@ -146,7 +144,7 @@ THUMBNAIL_SLIDE_OVERLAY_TEMPLATE = """<!DOCTYPE html>
         padding: 0;
         height: 100%;
         font-family: "Poppins", sans-serif;
-        background-color: #000000;
+        background-color: #f0f0f0;
       }}
       .container {{
         position: relative;
@@ -164,10 +162,10 @@ THUMBNAIL_SLIDE_OVERLAY_TEMPLATE = """<!DOCTYPE html>
       }}
       .logo {{
         position: absolute;
-        top: -50px;
-        right: -50px;
-        width: 250px;
-        height: 250px;
+        top: -60px;
+        right: -40px;
+        width: 220px;
+        height: auto;
       }}
       .text-overlay {{
         position: absolute;
@@ -181,7 +179,7 @@ THUMBNAIL_SLIDE_OVERLAY_TEMPLATE = """<!DOCTYPE html>
           rgba(0, 0, 0, 0.6) 50%,
           transparent 100%
         );
-        padding: 60px 40px 35px 40px;
+        padding: 60px 40px 45px 40px;
         color: white;
         display: flex;
         flex-direction: column;
@@ -192,7 +190,7 @@ THUMBNAIL_SLIDE_OVERLAY_TEMPLATE = """<!DOCTYPE html>
       .text-content h1 {{
         margin: 0 0 0 0;
         font-size: 60px;
-        font-weight: 600;
+        font-weight: 700;
         line-height: 1;
         text-align: center;
         /* -webkit-text-stroke: 1px black; */
@@ -204,8 +202,8 @@ THUMBNAIL_SLIDE_OVERLAY_TEMPLATE = """<!DOCTYPE html>
 
       .text-content .subtext {{
         margin: 20px 0 0;
-        font-size: 40px;
-        font-weight: 600;
+        font-size: 30px;
+        font-weight: 800;
         text-align: center;
         -webkit-text-stroke: 1px black;
         text-shadow: 4px 4px 8px rgba(0, 0, 0, 1);
@@ -218,9 +216,7 @@ THUMBNAIL_SLIDE_OVERLAY_TEMPLATE = """<!DOCTYPE html>
       <img src="{logo_image}" alt="Social Village Logo" class="logo" />
       <div class="text-overlay">
         <div class="text-content">
-          <h1>
             {headline}
-          </h1>
           <div class="subtext">{subtext}</div>
         </div>
       </div>

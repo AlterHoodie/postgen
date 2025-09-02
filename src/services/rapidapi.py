@@ -388,5 +388,7 @@ if __name__ == "__main__":
     # insta_data = insta_data[:10]
     # with open("./data_/insta_extracted.p","wb") as f:
     #     pickle.dump(get_latest_instagram_post(last_created_at=(datetime.now().timestamp() - 86400)),f)
-
-    print(get_tweet_data("https://x.com/mainkyabatau/status/1798776283926859825"))
+    import json
+    data = get_tweet_data("https://x.com/divyanshiwho/status/1962363623675707434")
+    with open("./data_/tweet_data.json","w") as f:
+        json.dump(data,f,indent=4)
