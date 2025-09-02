@@ -3,31 +3,51 @@ Thumbnail: This ScoopWhoop template creates eye-catching thumbnail images for so
 The source should only be used if the post or the news is not from ScoopWhoop.
 NOTE: Only one slide is required for this template.
 """
-
 JSON_DESCRIPTION = """
 This template has the following slides/sections:
-Thumbnail Slide:
-  ### Attributes:
-  - This should be the opening slide of the storyboard. Must be eye catching and engaging.
-    EX: A photo of a temple and a gurdwara created inside a game.
-  
-  - image_description: A one line description of the image you would like to use for the slide.
-  - headline: The main headline of the story must be given as an html H1 tag 
-    EX: Meanwhile Sharvi, Kavita, Dinaz and Jasmine after pulling off Netflix level scam
 
-  ### Text Input:
+**1. Meme Up Slide**
+*   **Purpose:** Sets up the joke, context, or situation. This is where the **premise** of the meme goes, usually creating curiosity or irony. The text appears at the **top center** of the slide.
+  
+### Attributes:
+*   **`image_description`:** A one-line description of the background image. Keep it simple and direct, like describing the scene of a viral moment or a reaction image.
+*   **`headline`:** The meme text for the setup. You can use **str** to highlight words and \\n tags to break into multiple lines.
+
+### Text Input:
     {{
-      "name": "headline_slide",
+      "name": "meme_up_slide",
+      "image_description": "str",
+      "text":{{
+      "headline": "str",
+      }}
+    }}
+---
+
+**2. Meme Down Slide**
+*   **Purpose:** Delivers the punchline or reaction. This is where the **payoff** of the meme goes, turning the setup into humor, sarcasm, or relatability. The text appears at the **bottom center** of the slide.
+
+### Attributes:
+*   **`image_description`:** A one-line description of the background image. Keep it simple and direct, usually focusing on the reaction, expression, or final frame.
+*   **`headline`:** The meme text for the punchline. You can use **str** to highlight words and \\n tags to break into multiple lines.
+
+### Text Input:
+    {{
+      "name": "meme_down_slide",
       "image_description": "str",
       "text":{{
       "headline": "str",
       }}
     }}
 
-NOTE: 
-- YOU CAN USE "**str**" to highlight words and to make the headline more engaging. Use \\n tags to break the text into multiple lines.
-- DO NOT COMPLICATE THE IMAGE DESCRIPTIONS, KEEP IT SIMPLE AND DIRECT.
+---
+
+**NOTE:**
+- Use **str** to highlight words and make the meme text more impactful.
+- Generate one of each.
+- Use \\n tags to split the text into multiple lines for timing or dramatic effect.
+- Keep image descriptions simple, focusing on **what’s happening visually** (e.g., “dog looking shocked”, “student hiding behind books”).
 """
+
 MEME_UP_HTML_TEMPLATE = """
 <!DOCTYPE html>
 <html lang="en">
