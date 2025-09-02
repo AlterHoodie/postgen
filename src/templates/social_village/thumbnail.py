@@ -238,6 +238,7 @@ thumbnail_template = {
         "headline_slide": {
             "html_template": THUMBNAIL_SLIDE_HTML_TEMPLATE,
             "overlay_template": THUMBNAIL_SLIDE_OVERLAY_TEMPLATE,
+            "text_only": False,
             "text": {
                     "headline": {"type": "text_area", "tag": "h1", "class": ""},
                     "subtext": {"type": "text_area", "tag": "p", "class": "subtext"},

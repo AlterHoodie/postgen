@@ -281,6 +281,7 @@ tweet_text_template = {
         "text_based_slide": {
             "html_template": HEADLINE_SLIDE_HTML_TEMPLATE,
             "overlay_template": "",
+            "text_only": True,
             "text": {
                     "user_name": {"type": "text", "tag": "span", "class": "user-name"},
                     "user_handle": {"type": "text", "tag": "span", "class": "user-handle"},

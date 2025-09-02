@@ -349,6 +349,7 @@ meme_template = {
         "meme_up_slide": {
             "html_template": MEME_UP_HTML_TEMPLATE,
             "overlay_template": MEME_UP_OVERLAY_TEMPLATE,
+            "text_only": False,
             "text": {
                 "headline": {"type": "text_area", "tag": "h1", "class": ""},
             },
@@ -370,6 +371,7 @@ meme_template = {
         "meme_down_slide": {
             "html_template": MEME_DOWN_HTML_TEMPLATE,
             "overlay_template": MEME_DOWN_OVERLAY_TEMPLATE,
+            "text_only": False,
             "text": {
                 "headline": {"type": "text_area", "tag": "h1", "class": ""},
             },

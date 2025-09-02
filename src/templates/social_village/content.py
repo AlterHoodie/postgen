@@ -210,6 +210,7 @@ content_template = {
         "content_slide": {
             "html_template": CONTENT_SLIDE_HTML_TEMPLATE,
             "overlay_template": CONTENT_SLIDE_OVERLAY_TEMPLATE,
+            "text_only": False,
             "text": {
                     "headline": {"type": "text_area", "tag": "h1", "class": ""}
                 },

@@ -124,6 +124,7 @@ text_based_template = {
         "text_based_slide": {
             "html_template": TEXT_BASED_HTML_TEMPLATE,
             "overlay_template": "",
+            "text_only": True,
             "text": {
                 "headline": {"type": "text_area", "tag": "h1", "class": ""},
                 "subtext": {"type": "text_area", "tag": "p", "class": "subtext"},

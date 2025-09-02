@@ -382,6 +382,7 @@ infomance_content_template = {
         "infomance_content_slide": {
             "html_template": CONTENT_HTML_TEMPLATE,
             "overlay_template": CONTENT_OVERLAY_TEMPLATE,
+            "text_only": False,
             "text": {
                     "content_text": {"type": "text_area", "tag": "div", "class": "text-content"},
             },

@@ -443,6 +443,7 @@ tweet_image_template = {
         "twitter_post": {
             "html_template": HEADLINE_SLIDE_HTML_TEMPLATE,
             "overlay_template": HEADLINE_SLIDE_OVERLAY_TEMPLATE,
+            "text_only": False,
             "text": {
                     "user_name": {"type": "text", "tag": "span", "class": ""},
                     "user_handle": {"type": "text", "tag": "span", "class": "user-handle"},
