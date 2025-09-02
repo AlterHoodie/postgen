@@ -103,7 +103,6 @@ def show_sources_page():
                             "Timeline": "timeline",
                             "Thumbnail": "thumbnail",
                             "Writeup": "writeup",
-                            "Meme": "meme",
                             "Text Based": "text_based",
                         }
                     elif page_name == "twitter":

@@ -28,7 +28,6 @@ def show_generate_page():
             "Timeline": "timeline",
             "Thumbnail": "thumbnail",
             "Writeup": "writeup",
-            "Meme": "meme",
         }
     elif page_name == "twitter":
         template_options = {
