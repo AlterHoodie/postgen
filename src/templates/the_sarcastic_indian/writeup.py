@@ -90,7 +90,7 @@ CONTENT_SLIDE_HTML_TEMPLATE = """
       }}
 
       .headline {{
-        font-size: 60px;
+        font-size: 50px;
         font-weight: 700;
         line-height: 1.3;
         text-align: left;
@@ -124,7 +124,6 @@ CONTENT_SLIDE_HTML_TEMPLATE = """
   </body>
 </html>
 """
-
 
 HEADLINE_SLIDE_HTML_TEMPLATE = """
 <!DOCTYPE html>
