@@ -65,10 +65,10 @@ CONTENT_SLIDE_HTML_TEMPLATE = """
       }}
       .logo {{
         position: absolute;
-        top: -50px;
-        right: -50px;
-        width: 250px;
-        height: 250px;
+        top: -60px;
+        right: -40px;
+        width: 220px;
+        height: auto;
       }}
       .text-overlay {{
         position: absolute;
@@ -105,9 +105,7 @@ CONTENT_SLIDE_HTML_TEMPLATE = """
       <img src="{background_image}" class="background-image" />
       <div class="text-overlay">
         <div class="text-content">
-          <h1>
             {headline}
-          </h1>
         </div>
       </div>
     </div>
@@ -150,10 +148,10 @@ CONTENT_SLIDE_OVERLAY_TEMPLATE = """
       }}
       .logo {{
         position: absolute;
-        top: -50px;
-        right: -50px;
-        width: 250px;
-        height: 250px;
+        top: -60px;
+        right: -40px;
+        width: 220px;
+        height: auto;
       }}
       .text-overlay {{
         position: absolute;
@@ -189,9 +187,7 @@ CONTENT_SLIDE_OVERLAY_TEMPLATE = """
       <img src="{logo_image}" alt="Social Village Logo" class="logo" />
       <div class="text-overlay">
         <div class="text-content">
-          <h1>
-            {headline}
-          </h1>
+          {headline}
         </div>
       </div>
     </div>
