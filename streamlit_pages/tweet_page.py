@@ -40,6 +40,20 @@ def show_tweet_page():
             # Placeholder content when no results
             show_preview_placeholder()
 
+def extract_tweet_url(tweet_url: str) -> str:
+    """Extract tweet URL from given URL string using regex.
+    
+    Args:
+        tweet_url: Input URL string
+        
+    Returns:
+        Extracted tweet URL in format https://x.com/username/status/1234567890
+    """
+    pattern = r'https://x\.com/\w+/status/\d+'
+    match = re.search(pattern, tweet_url)
+    if match:
+        return match.group(0)
+    return tweet_url
 
 def show_url_input_step():
     """Step 1: URL input and tweet data fetching"""
@@ -51,6 +65,7 @@ def show_url_input_step():
         placeholder="https://x.com/username/status/1234567890",
         help="Paste the full URL of the tweet you want to convert"
     )
+    tweet_url = extract_tweet_url(tweet_url)
 
     # Validate URL format
     if tweet_url and not is_valid_tweet_url(tweet_url):
@@ -97,6 +112,9 @@ def show_tweet_form_step():
         )
 
         # Media information (read-only for now)
+        st.markdown("#### Crop Type")
+        crop_type = st.selectbox("Crop Type", ["cover", "contain"], index=0, key="crop_type_selectbox")
+
         st.markdown("#### Media")
         if tweet_data.get("media"):
                 media = tweet_data["media"][0]
@@ -119,7 +137,8 @@ def show_tweet_form_step():
                 "is_verified": is_verified,
                 "profile_picture_url": tweet_data.get("profile_picture_url", ""),
                 "text": tweet_text,
-                "media": tweet_data.get("media", [])
+                "media": tweet_data.get("media", []),
+                "crop_type": crop_type
             }
             generate_tweet_content_from_data(updated_tweet_data)
 

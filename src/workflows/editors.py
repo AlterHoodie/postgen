@@ -233,14 +233,14 @@ if __name__ == "__main__":
     final_image = text_editor(
         template=tweet_image_template['slides']['twitter_post'],
         page_name="twitter",
-        image_edits={"crop_type": "cover"},
+        image_edits={"crop_type": "contain"},
         video_edits={"type":"video_overlay","class_name":"tweet-media","padding":85},
         text={"user_name": "John Doe",
               "user_handle": "@johndoe",
               "tweet_text": "This is a test tweet",
               "add_verified_badge": True},
-        assets={"background_video": "./data_/2.mp4"},
-        is_video=True,
+        assets={"background_image": "test.png"},
+        is_video=False,
         session_id="test",
     )
     # from src.templates.scoopwhoop.thumbnail import thumbnail_template
@@ -272,5 +272,5 @@ if __name__ == "__main__":
     #     session_id="test",
     # )
 
-    with open("./data_/test_out.mp4", "wb") as f:
+    with open("./data_/test_out.png", "wb") as f:
         f.write(final_image)

@@ -232,12 +232,29 @@ HEADLINE_SLIDE_HTML_TEMPLATE = """
         justify-content: center;
       }}
 
-      .tweet-image {{
-        width: auto;
-        height: 95%;
+      .tweet-media.cover {{
+        height: auto; /* Fixed height for cover mode */
+        width: 100%;
+      }}
+
+      .tweet-image {{ 
+        width: 100%;
+        height: auto;
         object-fit: cover;
         display: block;
         border-radius: 24px;
+      }}
+
+      .tweet-image.contain {{
+        object-fit: contain;
+        width: auto;
+        height: 100%;
+      }}
+
+      .tweet-image.cover {{
+        object-fit: cover;
+        width: 100%;
+        height: 100%; /* Fill the container completely */
       }}
     </style>
   </head>
@@ -245,11 +262,15 @@ HEADLINE_SLIDE_HTML_TEMPLATE = """
     <div class="container">
       <div class="tweet-header">
         <div class="header-left">
-          <img src="{profile_pic}" alt="Profile Picture" class="profile-pic" />
+          <img
+            src="{profile_pic}"
+            alt="Profile Picture"
+            class="profile-pic"
+          />
           <div class="user-info">
             <span class="user-name">
-              {user_name}
-              {add_verified_badge}
+            {user_name}
+            {add_verified_badge}
             </span>
             {user_handle}
           </div>
@@ -269,16 +290,30 @@ HEADLINE_SLIDE_HTML_TEMPLATE = """
     </div>
   </body>
   <script>
+    // Global crop type - change this to 'contain' or 'cover'
+    const CROP_TYPE = "{crop_type}"; // Change to 'cover' to test different behavior
+
     function alignWidths() {{
-        const tweetImage = document.querySelector(".tweet-image");
-        const tweetVideo = document.querySelector(".tweet-video");
-        const tweetHeader = document.querySelector(".tweet-header");
-        const tweetText = document.querySelector(".tweet-text");
+      const tweetImage = document.querySelector(".tweet-image");
+      const tweetVideo = document.querySelector(".tweet-video");
+      const tweetHeader = document.querySelector(".tweet-header");
+      const tweetText = document.querySelector(".tweet-text");
 
-        // Determine which media element exists
-        const mediaElement = tweetImage || tweetVideo;
+      // Determine which media element exists
+      const mediaElement = tweetImage || tweetVideo;
 
-        if (mediaElement && tweetHeader && tweetText) {{
+      if (mediaElement && tweetHeader && tweetText) {{
+        // Apply crop type class to image and media container
+        if (tweetImage) {{
+          tweetImage.className = `tweet-image ${{CROP_TYPE}}`;
+          const tweetMedia = document.querySelector(".tweet-media");
+          if (tweetMedia) {{
+            tweetMedia.className = `tweet-media ${{CROP_TYPE}}`;
+          }}
+        }}
+
+        if (CROP_TYPE === "contain") {{
+          // For contain mode: align widths based on image dimensions (current behavior)
           function setWidths() {{
             const mediaWidth = mediaElement.offsetWidth;
             tweetHeader.style.width = mediaWidth + "px";
@@ -290,7 +325,7 @@ HEADLINE_SLIDE_HTML_TEMPLATE = """
             // For images
             if (tweetImage.complete && tweetImage.naturalWidth > 0) {{
               setWidths();
-            }} else {{  
+            }} else {{
               tweetImage.onload = setWidths;
             }}
           }} else if (tweetVideo) {{
@@ -302,15 +337,22 @@ HEADLINE_SLIDE_HTML_TEMPLATE = """
               tweetVideo.addEventListener("loadedmetadata", setWidths);
             }}
           }}
+        }} else if (CROP_TYPE === "cover") {{
+          // For cover mode: image fills container, header and text use full container width
+          const containerWidth =
+            document.querySelector(".container").offsetWidth - 170; // Account for padding
+          tweetHeader.style.width = containerWidth + "px";
+          tweetText.style.width = containerWidth + "px";
         }}
       }}
+    }}
 
-      // Run when DOM is loaded
-      document.addEventListener("DOMContentLoaded", alignWidths);
+    // Run when DOM is loaded
+    document.addEventListener("DOMContentLoaded", alignWidths);
 
-      // Run when window is resized (in case of responsive changes)
-      window.addEventListener("resize", alignWidths);
-    </script>
+    // Run when window is resized (in case of responsive changes)
+    window.addEventListener("resize", alignWidths);
+  </script>
 </html>
 """
 
@@ -502,6 +544,7 @@ tweet_image_template = {
                 "profile_pic": {"type":"bytes", "file_type":"png", "default": "profile_pic.png"},
             },
             "image_edits": {
+                "crop_type":{"type":"dropdown", "values":["cover", "contain"], "default":"contain"},
             },
             "video_edits":{
                 "type": {"type":"default", "values": "video_overlay"},

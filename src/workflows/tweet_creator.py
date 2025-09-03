@@ -44,6 +44,7 @@ async def create_tweet_content(tweet_data: dict) -> tuple[bytes, bool]:
                 'profile_picture_url': str,
                 'text': str,
                 'media': [{'type': str, 'url': str}, ...]
+                'crop_type': ["cover", "contain"]
             }
         
     Returns:
@@ -104,10 +105,11 @@ async def create_tweet_content(tweet_data: dict) -> tuple[bytes, bool]:
         template = tweet_text_template["slides"]["text_based_slide"]
     
     # Set up edit parameters
-    image_edits = {"crop_type": "cover"}
+    image_edits = {"crop_type": tweet_data["crop_type"]}
     video_edits = {"crop_type": "cover", "type": "video_overlay", "class_name":"tweet-media", "padding":85}
     
     # Call text_editor to generate content
+    print(image_edits)
     result = text_editor(
         template=template,
         page_name="twitter",
