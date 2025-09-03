@@ -287,18 +287,19 @@ def get_latest_instagram_post(page_id:str, last_created_at: int = None, n_posts:
 def extract_tweet_details(tweet_data: dict) -> dict:
     """
     Extracts key details from a tweet's JSON data, including user info,
-    verification status, profile picture, text, and media URLs.
+    verification status, profile picture, text, media URLs, and quoted tweet data.
     
     For videos, it finds the highest bitrate MP4 URL.
     For photos, it uses the standard media URL.
+    For quoted tweets, it extracts user info, text, media, and creation date.
 
     Args:
         tweet_data: A dictionary containing the full tweet data structure.
 
     Returns:
         A dictionary containing user details, verification status, text,
-        and a list of media objects. Returns a dictionary with empty
-        values if the data cannot be parsed.
+        media objects, and quoted tweet information if present. Returns a dictionary 
+        with empty values if the data cannot be parsed.
     """
     extracted_info = {
         "username": None,
@@ -306,14 +307,20 @@ def extract_tweet_details(tweet_data: dict) -> dict:
         "is_verified": False, # Default to False
         "profile_picture_url": None,
         "text": None,
-        "media": []
+        "media": [],
+        "quoted_username": None,
+        "quoted_userhandle": None,
+        "quoted_is_verified": False,
+        "quoted_profile_picture_url": None,
+        "quoted_text": None,
+        "quoted_media": [],
+        "quoted_created_at": None
     }
 
     try:
         # Navigate through the nested JSON to the main result object
         tweet_result = tweet_data['result']['tweetResult']['result']
         user_result = tweet_result['core']['user_results']['result']
-
         # --- Extract User Info ---
         user_legacy = user_result['legacy']
         extracted_info['username'] = user_legacy.get('name')
@@ -327,36 +334,100 @@ def extract_tweet_details(tweet_data: dict) -> dict:
         extracted_info['text'] = tweet_result['legacy'].get('full_text')
 
         # --- Extract Media Details ---
-        if 'extended_entities' not in tweet_result['legacy']:
-            return extracted_info
+        if 'extended_entities' in tweet_result['legacy']:
 
-        media_list = tweet_result['legacy']['extended_entities'].get('media', [])
+            media_list = tweet_result['legacy']['extended_entities'].get('media', [])
+
+            for media_item in media_list:
+                media_type = media_item.get('type')
+                media_detail = {"type": media_type}
+
+                # If it's a video or animated GIF, find the best video file
+                if media_type in ['video', 'animated_gif']:
+                    video_variants = media_item.get('video_info', {}).get('variants', [])
+                    best_variant_url = None
+                    max_bitrate = -1
+
+                    for variant in video_variants:
+                        if variant.get('content_type') == 'video/mp4':
+                            bitrate = variant.get('bitrate', 0)
+                            if bitrate > max_bitrate:
+                                max_bitrate = bitrate
+                                best_variant_url = variant.get('url')
+
+                    media_detail['url'] = best_variant_url
+
+                # If it's a photo, get the standard media URL
+                elif media_type == 'photo':
+                    media_detail['url'] = media_item.get('media_url_https')
+
+                if media_detail.get('url'):
+                    extracted_info['media'].append(media_detail)
         
-        for media_item in media_list:
-            media_type = media_item.get('type')
-            media_detail = {"type": media_type}
-
-            # If it's a video or animated GIF, find the best video file
-            if media_type in ['video', 'animated_gif']:
-                video_variants = media_item.get('video_info', {}).get('variants', [])
-                best_variant_url = None
-                max_bitrate = -1
-
-                for variant in video_variants:
-                    if variant.get('content_type') == 'video/mp4':
-                        bitrate = variant.get('bitrate', 0)
-                        if bitrate > max_bitrate:
-                            max_bitrate = bitrate
-                            best_variant_url = variant.get('url')
-                
-                media_detail['url'] = best_variant_url
-
-            # If it's a photo, get the standard media URL
-            elif media_type == 'photo':
-                media_detail['url'] = media_item.get('media_url_https')
+        # --- Extract Quoted Tweet Data ---
+        quoted_status = tweet_result.get("quoted_status_result", {}).get("result", {})
+        if quoted_status:
+            quoted_info = {
+                "quoted_username": None,
+                "quoted_userhandle": None,
+                "quoted_is_verified": False,
+                "quoted_profile_picture_url": None,
+                "quoted_text": None,
+                "quoted_media": [],
+                "quoted_created_at": None
+            }
             
-            if media_detail.get('url'):
-              extracted_info['media'].append(media_detail)
+            try:
+                # Extract quoted user info
+                quoted_user = quoted_status.get('core', {}).get('user_results', {}).get('result', {})
+                if quoted_user:
+                    quoted_user_legacy = quoted_user.get('legacy', {})
+                    quoted_info["quoted_username"] = quoted_user_legacy.get('name')
+                    quoted_info["quoted_userhandle"] = quoted_user_legacy.get('screen_name')
+                    quoted_info["quoted_is_verified"] = quoted_user.get('is_blue_verified', False)
+                    quoted_info["quoted_profile_picture_url"] = quoted_user_legacy.get('profile_image_url_https')
+                
+                # Extract quoted tweet text and creation date
+                quoted_legacy = quoted_status.get('legacy', {})
+                quoted_info["quoted_text"] = quoted_legacy.get('full_text')
+                quoted_info["quoted_created_at"] = quoted_legacy.get('created_at')
+                
+                # Extract quoted tweet media
+                if 'extended_entities' in quoted_legacy:
+                    quoted_media_list = quoted_legacy['extended_entities'].get('media', [])
+                    
+                    for media_item in quoted_media_list:
+                        media_type = media_item.get('type')
+                        media_detail = {"type": media_type}
+
+                        # If it's a video or animated GIF, find the best video file
+                        if media_type in ['video', 'animated_gif']:
+                            video_variants = media_item.get('video_info', {}).get('variants', [])
+                            best_variant_url = None
+                            max_bitrate = -1
+
+                            for variant in video_variants:
+                                if variant.get('content_type') == 'video/mp4':
+                                    bitrate = variant.get('bitrate', 0)
+                                    if bitrate > max_bitrate:
+                                        max_bitrate = bitrate
+                                        best_variant_url = variant.get('url')
+                            
+                            media_detail['url'] = best_variant_url
+
+                        # If it's a photo, get the standard media URL
+                        elif media_type == 'photo':
+                            media_detail['url'] = media_item.get('media_url_https')
+                        
+                        if media_detail.get('url'):
+                            quoted_info['quoted_media'].append(media_detail)
+                
+                # Add quoted info to main extracted_info
+                extracted_info.update(quoted_info)
+                
+            except (KeyError, TypeError) as e:
+                print(f"An error occurred while parsing quoted tweet data: {e}")
+                # Continue without quoted tweet data if there's an error
 
     except (KeyError, TypeError) as e:
         print(f"An error occurred while parsing the tweet data: {e}")
@@ -366,7 +437,14 @@ def extract_tweet_details(tweet_data: dict) -> dict:
             "is_verified": False,
             "profile_picture_url": None,
             "text": None,
-            "media": []
+            "media": [],
+            "quoted_username": None,
+            "quoted_userhandle": None,
+            "quoted_is_verified": False,
+            "quoted_profile_picture_url": None,
+            "quoted_text": None,
+            "quoted_media": [],
+            "quoted_created_at": None
         }
         
     return extracted_info
@@ -388,7 +466,15 @@ if __name__ == "__main__":
     # insta_data = insta_data[:10]
     # with open("./data_/insta_extracted.p","wb") as f:
     #     pickle.dump(get_latest_instagram_post(last_created_at=(datetime.now().timestamp() - 86400)),f)
+    # import json
+    # data = get_tweet_data("https://x.com/divyanshiwho/status/1962363623675707434")
+    # with open("./data_/tweet_data.json","w") as f:
+    #     json.dump(data,f,indent=4)
+
     import json
-    data = get_tweet_data("https://x.com/divyanshiwho/status/1962363623675707434")
-    with open("./data_/tweet_data.json","w") as f:
-        json.dump(data,f,indent=4)
+    with open("./data_/tweet_data.json","r") as f:
+        data = json.load(f)
+    print(data.keys())
+    with open("./data_/tweet_data_extracted.json","w") as f:
+        json.dump(extract_tweet_details(data),f,indent=4)
+    

@@ -124,7 +124,7 @@ def text_editor_form(
                 elif config.get("type") == "bytes":
                     value = st.file_uploader(
                         f"{display_name}:",
-                        type=config.get("file_type", ""),
+                        type=["png", "jpg", "jpeg"],
                         help=config.get("help", "")
                     )
                     if value is not None:
@@ -256,6 +256,7 @@ def show_media_editor():
     elif page_name == "twitter":
         template_options = {
             "Tweet Image": "tweet_image",
+            "Tweet Tag": "tweet_tag",
         }
     elif page_name == "social_village":
         template_options = {

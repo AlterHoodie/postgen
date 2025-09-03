@@ -1,9 +1,9 @@
 import streamlit as st
-import asyncio
-import time
-import concurrent.futures
 import re
-from pathlib import Path
+import concurrent
+import asyncio
+from datetime import datetime
+import time
 
 from src.workflows.tweet_creator import create_tweet_content
 from src.services.rapidapi import get_tweet_data
@@ -102,6 +102,7 @@ def show_tweet_form_step():
         username = st.text_input("Username", value=tweet_data.get("username", ""))
         userhandle = st.text_input("Handle (without @)", value=tweet_data.get("userhandle", ""))
         is_verified = st.checkbox("Verified Account", value=tweet_data.get("is_verified", False))
+        profile_picture_url = st.text_input("Profile Picture URL", value=tweet_data.get("profile_picture_url", ""))
 
         st.markdown("#### Tweet Content")
         tweet_text = st.text_area(
@@ -111,16 +112,54 @@ def show_tweet_form_step():
             help="Edit the tweet text as needed"
         )
 
-        # Media information (read-only for now)
+        # Media information
+        st.markdown("#### Media")
+        if tweet_data.get("media"):
+            media = tweet_data["media"][0]
+            st.info(f"📁 Media: {media.get('type', 'Unknown')} - {media.get('url', 'No URL')}")
+            
+            # Allow editing media type and URL
+            media_type = st.text_input("Media Type", value=media.get('type', ''))
+            media_url = st.text_input("Media URL", value=media.get('url', ''))
+        else:
+            st.info("📝 No media attached to this tweet")
+            media_type = ""
+            media_url = ""
+
         st.markdown("#### Crop Type")
         crop_type = st.selectbox("Crop Type", ["cover", "contain"], index=0, key="crop_type_selectbox")
 
-        st.markdown("#### Media")
-        if tweet_data.get("media"):
-                media = tweet_data["media"][0]
-                st.info(f"📁 Media: {media.get('type', 'Unknown')} - {media.get('url', 'No URL')}")
+        # Quoted tweet information - only show if there's quoted data
+        if (tweet_data.get("quoted_username") or tweet_data.get("quoted_text") or 
+            tweet_data.get("quoted_media") or tweet_data.get("quoted_userhandle")):
+            
+            st.markdown("#### Quoted Tweet")
+            quoted_username = st.text_input("Quoted Username", value=tweet_data.get("quoted_username", ""))
+            quoted_userhandle = st.text_input("Quoted Handle (without @)", value=tweet_data.get("quoted_userhandle", ""))
+            quoted_profile_picture_url = st.text_input("Quoted Profile Picture URL", value=tweet_data.get("quoted_profile_picture_url", ""))
+            quoted_text = st.text_area("Quoted Tweet Text", value=tweet_data.get("quoted_text", ""), height=80)
+            
+            # Quoted media
+            if tweet_data.get("quoted_media"):
+                quoted_media = tweet_data["quoted_media"][0]
+                st.info(f"📁 Quoted Media: {quoted_media.get('type', 'Unknown')} - {quoted_media.get('url', 'No URL')}")
+                
+                quoted_media_type = quoted_media.get('type', '')
+                quoted_media_url = quoted_media.get('url', '')
+            else:
+                quoted_media_type = ""
+                quoted_media_url = ""
+            
+            quoted_created_at = st.text_input("Quoted Tweet Date", value=datetime.strptime(tweet_data["quoted_created_at"], "%a %b %d %H:%M:%S %z %Y").strftime("%b %d"))
         else:
-            st.info("📝 No media attached to this tweet")
+            # Initialize empty values for quoted fields when not shown
+            quoted_username = ""
+            quoted_userhandle = ""
+            quoted_profile_picture_url = ""
+            quoted_text = ""
+            quoted_media_type = ""
+            quoted_media_url = ""
+            quoted_created_at = ""
 
         # Generate button
         submitted = st.form_submit_button(
@@ -135,11 +174,19 @@ def show_tweet_form_step():
                 "username": username,
                 "userhandle": userhandle,
                 "is_verified": is_verified,
-                "profile_picture_url": tweet_data.get("profile_picture_url", ""),
+                "profile_picture_url": profile_picture_url,
                 "text": tweet_text,
-                "media": tweet_data.get("media", []),
-                "crop_type": crop_type
+                "media": [{"type": media_type, "url": media_url}] if media_type and media_url else [],
+                "crop_type": crop_type,
+                "quoted_username": quoted_username,
+                "quoted_userhandle": quoted_userhandle,
+                "quoted_profile_picture_url": quoted_profile_picture_url,
+                "quoted_text": quoted_text,
+                "quoted_media": [{"type": quoted_media_type, "url": quoted_media_url}] if quoted_media_type and quoted_media_url else [],
+                "quoted_created_at": quoted_created_at
             }
+
+            print(updated_tweet_data)
             generate_tweet_content_from_data(updated_tweet_data)
 
     # Back button
@@ -205,14 +252,6 @@ def generate_tweet_content_from_data(tweet_data: dict):
         status_text = st.empty()
 
     try:
-        # Step 1: Initialize
-        progress_bar.progress(20)
-        status_text.text("📋 Preparing content generation...")
-        time.sleep(1)
-
-        # Step 2: Download assets
-        progress_bar.progress(40)
-        status_text.text("📷 Downloading media assets...")
         
         # Step 3: Generate content
         progress_bar.progress(60)
@@ -226,11 +265,6 @@ def generate_tweet_content_from_data(tweet_data: dict):
             future = executor.submit(run_tweet_workflow)
             result_bytes, is_video = future.result()
 
-        # Step 4: Finalize
-        progress_bar.progress(80)
-        status_text.text("📱 Finalizing content...")
-        time.sleep(1)
-
         # Step 5: Complete
         progress_bar.progress(100)
         status_text.text("✅ Tweet content generated successfully!")
@@ -240,8 +274,6 @@ def generate_tweet_content_from_data(tweet_data: dict):
         st.session_state["is_video"] = is_video
         st.session_state["latest_tweet_data"] = tweet_data
         st.session_state["show_tweet_results"] = True
-
-        time.sleep(1)
         st.rerun()
 
     except Exception as e:
@@ -250,8 +282,6 @@ def generate_tweet_content_from_data(tweet_data: dict):
         status_text.text("Generation failed")
 
     finally:
-        # Clear progress after 2 seconds
-        time.sleep(2)
         progress_container.empty()
 
 

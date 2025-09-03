@@ -6,6 +6,7 @@ from src.templates.scoopwhoop.meme import meme_template
 
 from src.templates.twitter.tweet_image import tweet_image_template
 from src.templates.twitter.tweet_text import tweet_text_template
+from src.templates.twitter.tweet_tag import tweet_tag_template
 
 from src.templates.social_village.content import content_template
 from src.templates.social_village.thumbnail import thumbnail_template as social_village_thumbnail_template
@@ -34,6 +35,8 @@ def get_template_config(template_type: str, page_name: str) -> dict:
     elif page_name == "twitter":
         if template_type == "tweet_image":
             return tweet_image_template
+        elif template_type == "tweet_tag":
+            return tweet_tag_template
         elif template_type == "text_based":
             return tweet_text_template
         else:
